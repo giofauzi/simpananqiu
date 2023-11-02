@@ -103,10 +103,20 @@ $master = [
         <a href="../akun/akun.php" class="nav-link <?= ($current_page === 'akun.php') ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-dollar-sign"></i>
             <p>
-                Akun user
+                Akun User
             </p>
         </a>
     </li>
+
+    <li class="nav-item">
+    <a href="../kontak/kontak.php" class="nav-link <?= ($current_page === 'kontak.php') ? 'active' : ''; ?>">
+        <i class="nav-icon fas fa-address-book"></i> <!-- Mengganti ikon ke fas fa-address-book -->
+        <p>
+            Kontak
+        </p>
+    </a>
+</li>
+
     
     <li class="nav-item <?= (in_array($current_page, array_keys($setting))) ? 'menu-open' : ''; ?>">
         <a href="#" class="nav-link <?= (in_array($current_page, array_keys($setting))) ? 'active' : ''; ?>">
