@@ -65,7 +65,7 @@ date_default_timezone_set('Asia/Jakarta'); // Set zona waktu ke Indonesia
 
 $currentDateTime = date('Y-m-d H:i:s');
 
-$query = "INSERT INTO users (nama_user, username, gender, no_hp, email, password, foto, tgl_b, status, vr) VALUES ('$nama', '$username', '$jenis_kelamin', '$nohp', '$email',  '$hashedPassword', '$gambarName', '$currentDateTime', 0, NULL)";
+$query = "INSERT INTO users (nama_user, username, gender, no_hp, email, password, foto, tgl_b, status, vr) VALUES ('$nama', '$username', '$jenis_kelamin', '$nohp', '$email',  '$hashedPassword', '$gambarName', '$currentDateTime', 1, NULL)";
 
 // Eksekusi query untuk "area"
 if (mysqli_query($koneksi, $query)) {

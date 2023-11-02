@@ -45,7 +45,18 @@
                   </thead>
                   
                   <tbody>
+
+                  
                   <?php
+                  function sensorEmail($email) {
+    $parts = explode('@', $email);
+    $username = $parts[0];
+    $domain = $parts[1];
+
+    $sensoredUsername = substr($username, 0, 3) . str_repeat('*', max(0, strlen($username) - 4));
+
+    return $sensoredUsername . '@' . $domain;
+}
 $no = 1;
 $query = mysqli_query($koneksi, "SELECT * FROM users");
 while ($row = mysqli_fetch_array($query)) {
@@ -55,18 +66,6 @@ while ($row = mysqli_fetch_array($query)) {
   <td><?= $row['nama_user']; ?></td>
   <td><?= $row['gender']; ?></td>
   <td><?= $row['no_hp']; ?></td>
-  <?php
-  function sensorEmail($email) {
-    $parts = explode('@', $email);
-    $username = $parts[0];
-    $domain = $parts[1];
-
-    $sensoredUsername = substr($username, 0, 3) . str_repeat('*', max(0, strlen($username) - 4));
-
-    return $sensoredUsername . '@' . $domain;
-}
-
-  ?>
   <td><?= sensorEmail($row['email']); ?></td>
 
   <td><?php
@@ -111,10 +110,9 @@ while ($row = mysqli_fetch_array($query)) {
         </div>
    
 <?php
-  $query = mysqli_query($koneksi, "SELECT * FROM users");
-  while ($row = mysqli_fetch_array($query)) {
+$query = mysqli_query($koneksi, "SELECT * FROM users");
+while ($row = mysqli_fetch_array($query)) {
 ?>
-<!-- Add this modal code at the end of your PHP/HTML content -->
 <div class="modal fade" id="updateModal<?= $row['id_user'] ?>" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -125,93 +123,93 @@ while ($row = mysqli_fetch_array($query)) {
         </button>
       </div>
       <div class="modal-body">
-        <!-- Add your update form here -->
-        <form > <!-- Change 'update_user.php' to the actual update script -->
-        <div class="form-group">
-    <label for="status">Status:</label>
-    <select class="form-control" name="status" id="status" style="width: 100%">
-        <?php
-        $statusOptions = array(
-            array('value' => '1', 'label' => 'NOT ACTIVE'),
-            array('value' => '2', 'label' => 'ACTIVE')
-            // Tambahkan opsi lainnya jika diperlukan
-        );
+        <form>
+          <div class="form-group">
+            <label for="status">Status:</label>
+            <select class="form-control status" name="status" style="width: 100%">
+              <?php
+              $statusOptions = array(
+                array('value' => '1', 'label' => 'NOT ACTIVE'),
+                array('value' => '2', 'label' => 'ACTIVE')
+                // Tambahkan opsi lainnya jika diperlukan
+              );
 
-        $selectedStatus = $row['status']; // Ambil nilai status dari database
+              $selectedStatus = $row['status']; // Ambil nilai status dari database
 
-        foreach ($statusOptions as $option) {
-            $selected = ($option['value'] == $selectedStatus) ? 'selected' : '';
-            echo '<option value="' . $option['value'] . '" ' . $selected . '>' . $option['label'] . '</option>';
-        }
-        ?>
-    </select>
-</div>
-
-          <!-- Add other form fields for updating user information -->
-
-          <!-- Hidden input to store user ID -->
-          <input type="hidden" id="id_user" name="id_user" value="<?= $row['id_user'] ?>">
+              foreach ($statusOptions as $option) {
+                $selected = ($option['value'] == $selectedStatus) ? 'selected' : '';
+                echo '<option value="' . $option['value'] . '" ' . $selected . '>' . $option['label'] . '</option>';
+              }
+              ?>
+            </select>
+          </div>
+          <input type="hidden" class="id_user" name="id_user" value="<?= $row['id_user'] ?>">
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" id="simpan" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-primary simpan">Save Changes</button>
       </div>
     </div>
   </div>
 </div>
 <?php } ?>
-    <script>
-    $(document).ready(function () {
-      // Event saat tombol "Simpan" diklik
-      $("#simpan").on("click", function () {
-        var idUser = $("#id_user").val(); // Dapatkan nilai input 
-        var status = $("#status").val(); // Dapatkan nilai input
-        // Kirim permintaan Ajax
-        $.ajax({
-          type: "POST",
-          url: "update_akun.php", // Ganti dengan alamat file PHP yang sesuai
-          data: {
-            id_user: idUser, // Tambahkan id_user ke data yang dikirimkan
-            status: status, // Tambahkan transaksi ke data yang dikirimkan
-          },
-          success: function (response) {
-            if (response.includes("berhasil")) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Sukses',
-                text: response,
-                showConfirmButton: false,
-                timer: 3000 // Menampilkan notifikasi selama 3 detik
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  setTimeout(() => {
-                    location.reload(); // Melakukan refresh halaman setelah 3 detik
-                  }, 1000); // Tunggu 1 detik sebelum melakukan reload
-                }
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: response,
-                showConfirmButton: false,
-                timer: 2000
-              });
+
+<script>
+$(document).ready(function () {
+  // Event saat tombol "Simpan" diklik
+  $(".simpan").on("click", function () {
+    var modal = $(this).closest(".modal"); // Temukan modal yang terkait dengan tombol "Simpan"
+    var idUser = modal.find(".id_user").val(); // Dapatkan nilai input 
+    var status = modal.find(".status").val(); // Dapatkan nilai input
+
+    // Kirim permintaan Ajax dengan id pengguna yang sesuai
+    $.ajax({
+      type: "POST",
+      url: "update_akun.php", // Ganti dengan alamat file PHP yang sesuai
+      data: {
+        id_user: idUser, // Tambahkan id_user ke data yang dikirimkan
+        status: status, // Tambahkan transaksi ke data yang dikirimkan
+      },
+      success: function (response) {
+        if (response.includes("berhasil")) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Sukses',
+            text: response,
+            showConfirmButton: false,
+            timer: 3000 // Menampilkan notifikasi selama 3 detik
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setTimeout(() => {
+                location.reload(); // Melakukan refresh halaman setelah 3 detik
+              }, 1000); // Tunggu 1 detik sebelum melakukan reload
             }
-          },
-          error: function (xhr, status, error) {
-            // Tangani kesalahan jika permintaan Ajax gagal
-            Swal.fire({
-              icon: 'error',
-              title: 'Terjadi Kesalahan',
-              text: 'Terjadi kesalahan: ' + error,
-            });
-          }
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: response,
+            showConfirmButton: false,
+            timer: 2000
+          });
+        }
+      },
+      error: function (xhr, status, error) {
+        // Tangani kesalahan jika permintaan Ajax gagal
+        Swal.fire({
+          icon: 'error',
+          title: 'Terjadi Kesalahan',
+          text: 'Terjadi kesalahan: ' + error,
         });
-      });
+      }
     });
-    </script>
+  });
+});
+</script>
+
+
 
 
 <?php include '../view/footer_t.php' ?>
