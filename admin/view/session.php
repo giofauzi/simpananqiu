@@ -7,37 +7,35 @@ $username = "root"; // Ganti dengan nama pengguna database Anda
 $password = ""; // Ganti dengan kata sandi database Anda
 $koneksi = mysqli_connect($host, $username, $password, $dbname);
 
-// Periksa apakah sesi 'user_login' dan 'status_vr' sudah diinisialisasi
-if (!isset($_SESSION['user_login']) || !isset($_SESSION['status_vr'])) {
-    $_SESSION['belum_login'] = 'Anda belum login, silakan login  terlebih dahulu.';
-    header("Location: ../../../simpananqiu/login/"); // Ganti dengan halaman login yang sesuai
+// Periksa apakah sesi 'user_login'  sudah diinisialisasi
+if (!isset($_SESSION['admin_login'])) {
+$_SESSION['belum_login'] = 'Anda belum login, silakan login  terlebih dahulu.';
+    header("Location: ../../../simpananqiu/admin/"); // Ganti dengan halaman login yang sesuai
     exit();
 }
 
-// Periksa apakah sesi 'user_login' dan 'status_vr' sudah sesuai, misalnya dengan database
-$id_users = $_SESSION['user_login'];
-$status_vr = $_SESSION['status_vr'];
+// Periksa apakah sesi 'admin_login'  sudah sesuai, misalnya dengan database
+$id_admin = $_SESSION['admin_login'];
 
-// Query database untuk memeriksa apakah 'id_users' sesuai dengan 'status_vr'
-$query = "SELECT * FROM users WHERE id_user = ? AND vr = ?";
+
+// Query database untuk memeriksa apakah 'id_admin'
+$query = "SELECT * FROM admin WHERE id_admin = ?";
 $stmt = mysqli_prepare($koneksi, $query);
-mysqli_stmt_bind_param($stmt, "is", $id_users, $status_vr);
+mysqli_stmt_bind_param($stmt, "s", $id_admin,);
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
-$user = mysqli_fetch_assoc($result);
+$admin = mysqli_fetch_assoc($result);
 
-if (!$user) {
-    // Jika 'id_users' dan 'status_vr' tidak sesuai dengan database, alihkan ke halaman login
+if (!$admin) {
+    // Jika 'id_admin'  tidak sesuai dengan database, alihkan ke halaman login
     $_SESSION['belum_login'] = 'Anda belum login, silakan login  terlebih dahulu.';
-    header("Location: ../../../simpananqiu/login/"); // Ganti dengan halaman login yang sesuai
+    header("Location: ../../../simpananqiu/admin/"); // Ganti dengan halaman login yang sesuai
     exit();
 }
 
-// Jika sesi valid, Anda dapat melanjutkan dengan kode Anda yang menggunakan $id_users, $status_vr, dan $user
+// Jika sesi valid, Anda dapat melanjutkan dengan kode Anda yang menggunakan $id_admin, dan $admin
 // ...
 
-$result = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user = $id_users");
+$result = mysqli_query($koneksi, "SELECT * FROM admin WHERE id_admin = $id_admin");
 $all = mysqli_fetch_array($result);
-
-
