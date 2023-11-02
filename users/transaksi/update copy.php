@@ -15,7 +15,6 @@ if (isset($_SESSION['id_keuangan'])) {
     $id_keuangan = $_SESSION['id_keuangan'];
 ?>
 
-
  <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -27,7 +26,7 @@ if (isset($_SESSION['id_keuangan'])) {
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item"><a href="">Home</a></li>
               <li class="breadcrumb-item active">Transaksi</li>
             </ol>
           </div>
@@ -40,7 +39,7 @@ if (isset($_SESSION['id_keuangan'])) {
       <div class="container-fluid">
         <div class="row">
           <div class="col-12">
-             <div class="card card-primary card-tabs">
+            <div class="card card-primary card-tabs">
               <div class="card-header p-0 pt-1">
                 <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
                   <li class="pt-2 px-3"><h3 class="card-title">Ubah Data</h3></li>
@@ -53,11 +52,8 @@ if (isset($_SESSION['id_keuangan'])) {
                </div>
               <!-- /.card-header -->
              
-
-  
-              <div class="card-body">
-                <div class="container-fluid ">
-              <?php 
+            <div class="card-body">
+<?php 
       $query_edit = mysqli_query($koneksi, "SELECT * FROM keuangan WHERE id_keuangan = '$id_keuangan' AND  id_user = '$id_users'");
     $edit = mysqli_fetch_array($query_edit) or die(mysqli_error($koneksi));
       ?>
@@ -171,8 +167,7 @@ echo '<option value="">Pilih</option>';
              
 <div class="form-group">
                         <div class="">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                         <a href="transaksi.php"><button type="button" class="btn btn-warning">Kembali</button></a>
+                        <button type="submit" class="btn btn-primary" name="Ubah">Simpan</button>
 
                         </div>
                       </div>
@@ -182,12 +177,11 @@ echo '<option value="">Pilih</option>';
                  
                 
                 </div>
-               </div>
-                </div>
+              </div>
+              <!-- /.card -->
                   </div>
                
-                 
-          <!-- /.col -->
+                  
         </div>
         <!-- /.row -->
       </div>
@@ -195,10 +189,14 @@ echo '<option value="">Pilih</option>';
     </section>
     <!-- /.content -->
   </div>
+  </div>
+<?php 
+} else {
+  echo '<script>window.location.href = "transaksi.php";</script>';
+}
+?>
 
-
-
- <script>
+  <script>
 
           // Edit data
 $('.EditTransaksi').on('submit', function(e) {
@@ -361,14 +359,10 @@ $('.kategori-edit').on('change', function () {
 
 </script>
 
+
+
+
    <?php 
 
 include "../view/footer_t.php";
-?>
-
-<?php 
-} else {
-  $_SESSION['gagal'] = 'Opps, Anda Gagal!';
-  echo '<script>window.location.href = "transaksi.php";</script>';
-}
 ?>

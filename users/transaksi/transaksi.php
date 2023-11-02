@@ -220,7 +220,44 @@ if ($row['nama_keuangan'] === 'Pemasukan') {
         ?>
     </td>
     <td>
-      <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#modal-lg<?= $row['id_keuangan'] ?>" ><i class="fa fa-pen"></i></a>
+      <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#modal-lg<?= $row['id_keuangan'] ?>"
+   onclick="setUpdateId(<?= $row['id_keuangan'] ?>)">
+   <i class="fa fa-pen"></i>
+</a>
+
+<script>
+function setUpdateId(id_keuangan) {
+    // Simpan id_keuangan dalam session menggunakan AJAX
+    $.ajax({
+        type: "POST",
+        url: "set_session.php", // Buat file set_session.php
+        data: { id_keuangan: id_keuangan },
+        success: function(response) {
+            if (response === 'success') {
+                // Session berhasil disimpan
+                // Selanjutnya, buka halaman update.php
+                window.location.href = 'update.php';
+            } else {
+                // Sesuatu yang salah terjadi saat menyimpan session
+                alert('Terjadi kesalahan saat menyimpan session.');
+            }
+        }
+    });
+}
+
+  // Menunggu selama 5 detik sebelum menghapus session
+  setTimeout(function() {
+    <?php
+    // Hapus session id_keuangan
+    if (isset($_SESSION['id_keuangan'])) {
+      unset($_SESSION['id_keuangan']);
+    }
+    ?>
+  }, 5000); // 5000 milidetik = 5 detik
+
+
+</script>
+
       <a href="#" class="btn btn-danger delete" data-id="<?= $row['id_keuangan'] ?>"><i class="fa fa-trash"></i></a>
   </td>
 </tr>
@@ -750,226 +787,11 @@ setTimeout(() => {
       </div>
       <!-- /.modal -->
 
-<?php 
-      $query_edit = mysqli_query($koneksi, "SELECT * FROM keuangan WHERE  id_user = '$id_users'");
-      while($edit = mysqli_fetch_array($query_edit)) {
-
-      ?>
-      <div class="modal fade" id="modal-lg<?= $edit['id_keuangan'] ?>">
-        <div class="modal-dialog modal-xl">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Ubah Transaksi</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-             <div class="modal-body" >
-                <div class="col-12 col-sm-12">
-            <div class="card card-primary card-outline card-outline-tabs">
-              <div class="card-header p-0 border-bottom-0">
-              
-              </div>
 
 
-              <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                <div class="tab-content" id="custom-tabs-four-tabContent">
-                  <div class="tab-pane fade show active" id="custom-tabs-four-home"  role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
-                    
-                    <form method="post" action="edit.k" enctype="multipart/form-data">
-                    <input type="hidden" class="form-control" name="id_user" id="id_user" value="<?= $id_users ?>">
-                    <input type="hidden" class="form-control" name="id_keuangan" id="id_keuangan" value="<?= $edit['id_keuangan'] ?>">
-                    <div class="form-group">
-                      <label for="nama_keuangan">Transaksi</label>
-  <select class="form-control select2 transaksi-keuangan" style="width:100;" required>
-    <option value="">Pilih</option>
-    <option value="Pemasukan">Pemasukan</option>
-    <option value="Pengeluaran">Pengeluaran</option>
-  </select>
-<div id="passwordHelpBlock" class="form-text">
-  Silahkan mengisi transaksi sesuai dengan keinginan Anda.
-</div>
-                    <input type="hidden" class="form-control nilai_transaksi" name="nilai_transaksi">
-                    <input type="hidden" class="form-control nilai_kategori" name="nilai_kategori">
+  <script>
 
-                    </div>
-                    <!-- Date and time -->
-                    
-               <div class="form-group">
-  <label>Tanggal</label>
-  <div class="input-group date" id="" data-target-input="nearest">
-   <input type="text" name="tanggal_waktu_edit" value="<?= date('d/m/Y H:i', strtotime($edit['tgl_b'])) ?>" id="tanggal_waktu_edit" class="form-control datetimepicker-input" data-target="#" />
-
-    <div class="input-group-append" data-target="#" data-toggle="datetimepicker">
-      <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-    </div>
-  </div>
-</div>
-
-
-
-                
-
-                 <div class="form-group">
-                    <label for="total_edit">Total</label>
-                    <input type="number" value="<?= $edit['total'] ?>" required class="form-control" name="total_edit" id="total_edit" placeholder="Masukkan Total">
-                  </div>
-
-
-                <div class="form-group">
-  <label>Kategori</label>
-  <select class="form-control select2 kategori-edit" required style="width: 100%;">
-    <!-- Kategori akan dimuat di sini -->
-  </select>
-</div>
-
-               
-                <div class="form-group">
-                  <label for="aset_edit">Aset</label>
-                  <select name="aset_edit" class="form-control select2 aset-edit" required style="width:100%;">
-                <?php 
-                $id_aset = $edit['id_aset'];
-                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users'");
-echo '<option value="">Pilih</option>';
-                while($row_aset = mysqli_fetch_array($query_aset)) {
-                      $aset_id = $row_aset['id_aset'];
-                      $nama_aset =  $row_aset['nama_aset'];
-                      $grup =  $row_aset['grup'];
-
-                      $selected = ($aset_id == $id_aset) ? 'selected' : '';
-                      echo '<option value="' . $aset_id . '" ' . $selected . '>' . $grup . ' -  '.$nama_aset.'</option>';
-
-                }
-                ?>
-                </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="catatan_edit">Catatan</label>
-                   <textarea class="form-control" name="catatan_edit" required id="catatan_edit" placeholder="Masukkan Catatan" rows="3"><?= $edit['catatan']  ?></textarea>
-                </div>
-
-                <div class="form-group">
-  <label for="pilih_tipe">Pilih Tipe</label>
-  <select class="form-control select2 pilih_tipe" required style="width:100%;">
-    <option value="">Pilih</option>
-    <option value="deskripsi">Deskripsi</option>
-    <option value="file">File</option>
-  </select>
-</div>
-
-<div class="form-group deskripsi-input" style="display: none;">
-  <label for="deskripsi_ubah">Deskripsi</label>
-  <input type="text" name="deskripsi_ubah" required class="form-control deskripsi_ubah" placeholder="Masukkan Deskripsi">
-</div>
-
-<div class="form-group file-input" style="display: none;">
-  <label for="fileInput_ubah">File</label>
-  <input type="file" class="form-control fileInput_ubah" required name="fileInput_ubah" placeholder="Masukkan File">
-
-   <div class="text-center mt-3">
-                    <?php 
-                     $gambarPath = "../../data/img/transaksi/" . $edit['deskripsi']; // Path gambar sesuai dengan data dalam database
-                    if (file_exists($gambarPath)) {
-                      echo '<img src="../../data/img/transaksi/' . $edit['deskripsi']. '" alt="Gambar" style="max-width: 300px; max-height: 300px;">';
-                    } else {
-                       echo '<img src="../dist/img/galeri.png" style="max-width: 300px; max-height: 300px;">';
-                    }
-                    ?>
-</div>
-</div>
-
-
-             
-<div class="form-group">
-                        <div class="">
-                        <button type="submit" class="btn btn-primary" name="Ubah">Simpan</button>
-
-                        </div>
-                      </div>
-                    </form>
-               
-                   
-<script>
-
-    $(document).ready(function() {
-    $(".pilih_tipe").change(function() {
-      if ($(this).val() == "deskripsi") {
-        $(".deskripsi-input").show();
-        $(".file-input").hide();
-      } else {
-        $(".deskripsi-input").hide();
-        $(".file-input").show();
-      }
-    });
-  });
-
-   
-
-$(document).ready(function () {
-
-  // Ketika jenis transaksi berubah
-    $('.transaksi-keuangan').on('change', function () {
-        var selectedTransaksi = $(this).val();
         
-        // Ganti elemen dengan ID "nilai_transaksi" dengan nilai yang sesuai
-        if (selectedTransaksi === 'Pemasukan') {
-            $('.nilai_transaksi').val('Pemasukan');
-        } else if (selectedTransaksi === 'Pengeluaran') {
-            $('.nilai_transaksi').val('Pengeluaran');
-        }
-    });
-
-      // Ketika jenis transaksi berubah
-   // Ketika jenis transaksi berubah
-$('.kategori-edit').on('change', function () {
-    var selectedKategori = $(this).val();
-    
-    // Ganti nilai dari input dengan nama "nilai_kategori" dengan nilai yang sesuai
-    $('.nilai_kategori').val(selectedKategori);
-});
-
-  // Saat halaman dimuat
-  $('.transaksi-keuangan').each(function () {
-    var savedTransaksi = $(this).data('transaksi');
-    var id_user = $('#id_user').val();
-    
-    // Set opsi yang dipilih berdasarkan transaksi yang tersimpan dalam data
-    $(this).val(savedTransaksi);
-    
-    // Kirim permintaan AJAX untuk memuat kategori berdasarkan transaksi
-    var kategoriSelect = $(this).closest('form').find('.kategori-edit'); // Cari elemen kategori di dalam form terkait
-    $.ajax({
-      type: 'GET',
-      url: 'get_kategori.php', // Ganti dengan URL yang sesuai untuk mengambil kategori
-      data: { transaksi: savedTransaksi, id_user: id_user }, // Kirim jenis transaksi dan id_user ke server
-      success: function (response) {
-        // Perbarui pilihan kategori dengan hasil dari server
-        kategoriSelect.html(response);
-      }
-    });
-  });
-  
-  // Ketika jenis transaksi berubah
-  $('.transaksi-keuangan').on('change', function () {
-    var selectedTransaksi = $(this).val();
-    var id_user = $('#id_user').val();
-    
-    // Kirim permintaan AJAX untuk mendapatkan kategori
-    var kategoriSelect = $(this).closest('form').find('.kategori-edit'); // Cari elemen kategori di dalam form terkait
-    $.ajax({
-      type: 'GET',
-      url: 'get_kategori.php', // Ganti dengan URL yang sesuai untuk mengambil kategori
-      data: { transaksi: selectedTransaksi, id_user: id_user }, // Kirim jenis transaksi dan id_user ke server
-      success: function (response) {
-        // Perbarui pilihan kategori dengan hasil dari server
-        kategoriSelect.html(response);
-      }
-    });
-  });
-});
-
-
 
 
 // Tambahkan event handler untuk tombol "Delete"
@@ -1027,31 +849,6 @@ setTimeout(() => {
 });
 
 </script>
-
-
-                <!-- /.form group -->
-                  </div>
-                  
-                  
-                </div>
-              </div>
-              <!-- /.card -->
-            </div>
-          </div>
-            </div>
-            <div class="modal-footer justify-content-between">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-              <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-
-      <?php } ?>
-
-  
 
 
   <script>
@@ -1120,7 +917,20 @@ while ($row_modal = mysqli_fetch_array($query_modal)) {
   </div>
 </div>
 
-
+<?php 
+if (isset($_SESSION['gagal'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "warning",';
+    echo '    title: "' . $_SESSION['gagal'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 2000'; //Ini 2 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['gagal']); // Hapus pesan dari session
+}
+?>
 
 
 
