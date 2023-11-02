@@ -58,12 +58,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
 // Daftar kategori
 $setting = [
     'profile.php' => ['icon' => 'fas fa-user', 'title' => 'Profile'],
-    '#' => ['icon' => 'fas fa-sign-out-alt', 'title' => 'Logout']
+    
    
 ];
 $master = [
     'k_s.php' => ['icon' => 'fas fa-tag', 'title' => 'Kategori'],
-    'aset.php' => ['icon' => 'fas fa-wallet', 'title' => 'Aset'],
+    // 'aset.php' => ['icon' => 'fas fa-wallet', 'title' => 'Aset'],
    
 ];
 
@@ -71,7 +71,7 @@ $master = [
 
 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
     <li class="nav-item">
-        <a href="../index.php" class="nav-link <?= ($current_page === 'index.php') ? 'active' : ''; ?>">
+        <a href="../dashboard/index.php" class="nav-link <?= ($current_page === 'index.php') ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
                 Dashboard
@@ -100,23 +100,14 @@ $master = [
     </li>
 
     <li class="nav-item">
-        <a href="../transaksi/transaksi.php" class="nav-link <?= ($current_page === 'transaksi.php') ? 'active' : ''; ?>">
+        <a href="../akun/akun.php" class="nav-link <?= ($current_page === 'akun.php') ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-dollar-sign"></i>
             <p>
-                Transaksi
+                Akun user
             </p>
         </a>
     </li>
     
-     <li class="nav-item">
-        <a href="#" id="logoutLink" class="nav-link">
-            <i class="nav-icon fas fa-sign-out-alt"></i>
-            <p>
-                Logout
-            </p>
-        </a>
-    </li>
-
     <li class="nav-item <?= (in_array($current_page, array_keys($setting))) ? 'menu-open' : ''; ?>">
         <a href="#" class="nav-link <?= (in_array($current_page, array_keys($setting))) ? 'active' : ''; ?>">
             <i class="nav-icon fas fa-cog"></i>
@@ -133,10 +124,21 @@ $master = [
             <p><?= $settings['title'] ?></p>
         </a>
     </li>
+    </ul>
+    </li>
+
+    <li class="nav-item">
+        <a href="#" id="logoutLink" class="nav-link">
+            <i class="nav-icon fas fa-sign-out-alt"></i>
+            <p>
+                Logout
+            </p>
+        </a>
+    </li>
+    
 <?php endforeach; ?>
 
-        </ul>
-    </li>
+        
 
      
 
@@ -160,7 +162,7 @@ document.getElementById('logoutLink').addEventListener('click', function (e) {
         cancelButtonText: 'Tidak',
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = '../../logout.php';
+            window.location.href = '../logout.php';
         }
     });
 });

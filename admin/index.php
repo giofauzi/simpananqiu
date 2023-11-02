@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['admin_login'] = $user['id_admin'];
 
-        header("Location: ../admin/dashboard.php"); // Ubah ke halaman yang sesuai
+        header("Location: ../admin/dashboard/"); // Ubah ke halaman yang sesuai
         exit();
     } else {
         $_SESSION['error_message'] = 'Username/Password yang Anda masukkan salah.';
