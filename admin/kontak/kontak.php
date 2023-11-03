@@ -35,11 +35,11 @@
                   <tr>
                     <th>No</th>
                     <th>Nama</th>
-                    <th>Gender</th>
-                    <th>Handphone</th>
-                    <th>Email</th>
-                    <th>Foto</th>
                     <th>Status</th>
+                    <th>Email</th>
+                    <th>Judul</th>
+                    <th>Pesan</th>
+                    <th>Tanggal Buat</th>
                     <th>Aksi</th>
                   </tr>
                   </thead>
@@ -58,39 +58,25 @@
     return $sensoredUsername . '@' . $domain;
 }
 $no = 1;
-$query = mysqli_query($koneksi, "SELECT * FROM users");
+$query = mysqli_query($koneksi, "SELECT * FROM kontak");
 while ($row = mysqli_fetch_array($query)) {
 ?>
 <tr>
   <td><?= $no++; ?></td>
-  <td><?= $row['nama_user']; ?></td>
-  <td><?= $row['gender']; ?></td>
-  <td><?= $row['no_hp']; ?></td>
-  <td><?= sensorEmail($row['email']); ?></td>
-
-  <td><?php
-        $gambarPath = "../../data/img/users/" . $row['foto']; // Path gambar sesuai dengan data dalam database
-        if (file_exists($gambarPath)) {
-            // Tampilkan gambar jika file gambar ada
-            echo '<img src="' . $gambarPath . '" data-toggle="modal"  alt="Gambar Transaksi" data-target="#gambarModal' . $row['id_user'] . '"  width="100" height="100">';
-        } else {
-            // Tampilkan deskripsi jika file gambar tidak ada
-            echo $row['foto'];
-        }
-        ?>
-  </td>
-  <td>
-    <?php
-      if ($row['status'] == 1) {
-          echo 'NOT ACTIVE';
+  <td><?= $row['nama']; ?></td>
+  <td> <?php
+      if ($row['id_user'] == 0) {
+          echo 'Bukan Pengguna';
       } else {
-          echo 'ACTIVE';
+          echo 'Pengguna';
       }
-      ?>
-  </td>
+      ?></td>
+  <td><?= sensorEmail($row['email']); ?></td>
+  <td><?= $row['judul']; ?></td>
+  <td><?= $row['pesan']; ?></td>
+  <td><?= $row['tgl_b']; ?></td>
   <td>
-    <a href="#" class="btn btn-warning update" data-toggle="modal" data-target="#updateModal<?= $row['id_user'] ?>" data-userid="<?= $row['id_user'] ?>"><i class="fa fa-pen"></i></a>
-    
+    <a href="#" class="btn btn-danger delete" data-id="<?= $row['id_kontak'] ?>"><i class="fa fa-trash"></i></a>
   </td>
 
 </tr>
@@ -108,78 +94,38 @@ while ($row = mysqli_fetch_array($query)) {
           </div>
           <!-- /.col -->
         </div>
-   
-<?php
-$query = mysqli_query($koneksi, "SELECT * FROM users");
-while ($row = mysqli_fetch_array($query)) {
-?>
-<div class="modal fade" id="updateModal<?= $row['id_user'] ?>" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="updateModalLabel">Update User</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="status">Status:</label>
-            <select class="form-control status" name="status" style="width: 100%">
-              <?php
-              $statusOptions = array(
-                array('value' => '1', 'label' => 'NOT ACTIVE'),
-                array('value' => '2', 'label' => 'ACTIVE')
-                // Tambahkan opsi lainnya jika diperlukan
-              );
-
-              $selectedStatus = $row['status']; // Ambil nilai status dari database
-
-              foreach ($statusOptions as $option) {
-                $selected = ($option['value'] == $selectedStatus) ? 'selected' : '';
-                echo '<option value="' . $option['value'] . '" ' . $selected . '>' . $option['label'] . '</option>';
-              }
-              ?>
-            </select>
-          </div>
-          <input type="hidden" class="id_user" name="id_user" value="<?= $row['id_user'] ?>">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary simpan">Save Changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-<?php } ?>
-
 <script>
-  $(document).ready(function () {
-  // Event saat tombol "Simpan" diklik
-  $(".simpan").on("click", function () {
-    var modal = $(this).closest(".modal"); // Temukan modal yang terkait dengan tombol "Simpan"
-    var idUser = modal.find(".id_user").val(); // Dapatkan nilai input 
-    var status = modal.find(".status").val(); // Dapatkan nilai input
+  $('#example2').on('click', '.delete', function() {
+  // Dapatkan ID kategori yang akan dihapus
+  const kontakId = $(this).data('id');
 
-    // Kirim permintaan Ajax dengan id pengguna yang sesuai
-    $.ajax({
-      type: "POST",
-      url: "update_akun.php", // Ganti dengan alamat file PHP yang sesuai
-      data: {
-        id_user: idUser, // Tambahkan id_user ke data yang dikirimkan
-        status: status, // Tambahkan transaksi ke data yang dikirimkan
-      },
-      success: function (response) {
-        if (response.includes("berhasil")) {
-          setTimeout(() => {
-             Swal.fire({
-     icon: 'success',
-            title: 'Sukses',
-            text: response,
-            showConfirmButton: false,
-            timer: 1000 // Menampilkan notifikasi selama 3 detik
+  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi Penghapusan',
+    text: 'Anda yakin ingin menghapus transaksi ini?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Lakukan permintaan AJAX untuk menghapus transaksi
+      $.ajax({
+        url: 'delete.php', // Ganti dengan URL yang sesuai
+        method: 'POST',
+        data: { id: kontakId },
+        success: function(response) {
+  if (response === 'success') {
+    // Berhasil mengedit transaksi
+   // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
+setTimeout(() => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Transaksi Berhasil Dihapus!',
+  
+    showConfirmButton: false,
+    timer: 1000, // Menunggu 5 detik
+    allowOutsideClick: false
   }).then(() => {
     // Menunggu 5 detik sebelum mereset ulang halaman
     setTimeout(() => {
@@ -187,60 +133,22 @@ while ($row = mysqli_fetch_array($query)) {
     }, 1000);
   });
 }, 1000);
-          
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: response,
-            showConfirmButton: false,
-            timer: 2000
-          });
-        }
-      },
-      error: function (xhr, status, error) {
-        // Tangani kesalahan jika permintaan Ajax gagal
-        Swal.fire({
-          icon: 'error',
-          title: 'Terjadi Kesalahan',
-          text: 'Terjadi kesalahan: ' + error,
-        });
-      }
+  } else {
+    Swal.fire({
+      title: 'Gagal Menghapus transaksi',
+      icon: 'error',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
     });
+  }
+}
+      });
+    }
   });
 });
-
-</script>
-
-  <?php
-  
-$query_modal = mysqli_query($koneksi, "SELECT * FROM users");
-while ($row_modal = mysqli_fetch_array($query_modal)) {
-?>
- <!-- Modal -->
-<div class="modal fade" id="gambarModal<?= $row_modal['id_user'] ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $row_modal['id_user'] ?>" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        
-        <h5 class="modal-title" id="gambarModalLabel<?= $row_modal['id_user'] ?>">Gambar</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        
-      </div>
-      <div class="modal-body">
-        <img src="../../data/img/users/<?= $row_modal['foto'] ?>" alt="Gambar Modal" style="max-width: 100%; height: auto;">
-      </div>
-      <div class="modal-footer">
-       <a href="../../data/img/users/<?= $row_modal['foto'] ?>" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-      </div>
-    </div>
-  </div>
-</div>
-
+</script>   
 
 <?php
-}
+
 include '../view/footer_t.php' ?>
