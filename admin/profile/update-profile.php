@@ -19,7 +19,7 @@ $profileData = "
         <div class='text-center'>
         <a href='#' data-toggle='modal' class='edit-modal modal-gambar' data-id='$id_admin' data-target='#gambarModal$id_admin'>
             <img class='profile-user-img img-fluid img-circle'
-                 src='../../assets/img/admin.png'
+                 src='../../assets/img/admin-aja.png'
                  alt='Admin profile picture'>
                  </a>
         </div>

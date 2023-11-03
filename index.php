@@ -662,7 +662,7 @@ if (isset($_SESSION['subscribe_error'])) {
 
           <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="100">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-1.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/fajar.jpg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Fajar Maulana Nugroho Sutardi</h4>
                 <span>Leader, Front End, Back End</span>
@@ -679,7 +679,7 @@ if (isset($_SESSION['subscribe_error'])) {
 
           <div class="col-lg-6 mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="200">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-1.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/farish.jpeg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Farish Augie Yukeza</h4>
                 <span>UI/UX Designer</span>
@@ -747,11 +747,11 @@ if (isset($_SESSION['subscribe_error'])) {
 
           <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="400">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-4.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/riska.jpg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Riska Lia Amaliah Siagian</h4>
                 <span>UI/UX Designer</span>
-                <p>Dolorum tempora officiis odit laborum officiis et et accusamus</p>
+                <p>Ketika kamu terjatuh, cobalah untuk bangkit dan lihat kebelakang sudah sejauh mana kamu berjalan</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -944,21 +944,6 @@ if (isset($_SESSION['subscribe_error'])) {
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
-
-   <div class="footer-newsletter">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-6">
-        <h4>Langganan Newsletter Kami</h4>
-        <p>Ikuti berita terbaru kami dan dapatkan informasi eksklusif.</p>
-         <form action="" method="post">
-              <input type="email" required name="email"><button type="submit" name="subscribe">Subscribe</button>
-            </form>
-      </div>
-    </div>
-  </div>
-</div>
-
 
     <div class="footer-top">
   <div class="container">

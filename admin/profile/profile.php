@@ -101,11 +101,11 @@ function updateAbout() {
         </button>
         
       </div>
-      <div class="modal-body">
-        <img src="../../assets/img/admin.png" alt="Gambar Modal" style="max-width: 100%; height: auto;">
+      <div class="modal-body text-center">
+        <img src="../../assets/img/admin-aja.png" alt="Gambar Modal" style="max-width: 100%; height: auto;">
       </div>
-      <div class="modal-footer">
-       <a href="../../assets/img/admin.png" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>
+      <div class="modal-footer text-center">
+       <a href="../../assets/img/admin-aja.png" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
       </div>
     </div>

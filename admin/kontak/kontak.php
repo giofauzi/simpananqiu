@@ -1,11 +1,7 @@
 <?php include '../view/header_t.php' ?>
 <?php include '../view/navbar_t.php' ?>
 <?php include '../view/sidebar_t.php' ?>
-<!-- Include Bootstrap CSS and JS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -45,8 +41,6 @@
                   </thead>
                   
                   <tbody>
-
-                  
                   <?php
                   function sensorEmail($email) {
     $parts = explode('@', $email);
@@ -64,17 +58,31 @@ while ($row = mysqli_fetch_array($query)) {
 <tr>
   <td><?= $no++; ?></td>
   <td><?= $row['nama']; ?></td>
-  <td> <?php
+  <td>
+     <?php
       if ($row['id_user'] == 0) {
           echo 'Bukan Pengguna';
       } else {
           echo 'Pengguna';
       }
-      ?></td>
-  <td><?= sensorEmail($row['email']); ?></td>
+      ?>
+      </td>
+<td>
+   <?php
+      if ($row['id_user'] == 0) {
+          echo sensorEmail($row['email']);
+      } else {
+        $id_user = $row['id_user'];
+        $query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user = $id_user");
+        $user = mysqli_fetch_array($query_user);
+          echo sensorEmail($user['email']);
+      }
+   ?>
+</td>
+
   <td><?= $row['judul']; ?></td>
   <td><?= $row['pesan']; ?></td>
-  <td><?= $row['tgl_b']; ?></td>
+  <td><?= date('d F Y H.i', strtotime($row['tgl_b'])); ?></td>
   <td>
     <a href="#" class="btn btn-danger delete" data-id="<?= $row['id_kontak'] ?>"><i class="fa fa-trash"></i></a>
   </td>
