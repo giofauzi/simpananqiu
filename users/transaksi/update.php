@@ -152,20 +152,49 @@ echo '<option value="">Pilih</option>';
 </div>
 
 <div class="form-group file-input" style="display: none;">
-  <label for="fileInput_ubah">File</label>
-  <input type="file" class="form-control fileInput_ubah"  name="fileInput_ubah" placeholder="Masukkan File">
+    <label for="fileInput_ubah">File</label>
+    <input type="file" class="form-control fileInput_ubah" name="fileInput_ubah" id="fileInput" accept=".jpg, .jpeg, .png" placeholder="Masukkan File">
+    <div class="text-center mt-3">
+        <?php 
+        $gambarPath = "../../data/img/transaksi/" . $edit['deskripsi']; // Path gambar sesuai dengan data dalam database
+        if (file_exists($gambarPath)) {
+            echo '<img src="../../data/img/transaksi/' . $edit['deskripsi']. '" alt="Gambar" style="max-width: 300px; max-height: 300px;">';
+        } else {
+            echo '<img src="../dist/img/galeri.png" style="max-width: 300px; max-height: 300px;">';
+        }
+        ?>
+    </div>
+</div>
 
-   <div class="text-center mt-3">
-                    <?php 
-                     $gambarPath = "../../data/img/transaksi/" . $edit['deskripsi']; // Path gambar sesuai dengan data dalam database
-                    if (file_exists($gambarPath)) {
-                      echo '<img src="../../data/img/transaksi/' . $edit['deskripsi']. '" alt="Gambar" style="max-width: 300px; max-height: 300px;">';
-                    } else {
-                       echo '<img src="../dist/img/galeri.png" style="max-width: 300px; max-height: 300px;">';
-                    }
-                    ?>
-</div>
-</div>
+<div id="imageValidationMessage" style="display: none; color: red;"></div>
+
+<script>
+document.getElementById("fileInput").addEventListener("change", function() {
+    const fileInput = this;
+    const imageValidationMessage = document.getElementById("imageValidationMessage");
+
+    if (fileInput.files.length > 0) {
+        const selectedFile = fileInput.files[0];
+        const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+
+        if (fileExtension === "jpg" || fileExtension === "jpeg" || fileExtension === "png") {
+            // File yang dipilih adalah gambar
+            const imgPreview = document.querySelector(".form-group.file-input .text-center img");
+            imgPreview.src = URL.createObjectURL(selectedFile);
+            imageValidationMessage.style.display = "none";
+        } else {
+            // File yang dipilih bukan gambar
+            imageValidationMessage.textContent = "Hanya file gambar (JPG, JPEG, atau PNG) yang diizinkan.";
+            imageValidationMessage.style.display = "block";
+            fileInput.value = ""; // Hapus file yang dipilih
+        }
+    } else {
+        imageValidationMessage.style.display = "none";
+    }
+});
+</script>
+
+
 
 
              
