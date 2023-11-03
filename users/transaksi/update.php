@@ -225,6 +225,17 @@ document.getElementById("fileInput").addEventListener("change", function() {
     <!-- /.content -->
   </div>
 
+  <?php
+// Ambil nama gambar dari database
+$namaGambarDariDatabase = $edit['deskripsi'];
+?>
+
+<script>
+// Menggunakan PHP untuk mengirim nama gambar ke JavaScript
+var namaGambarDariDatabase = "<?php echo $namaGambarDariDatabase; ?>";
+</script>
+
+
 
 
  <script>
@@ -305,7 +316,8 @@ setTimeout(() => {
     });
 });
 
- $(document).ready(function () {
+
+$(document).ready(function () {
   $(".pilih_tipe").change(function () {
     var selectedTipe = $(this).val();
 
@@ -313,14 +325,35 @@ setTimeout(() => {
       $(".deskripsi-input").show();
       $(".file-input").hide();
       // Kosongkan input deskripsi
-      $(".deskripsi_ubah").val("");
+       // Mengambil deskripsi dari database yang telah disimpan di dalam elemen input tersembunyi
+      var deskripsiDariDatabase = namaGambarDariDatabase;
+      $(".deskripsi_ubah").val(deskripsiDariDatabase);
+      // Hapus atribut "src" gambar
+      $(".form-group.file-input .text-center img").removeAttr("src");
     } else if (selectedTipe === "file") {
       $(".deskripsi-input").hide();
       $(".file-input").show();
+
+      // Cek apakah gambar sesuai dengan deskripsi ada di folder
+      var gambarPath = "../../data/img/transaksi/" + namaGambarDariDatabase;
+
+      // Buat elemen gambar baru
+      var img = new Image();
+      img.src = gambarPath;
+
+      img.onload = function () {
+        // Gambar sesuai dengan deskripsi ada, tampilkan gambar itu
+        $(".form-group.file-input .text-center img").attr("src", gambarPath);
+      };
+
+      img.onerror = function () {
+        // Gambar sesuai dengan deskripsi tidak ada, tampilkan gambar alternatif
+        $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
+      };
+
+
       // Hapus gambar yang telah dipilih (reset input file)
       $(".fileInput_ubah").val("");
-      // Reset tampilan gambar ke gambar default jika ada
-      $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
       // Sembunyikan pesan validasi gambar jika ada
       $("#imageValidationMessage").hide();
     } else {
@@ -329,12 +362,15 @@ setTimeout(() => {
       // Kosongkan input deskripsi dan reset input file serta gambar jika ada
       $(".deskripsi_ubah").val("");
       $(".fileInput_ubah").val("");
-      $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
+      // Hapus atribut "src" gambar
+      $(".form-group.file-input .text-center img").removeAttr("src");
       // Sembunyikan pesan validasi gambar jika ada
       $("#imageValidationMessage").hide();
     }
   });
 });
+
+
 
 
    
