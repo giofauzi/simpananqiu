@@ -140,7 +140,7 @@ echo '<option value="">Pilih</option>';
                 <div class="form-group">
   <label for="pilih_tipe">Pilih Tipe</label>
   <select class="form-control select2 pilih_tipe"  style="width:100%;">
-    <option value="">Pilih</option>
+    <option value="pilih">Pilih</option>
     <option value="deskripsi">Deskripsi</option>
     <option value="file">File</option>
   </select>
@@ -305,17 +305,37 @@ setTimeout(() => {
     });
 });
 
-    $(document).ready(function() {
-    $(".pilih_tipe").change(function() {
-      if ($(this).val() == "deskripsi") {
-        $(".deskripsi-input").show();
-        $(".file-input").hide();
-      } else {
-        $(".deskripsi-input").hide();
-        $(".file-input").show();
-      }
-    });
+ $(document).ready(function () {
+  $(".pilih_tipe").change(function () {
+    var selectedTipe = $(this).val();
+
+    if (selectedTipe === "deskripsi") {
+      $(".deskripsi-input").show();
+      $(".file-input").hide();
+      // Kosongkan input deskripsi
+      $(".deskripsi_ubah").val("");
+    } else if (selectedTipe === "file") {
+      $(".deskripsi-input").hide();
+      $(".file-input").show();
+      // Hapus gambar yang telah dipilih (reset input file)
+      $(".fileInput_ubah").val("");
+      // Reset tampilan gambar ke gambar default jika ada
+      $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
+      // Sembunyikan pesan validasi gambar jika ada
+      $("#imageValidationMessage").hide();
+    } else {
+      $(".deskripsi-input").hide();
+      $(".file-input").hide();
+      // Kosongkan input deskripsi dan reset input file serta gambar jika ada
+      $(".deskripsi_ubah").val("");
+      $(".fileInput_ubah").val("");
+      $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
+      // Sembunyikan pesan validasi gambar jika ada
+      $("#imageValidationMessage").hide();
+    }
   });
+});
+
 
    
 
