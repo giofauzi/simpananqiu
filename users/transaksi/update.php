@@ -326,8 +326,26 @@ $(document).ready(function () {
       $(".file-input").hide();
       // Kosongkan input deskripsi
        // Mengambil deskripsi dari database yang telah disimpan di dalam elemen input tersembunyi
-      var deskripsiDariDatabase = namaGambarDariDatabase;
-      $(".deskripsi_ubah").val(deskripsiDariDatabase);
+      // Cek apakah gambar sesuai dengan deskripsi ada di folder
+var gambarPath = "../../data/img/transaksi/" + namaGambarDariDatabase;
+
+// Buat elemen gambar baru
+var img = new Image();
+img.src = gambarPath;
+
+img.onload = function () {
+  // Gambar sesuai dengan deskripsi ada, tampilkan gambar itu
+  $(".form-group.file-input .text-center img").attr("src", gambarPath);
+  $(".deskripsi_ubah").val(""); // Tampilkan deskripsi yang sesuai
+};
+
+img.onerror = function () {
+  // Gambar sesuai dengan deskripsi tidak ada, tampilkan gambar alternatif
+  $(".form-group.file-input .text-center img").attr("src", "../dist/img/galeri.png");
+  // Tampilkan deskripsi dari var (bisa disesuaikan dengan deskripsi alternatif)
+  $(".deskripsi_ubah").val(namaGambarDariDatabase);
+};
+
       // Hapus atribut "src" gambar
       $(".form-group.file-input .text-center img").removeAttr("src");
     } else if (selectedTipe === "file") {

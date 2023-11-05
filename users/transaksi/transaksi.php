@@ -925,7 +925,7 @@ if (isset($_SESSION['gagal'])) {
     echo '    icon: "warning",';
     echo '    title: "' . $_SESSION['gagal'] . '",';
     echo '    showConfirmButton: false,';
-    echo '    timer: 2000'; //Ini 2 detik
+    echo '    timer: 3000'; //Ini 3 detik
     echo '});';
     echo '</script>';
     unset($_SESSION['gagal']); // Hapus pesan dari session

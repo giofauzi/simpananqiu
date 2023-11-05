@@ -234,7 +234,7 @@ if ($user['status'] == 1) {
 $current_page = $_SERVER['PHP_SELF'];
 
 // Periksa apakah halaman saat ini adalah transaksi.php
-if (basename($current_page) !== 'transaksi.php') {
+// if (basename($current_page) !== 'transaksi.php') {
     // Jika bukan halaman transaksi, tampilkan preloader.
     ?>
     <!-- Preloader -->
@@ -242,7 +242,7 @@ if (basename($current_page) !== 'transaksi.php') {
         <img class="animation__shake" src="../dist/img/favicon.png" alt="Logo SimpananQiu" height="200" width="200">
     </div>
     <?php
-}
+// }
 ?>
 
   
