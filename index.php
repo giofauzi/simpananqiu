@@ -683,7 +683,7 @@ if (isset($_SESSION['subscribe_error'])) {
               <div class="member-info">
                 <h4>Farish Augie Yukeza</h4>
                 <span>UI/UX Designer</span>
-                <p>Aut maiores voluptates amet et quis praesentium qui senda para</p>
+                <p>Kalo mereka bisa kenapa harus saya</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>

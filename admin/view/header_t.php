@@ -40,8 +40,8 @@ include "session.php";
 
 
    <!-- Favicons -->
-  <link href="../../users/../../users/assets/img/favicon.jpeg" rel="icon">
-  <link href="../../users/../../users/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="../../users/dist/img/favicon.jpeg" rel="icon">
+  <link href="../../users/dist/img/favicon.jpeg" rel="apple-touch-icon">
 
   
     <!-- SweetAlert2 -->
@@ -54,26 +54,6 @@ include "session.php";
   <link rel="stylesheet" href="../../users/dist/css/adminlte.min.css">
 
 
-<!-- <script>
-function tampilkanIklan() {
-  Swal.fire({
-    title: 'Oops!',
-    text: 'Anda Belum Premium!',
-    imageUrl: '../../users/../../users/assets/img/promo.png',
-    imageWidth: 300,
-    imageHeight: 300,
-    imageAlt: 'Custom image',
-  });
-}
-
-// Menampilkan SweetAlert pertama kali setelah halaman dimuat
-setTimeout(tampilkanIklan, 60000); // Show the alert after 1 minute
-
-// Membuat interval untuk menampilkan SweetAlert setiap 1 menit
-setInterval(tampilkanIklan, 60000); // Show the alert every minute
-
-
-</script> -->
   
   <style>
 
@@ -152,6 +132,16 @@ setInterval(tampilkanIklan, 60000); // Show the alert every minute
   .modal.modal-bottom .modal-dialog {
     bottom: -100%;
   }
+  #previewImage {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 10px;
+  }
+   #previewImage_p {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 10px;
+  }
 }
 
 /* CSS untuk modal di layar yang lebih besar */
@@ -204,5 +194,20 @@ setInterval(tampilkanIklan, 60000); // Show the alert every minute
 <div class="wrapper">
 
 
- 
+  <?php
+// Menentukan halaman saat ini
+$current_page = $_SERVER['PHP_SELF'];
+
+// Periksa apakah halaman saat ini adalah transaksi.php
+if (basename($current_page) !== 'transaksi.php') {
+    // Jika bukan halaman transaksi, tampilkan preloader.
+    ?>
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+        <img class="animation__shake" src="../../users/dist/img/favicon.png" alt="Logo SimpananQiu" height="200" width="200">
+    </div>
+    <?php
+}
+?>
+
   

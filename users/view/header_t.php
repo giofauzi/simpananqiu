@@ -40,8 +40,8 @@ include "session.php";
 
 
    <!-- Favicons -->
-  <link href="../../assets/img/favicon.jpeg" rel="icon">
-  <link href="../../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="../dist/img/favicon.jpeg" rel="icon">
+  <link href="../dist/img/favicon.jpeg" rel="apple-touch-icon">
 
   
     <!-- SweetAlert2 -->

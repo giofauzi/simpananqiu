@@ -35,7 +35,7 @@ if (isset($_SESSION['user_last_activity'])) {
     // Hitung selisih waktu
     $now = time();
     $user_last_activity = $_SESSION['user_last_activity'];
-    $timeout_duration = 60 * 60 * 6; // 1 hari dalam detik
+    $timeout_duration = 60 * 60 * 6; //  6 jam
 
     if ($now - $user_last_activity > $timeout_duration) {
         // Matikan sesi

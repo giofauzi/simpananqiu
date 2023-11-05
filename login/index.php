@@ -191,7 +191,7 @@ if (isset($_SESSION['logout_success'])) {
     echo '<script>';
     echo 'Swal.fire({';
     echo '    position: "center",';
-    echo '    icon: "error",';
+    echo '    icon: "success",';
     echo '    title: "' . $_SESSION['logout_success'] . '",';
     echo '    showConfirmButton: false,';
     echo '    timer: 3000'; //Ini 3 detik
@@ -252,7 +252,6 @@ if (isset($_SESSION['error_message'])) {
     unset($_SESSION['error_message']); // Hapus pesan dari session
 }
 
-// 
 ?>
 
 

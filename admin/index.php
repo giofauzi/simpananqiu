@@ -31,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['admin_login'] = $user['id_admin'];
+          $_SESSION['admin_last_activity'] = time(); // Setel waktu aktivitas terakhir
 
-        header("Location: ../admin/dashboard/"); // Ubah ke halaman yang sesuai
+        header("Location: ../admin/dashboard/dashboard.php"); // Ubah ke halaman yang sesuai
         exit();
     } else {
         $_SESSION['error_message'] = 'Username/Password yang Anda masukkan salah.';
@@ -109,21 +110,20 @@ if (isset($_SESSION['success_message'])) {
 
 <!-- Untuk notifikasi logout -->
 <?php
-if (isset($_COOKIE['logout_message'])) {
+if (isset($_SESSION['logout_message'])) {
     echo '<script>';
     echo 'Swal.fire({';
     echo '    position: "center",';
     echo '    icon: "success",';
-    echo '    title: "' . $_COOKIE['logout_message'] . '",';
+    echo '    title: "' . $_SESSION['logout_message'] . '",';
     echo '    showConfirmButton: false,';
-    echo '    timer: 3000'; //Ini 3 detik
+    echo '    timer: 3000'; //Ini 2 detik
     echo '});';
     echo '</script>';
-    // Hapus cookie
-    setcookie('logout_message', '', time() - 3600, '/');
+    unset($_SESSION['logout_message']); // Hapus pesan dari session
 }
-
 ?>
+
 
 
 <!-- Untuk Tampilkan ganti passoword berhasil -->
@@ -145,31 +145,54 @@ if (isset($_SESSION['authenticated_user'])) {
 <!-- Untuk Pemberitahuan kalo data pasword/akun salah -->
 <?php
 if (isset($_SESSION['error_message'])) {
-    echo '<div class="alert alert-danger mt-3" role="alert">';
-    echo '<div class="d-flex align-items-center">';
-    echo '<div class="spinner-grow text-danger me-2 " role="status"></div>';
-    echo $_SESSION['error_message'];
-    echo '</div>';
-    echo '</div>';
-    unset($_SESSION['error_message']);
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "error",';
+    echo '    title: "' . $_SESSION['error_message'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 3000'; //Ini 3 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['error_message']); // Hapus pesan dari session
 }
-?>
-<script>
-    setTimeout(function() {
-        var errorAlert = document.querySelector('.alert-danger');
-        if (errorAlert) {
-            errorAlert.classList.add('fade-out'); // Menambahkan class untuk efek perlahan
-        }
-    }, 5000); // Menjalankan efek setelah 4 detik
 
-    // Hapus elemen setelah efek perlahan selesai
-    setTimeout(function() {
-        var errorAlert = document.querySelector('.alert-danger');
-        if (errorAlert) {
-            errorAlert.remove();
-        }
-    }, 5000); // Menghapus elemen setelah efek perlahan selesai (5000 ms)
-</script>
+?>
+
+<!-- Kalo belom login, tidak bisa masuk dan berikan notifikasi -->
+<?php
+if (isset($_SESSION['no_login'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "error",';
+    echo '    title: "' . $_SESSION['no_login'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 3000'; //Ini 3 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['no_login']); // Hapus pesan dari session
+}
+
+?>
+
+<!-- Kadaluarsa untuk login, jadi admin udah login tapi belom logout, dan terpaksa harus keluar dan berikan kondisi/notifikasi -->
+<!-- Ada di file back_login.php -->
+<?php
+if (isset($_SESSION['login_session_out'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "error",';
+    echo '    title: "' . $_SESSION['login_session_out'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 3000'; //Ini 3 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['login_session_out']); // Hapus pesan dari session
+}
+
+?>
 
 
 							<form action="" class="signin-form" method="post">

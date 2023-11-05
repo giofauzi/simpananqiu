@@ -9,6 +9,6 @@ session_destroy();
 setcookie('logout_success', "Anda telah berhasil logout.", time() + 60, '/'); // Cookie berlaku selama 1 menit
 
 // Alihkan pengguna ke halaman login
-header("Location: login/");
+header("Location: session_logout.php");
 exit();
 ?>

@@ -7,51 +7,7 @@
 
 
  
- <div class="floating-icon" id="tombol1"  data-toggle="modal" onclick="hide('custom-tabs-four-home')" data-target="#modal-lg">
-  <div class="circle">
-    <i class="fas fa-plus"></i>
-  </div>
-</div>
-<script>
-// Periksa URL halaman
-if (window.location.href.indexOf("profile.php") > -1) {
-  // Jika URL adalah "profile.php," sembunyikan elemen
-  document.querySelector('#tombol1').style.display = "none";
-}
-
-if (window.location.href.indexOf("transaksi.php") > -1) {
-  // Jika URL adalah "profile.php," sembunyikan elemen
-  document.querySelector('#tombol1').style.bottom = "60px";
-}
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Menampilkan tooltip saat halaman dimuat
-    var tooltip = new bootstrap.Tooltip(document.querySelector('#tombol1'), {
-        title: "Tambah Data",
-        placement: "right",
-        trigger: "manual"
-    });
-    tooltip.show();
-
-    // Menghilangkan tooltip setelah 6 detik
-    setTimeout(function () {
-        tooltip.hide();
-    }, 6000);
-
-     var aset = new bootstrap.Tooltip(document.querySelector('#custom-tabs-two-tab'), {
-        title: "Menampilkan Data",
-        placement: "top",
-        trigger: "manual"
-    });
-    aset.show();
-
-    // Menghilangkan aset setelah 6 detik
-    setTimeout(function () {
-        aset.hide();
-    }, 6000);
-});
-</script>
+ 
 
 <!-- Tambahkan Bootstrap JS dan jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -67,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+
 
 <!-- jQuery -->
 <script src="../../users/plugins/jquery/jquery.min.js"></script>
