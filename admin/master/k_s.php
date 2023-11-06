@@ -118,6 +118,7 @@
                                    <div class="form-group">
                   <label>Transaksi</label>
                   <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
+                    <option value="">Pilih</option>
                     <option value="Pemasukan">Pemasukan</option>
                     <option value="Pengeluaran">Pengeluaran</option>
                   </select>

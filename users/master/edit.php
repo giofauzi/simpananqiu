@@ -5,9 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = [];
 
     // Periksa apakah semua data yang diperlukan ada
-    if (empty($_POST['id_admin'])) {
-        $errors[] = " Tidak boleh kosong.";
-    }
+    
     if (empty($_POST['id'])) {
         $errors[] = " Tidak boleh kosong.";
     }
@@ -30,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $categoryId = mysqli_real_escape_string($koneksi, $_POST['id']);
 $editedCategoryName = mysqli_real_escape_string($koneksi, $_POST['nama']);
 $editIdUser = mysqli_real_escape_string($koneksi, $_POST['id_users']);
-$transaksi = mysqli_real_escape_string($koneksi, $_POST['transaksi_kategori']);
+$transaksi_kategori = mysqli_real_escape_string($koneksi, $_POST['transaksi_kategori']);
 $id_admin = mysqli_real_escape_string($koneksi, $_POST['id_admin']);
 
 
@@ -45,7 +43,6 @@ mysqli_stmt_store_result($stmt);
             // Kategori dengan nama yang sama sudah ada, kirim pesan kesalahan ke klien
             echo json_encode(['status' => 'error', 'message' => ["Kategori Sudah Ada!"]]);
         } else {
-            if ($id_admin === '1') {
             // Nama kategori unik, lanjutkan dengan UPDATE
             // Periksa apakah status pengguna dengan id_user yang sesuai adalah 0
             $statusQuery = "SELECT status FROM users WHERE id_user = '$editIdUser'";
@@ -54,23 +51,38 @@ mysqli_stmt_store_result($stmt);
             $userStatus = $statusRow['status'];
 
             // Query untuk menghitung jumlah kategori dengan id_user dan transaksi tertentu
-            $kategoriCountQuery = "SELECT COUNT(*) as count FROM kategori WHERE id_user = '$editIdUser' AND transaksi = '$transaksi' AND tgl_b != '0000-00-00 00:00:00'";
+            $kategoriCountQuery = "SELECT COUNT(*) as count FROM kategori WHERE id_user = '$editIdUser' AND transaksi = '$transaksi_kategori' AND tgl_b != '0000-00-00 00:00:00'";
             $kategoriCountResult = mysqli_query($koneksi, $kategoriCountQuery);
             $countRow = mysqli_fetch_assoc($kategoriCountResult);
             $kategoriCount = $countRow['count'];
 
-            if ($userStatus == '0') {
+            if ($userStatus == 1) {
                 // Jika status pengguna adalah 0 dan jumlah kategori mencapai batasan, tampilkan pesan harus menjadi premium
                 if ($kategoriCount >= 5) {
                     echo json_encode(['status' => 'error', 'message' => ["Anda harus upgrade akun ke premium."]]);
                 } else {
-                    
+                    if ($id_admin === '1') {
+                        $id_admin_nol = '0';
+                    // Nama kategori unik, lanjutkan dengan UPDATE
+                    date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    $query = "INSERT INTO kategori (id_user, id_admin, transaksi, nama_kategori, tgl_b, tgl_e) VALUES (?, ?, ?, ?, ?, ?)";
+                        $stmt = mysqli_prepare($koneksi, $query);
+                        mysqli_stmt_bind_param($stmt, "iissss", $editIdUser, $id_admin_nol, $transaksi_kategori, $editedCategoryName, $currentDateTime, $currentDateTime);
+                    if (mysqli_stmt_execute($stmt)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo json_encode(['status' => 'success']);
+                    } else {
+                        // Gagal menyimpan perubahan, kirim pesan kesalahan ke klien
+                        echo json_encode(['status' => 'error', 'message' => ["Gagal menyimpan perubahan."]]);
+                    }
+                } else {
                     // Nama kategori unik, lanjutkan dengan UPDATE
                     date_default_timezone_set('Asia/Jakarta');
                     $currentDateTime = date('Y-m-d H:i:s');
                     $query = "UPDATE kategori SET id_user = ?, transaksi = ?, nama_kategori = ?, tgl_e = ? WHERE id_kategori = ?";
                     $stmt = mysqli_prepare($koneksi, $query);
-                    mysqli_stmt_bind_param($stmt, "isssi", $editIdUser, $transaksi, $editedCategoryName, $currentDateTime, $categoryId);
+                    mysqli_stmt_bind_param($stmt, "isssi", $editIdUser, $transaksi_kategori, $editedCategoryName, $currentDateTime, $categoryId);
 
                     if (mysqli_stmt_execute($stmt)) {
                         // Berhasil menyimpan perubahan, kirim respons sukses ke klien
@@ -80,23 +92,39 @@ mysqli_stmt_store_result($stmt);
                         echo json_encode(['status' => 'error', 'message' => ["Gagal menyimpan perubahan."]]);
                     }
                 }
-            } else {
-                // Jika status pengguna bukan 0, lanjutkan tanpa memeriksa batasan kategori
-                // Nama kategori unik, lanjutkan dengan UPDATE
-                date_default_timezone_set('Asia/Jakarta');
-                $currentDateTime = date('Y-m-d H:i:s');
-                $query = "UPDATE kategori SET id_user = ?, transaksi = ?, nama_kategori = ?, tgl_e = ? WHERE id_kategori = ?";
-                $stmt = mysqli_prepare($koneksi, $query);
-               mysqli_stmt_bind_param($stmt, "isssi", $editIdUser, $transaksi, $editedCategoryName, $currentDateTime, $categoryId);
-
-                if (mysqli_stmt_execute($stmt)) {
-                    // Berhasil menyimpan perubahan, kirim respons sukses ke klien
-                    echo json_encode(['status' => 'success']);
-                } else {
-                    // Gagal menyimpan perubahan, kirim pesan kesalahan ke klien
-                    echo json_encode(['status' => 'error', 'message' => ["Gagal menyimpan perubahan."]]);
-                }
             }
+            } else {
+                if ($id_admin === '1') {
+                    $id_admin_nol = '0';
+                    // Nama kategori unik, lanjutkan dengan UPDATE
+                    date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    $query = "INSERT INTO kategori (id_user, id_admin, transaksi, nama_kategori, tgl_b, tgl_e) VALUES (?, ?, ?, ?, ?, ?)";
+                        $stmt = mysqli_prepare($koneksi, $query);
+                        mysqli_stmt_bind_param($stmt, "iissss", $editIdUser, $id_admin_nol, $transaksi_kategori, $editedCategoryName, $currentDateTime, $currentDateTime);
+                    if (mysqli_stmt_execute($stmt)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo json_encode(['status' => 'success']);
+                    } else {
+                        // Gagal menyimpan perubahan, kirim pesan kesalahan ke klien
+                        echo json_encode(['status' => 'error', 'message' => ["Gagal menyimpan perubahan."]]);
+                    }
+                } else {
+                    // Nama kategori unik, lanjutkan dengan UPDATE
+                    date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    $query = "UPDATE kategori SET id_user = ?, transaksi = ?, nama_kategori = ?, tgl_e = ? WHERE id_kategori = ?";
+                    $stmt = mysqli_prepare($koneksi, $query);
+                    mysqli_stmt_bind_param($stmt, "isssi", $editIdUser, $transaksi_kategori, $editedCategoryName, $currentDateTime, $categoryId);
+
+                    if (mysqli_stmt_execute($stmt)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo json_encode(['status' => 'success']);
+                    } else {
+                        // Gagal menyimpan perubahan, kirim pesan kesalahan ke klien
+                        echo json_encode(['status' => 'error', 'message' => ["Gagal menyimpan perubahan."]]);
+                    }
+                }
             }
         }
     }

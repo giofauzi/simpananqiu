@@ -8,6 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_POST['id'])) {
         $errors[] = "Id Kategori tidak boleh kosong.";
     }
+     if (empty($_POST['transaksi_aset'])) {
+        $errors[] = "Transaksi tidak boleh kosong.";
+    }
     if (empty($_POST['nama'])) {
         $errors[] = "Nama Aset tidak boleh kosong.";
     }
@@ -30,17 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['status' => 'error', 'message' => $errors]);
     } else {
         // Dapatkan data yang dikirimkan dari AJAX
-        $categoryId = $_POST['id'];
-        $editedCategoryName = $_POST['nama'];
-        $editIdUser = $_POST['id_users'];
-        $grup = $_POST['grup_aset'];
-        $total = $_POST['total_aset'];
-        $deskripsi = $_POST['deskripsi_aset'];
+       // Tangkap nilai yang diterima dari permintaan POST
+$categoryId = mysqli_real_escape_string($koneksi, $_POST['id']);
+$transaksi_aset = mysqli_real_escape_string($koneksi, $_POST['transaksi_aset']);
+$editedCategoryName = mysqli_real_escape_string($koneksi, $_POST['nama']);
+$editIdUser = mysqli_real_escape_string($koneksi, $_POST['id_users']);
+$grup = mysqli_real_escape_string($koneksi, $_POST['grup_aset']);
+$total = mysqli_real_escape_string($koneksi, $_POST['total_aset']);
+$deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi_aset']);
 
         // Lakukan proses validasi untuk memeriksa apakah ada aset dengan nama yang sama dalam jenis transaksi yang sama
-        $query = "SELECT id_aset, grup, id_user FROM aset WHERE nama_aset = ? AND id_aset <> ? AND id_user = ?";
+        $query = "SELECT id_aset, transaksi, grup, id_user FROM aset WHERE nama_aset = ? AND transaksi <> ? AND id_aset <> ? AND id_user = ?";
         $stmt = mysqli_prepare($koneksi, $query);
-        mysqli_stmt_bind_param($stmt, "sii", $editedCategoryName, $categoryId, $editIdUser);
+        mysqli_stmt_bind_param($stmt, "ssii", $editedCategoryName, $transaksi_aset , $categoryId, $editIdUser);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
 
@@ -56,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userStatus = $statusRow['status'];
 
             // Query untuk menghitung jumlah aset dengan id_user dan grup tertentu
-            $asetCountQuery = "SELECT COUNT(*) as count FROM aset WHERE id_user = '$editIdUser' AND grup = '$grup' AND tgl_b != '0000-00-00 00:00:00'";
+            $asetCountQuery = "SELECT COUNT(*) as count FROM aset WHERE id_user = '$editIdUser' AND transaksi = '$transaksi_aset' AND grup = '$grup' AND tgl_b != '0000-00-00 00:00:00'";
             $asetCountResult = mysqli_query($koneksi, $asetCountQuery);
             $countRow = mysqli_fetch_assoc($asetCountResult);
             $asetCount = $countRow['count'];
 
-            if ($userStatus == '0') {
+            if ($userStatus == 1) {
                 // Jika status pengguna adalah 0 dan jumlah aset mencapai batasan, tampilkan pesan harus menjadi premium
                 if ($asetCount >= 5) {
                     echo json_encode(['status' => 'error', 'message' => ["Anda harus upgrade akun ke premium."]]);
@@ -69,9 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Nama aset unik, lanjutkan dengan UPDATE
                     date_default_timezone_set('Asia/Jakarta');
                     $currentDateTime = date('Y-m-d H:i:s');
-                    $query = "UPDATE aset SET id_user = ?, grup = ?, nama_aset = ?, total = ?, deskripsi = ?, tgl_e = ? WHERE id_aset = ?";
+                    $query = "UPDATE aset SET id_user = ?, transaksi = ?, grup = ?, nama_aset = ?, total = ?, deskripsi = ?, tgl_e = ? WHERE id_aset = ?";
                     $stmt = mysqli_prepare($koneksi, $query);
-                    mysqli_stmt_bind_param($stmt, "isssssi", $editIdUser, $grup, $editedCategoryName, $total, $deskripsi, $currentDateTime, $categoryId);
+                    mysqli_stmt_bind_param($stmt, "issssssi", $editIdUser, $transaksi_aset, $grup, $editedCategoryName, $total, $deskripsi, $currentDateTime, $categoryId);
 
                     if (mysqli_stmt_execute($stmt)) {
                         // Berhasil menyimpan perubahan, kirim respons sukses ke klien
@@ -86,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Nama kategori unik, lanjutkan dengan UPDATE
                 date_default_timezone_set('Asia/Jakarta');
                 $currentDateTime = date('Y-m-d H:i:s');
-                $query = "UPDATE aset SET id_user = ?, grup = ?, nama_aset = ?, total = ?, deskripsi = ?, tgl_e = ? WHERE id_aset = ?";
+                $query = "UPDATE aset SET id_user = ?, transaksi =?, grup = ?, nama_aset = ?, total = ?, deskripsi = ?, tgl_e = ? WHERE id_aset = ?";
                 $stmt = mysqli_prepare($koneksi, $query);
-              mysqli_stmt_bind_param($stmt, "isssssi", $editIdUser, $grup, $editedCategoryName, $total, $deskripsi, $currentDateTime, $categoryId);
+              mysqli_stmt_bind_param($stmt, "issssssi", $editIdUser, $transaksi_aset, $grup, $editedCategoryName, $total, $deskripsi, $currentDateTime, $categoryId);
 
                 if (mysqli_stmt_execute($stmt)) {
                     // Berhasil menyimpan perubahan, kirim respons sukses ke klien

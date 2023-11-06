@@ -117,7 +117,10 @@ if (isset($_SESSION['id_keuangan'])) {
                   <select name="aset_edit" class="form-control select2 aset-edit"  style="width:100%;">
                 <?php 
                 $id_aset = $edit['id_aset'];
-                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users'");
+                $q_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_aset = $id_aset");
+                $r_aset = mysqli_fetch_array($q_aset);
+                $transaksi = $r_aset['transaksi'];
+                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users' AND transaksi = '$transaksi'");
 echo '<option value="">Pilih</option>';
                 while($row_aset = mysqli_fetch_array($query_aset)) {
                       $aset_id = $row_aset['id_aset'];

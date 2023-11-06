@@ -129,6 +129,7 @@ include "../view/sidebar_t.php";
                                    <div class="form-group">
                   <label>Transaksi</label>
                   <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
+                    <option value="">Pilih</option>
                     <option value="Pemasukan">Pemasukan</option>
                     <option value="Pengeluaran">Pengeluaran</option>
                   </select>
@@ -315,15 +316,16 @@ setInterval(function() {
   $('#pemasukan-container,  #pengeluaran-container').on('click', '.edit-category', function() {
   const categoryId = $(this).closest('.card-body').find('.nama_kategori').data('id');
   const categoryName = $(this).closest('.card-body').find('.nama_kategori').text();
-  const idUsers = $(this).closest('.card-body').find('.id_user').text();
   const transaksi = $(this).closest('.card-body').find('.transaksi').text();
+  const id_admin = $(this).closest('.card-body').find('.id_admin').text();
 
   Swal.fire({
     title: 'Edit Kategori',
     html: `<div class="form-group">
       <label for="nama_kategori">Nama Kategori</label>
       <input type="text" class="form-control" required name="nama" id="nama_kategori" placeholder="Masukkan Nama Kategori" value="${categoryName}">
-      <input type="hidden" class="form-control" required name="id_users" id="id_user" value="${idUsers}">
+      <input type="hidden" class="form-control" required name="id_users" id="id_user" value="<?= $id_users ?>">
+      <input type="hidden" class="form-control" required name="id_admin" id="id_admin" value="${id_admin}">
     </div>
     <div class="form-group">
       <label for="transaksi_kategori">Jenis Transaksi</label>
@@ -348,15 +350,17 @@ setInterval(function() {
       const editedCategoryName = $('#nama_kategori').val();
       const editIdUser = $('#id_user').val();
       const transaksi_kategori = $('#transaksi_kategori').val();
+      const id_admin = $('#id_admin').val();
 
       $.ajax({
-    url: 'edit_pemasukan.php',
+    url: 'edit.php',
     method: 'POST',
     data: {
         id: categoryId,
         id_users: editIdUser,
         nama: editedCategoryName,
         transaksi_kategori: transaksi_kategori,
+        id_admin: id_admin,
     },
     dataType: 'json', // Mengharapkan respons dalam format JSON
     success: function(response) {

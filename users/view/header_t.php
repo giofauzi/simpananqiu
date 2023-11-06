@@ -229,20 +229,18 @@ if ($user['status'] == 1) {
 <div class="wrapper">
 
 
-  <?php
+ <?php
 // Menentukan halaman saat ini
-$current_page = $_SERVER['PHP_SELF'];
+$current_page = basename($_SERVER['PHP_SELF']);
 
-// Periksa apakah halaman saat ini adalah transaksi.php
-// if (basename($current_page) !== 'transaksi.php') {
-    // Jika bukan halaman transaksi, tampilkan preloader.
+// Periksa apakah halaman saat ini bukan transaksi.php atau update.php
+if ($current_page !== 'transaksi.php' && $current_page !== 'update.php') {
+    // Tampilkan preloader.
     ?>
     <!-- Preloader -->
     <div class="preloader flex-column justify-content-center align-items-center">
         <img class="animation__shake" src="../dist/img/favicon.png" alt="Logo SimpananQiu" height="200" width="200">
     </div>
     <?php
-// }
+}
 ?>
-
-  

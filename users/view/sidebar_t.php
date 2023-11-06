@@ -101,7 +101,8 @@ $master = [
     </li>
 
     <li class="nav-item">
-        <a href="../transaksi/transaksi.php" class="nav-link <?= ($current_page === 'transaksi.php' OR 'update.php') ? 'active' : ''; ?>">
+        <a href="../transaksi/transaksi.php" class="nav-link <?= ($current_page === 'transaksi.php' || $current_page === 'update.php') ? 'active' : ''; ?>
+">
             <i class="nav-icon fas fa-dollar-sign"></i>
             <p>
                 Transaksi

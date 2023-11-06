@@ -5,7 +5,9 @@ include "../../koneksi.php";
 // Cek apakah permintaan datang dari metode POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data yang diterima
-    if (empty($_POST['id_user'])) {
+     if (empty($_POST['transaksi'])) {
+        echo "Transaksi tidak boleh kosong.";
+     } else if (empty($_POST['id_user'])) {
         echo "Id User tidak boleh kosong.";
     } else if (empty($_POST['grup'])) {
         echo "Grup tidak boleh kosong.";
@@ -15,8 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Total tidak boleh kosong.";
     } else if (empty($_POST['deskripsi_aset'])) {
         echo "Deskripsi tidak boleh kosong.";
-    } else {
+    }  else {
         $id_user = mysqli_real_escape_string($koneksi, $_POST['id_user']);
+        $transaksi = mysqli_real_escape_string($koneksi, $_POST['transaksi']);
         $grup = mysqli_real_escape_string($koneksi, $_POST['grup']);
         $nama_aset = mysqli_real_escape_string($koneksi, $_POST['nama_aset']);
         $total_aset = mysqli_real_escape_string($koneksi, $_POST['total_aset']);
@@ -31,19 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
          // Query untuk menghitung jumlah aset dengan id_user dan grup tertentu
-        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE id_user = '$id_user' AND grup = '$grup'";
+        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE id_user = '$id_user' AND transaksi = '$transaksi' AND grup = '$grup'";
         $asetCountResult = mysqli_query($koneksi, $checkQuery);
         $countRow = mysqli_fetch_assoc($asetCountResult);
         $asetCount = $countRow['count'];
 
 
-         if ($userStatus == '0') {
+         if ($userStatus == 1){
     // Jika status pengguna adalah 0 dan jumlah aset mencapai batasan, tampilkan pesan harus menjadi premium
     if ($asetCount >= 5) {
         echo "Anda harus upgrade akun ke premium";
     } else {
         // Query untuk memeriksa apakah nama aset sudah ada dalam database dengan grup yang sesuai
-        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE nama_aset = '$nama_aset' AND grup = '$grup'";
+        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE nama_aset = '$nama_aset' AND transaksi = '$transaksi' AND grup = '$grup'";
         $checkResult = mysqli_query($koneksi, $checkQuery);
         $row = mysqli_fetch_assoc($checkResult);
         $asetCount = $row['count'];
@@ -54,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lanjutkan dengan query untuk menambahkan data
             date_default_timezone_set('Asia/Jakarta');
             $currentDateTime = date('Y-m-d H:i:s');
-            $query = "INSERT INTO aset (id_user, grup, nama_aset, total, deskripsi, tgl_b) VALUES ('$id_user', '$grup', '$nama_aset', '$total_aset', '$deskripsi_aset', '$currentDateTime')";
+            $query = "INSERT INTO aset (id_user, transaksi, grup, nama_aset, total, deskripsi, tgl_b) VALUES ('$id_user', '$transaksi', '$grup', '$nama_aset', '$total_aset', '$deskripsi_aset', '$currentDateTime')";
 
             if (mysqli_query($koneksi, $query)) {
                 echo "Aset berhasil ditambahkan.";
@@ -65,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else {
       // Query untuk memeriksa apakah nama aset sudah ada dalam database dengan grup yang sesuai
-        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE nama_aset = '$nama_aset' AND grup = '$grup'";
+        $checkQuery = "SELECT COUNT(*) as count FROM aset WHERE nama_aset = '$nama_aset' AND transaksi = '$transaksi' AND grup = '$grup'";
         $checkResult = mysqli_query($koneksi, $checkQuery);
         $row = mysqli_fetch_assoc($checkResult);
         $asetCount = $row['count'];
@@ -76,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Jika status pengguna bukan 0, lanjutkan tanpa memeriksa batasan kategori
         date_default_timezone_set('Asia/Jakarta');
         $currentDateTime = date('Y-m-d H:i:s');
-        $query = "INSERT INTO aset (id_user, grup, nama_aset, total, deskripsi, tgl_b) VALUES ('$id_user', '$grup', '$nama_aset', '$total_aset', '$deskripsi_aset', '$currentDateTime')";
+        $query = "INSERT INTO aset (id_user, transaksi, grup, nama_aset, total, deskripsi, tgl_b) VALUES ('$id_user', '$transaksi', '$grup', '$nama_aset', '$total_aset', '$deskripsi_aset', '$currentDateTime')";
 
         if (mysqli_query($koneksi, $query)) {
             echo "Aset berhasil ditambahkan.";

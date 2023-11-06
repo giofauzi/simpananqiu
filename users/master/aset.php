@@ -126,9 +126,18 @@ include "../view/sidebar_t.php";
                                 <input type="hidden" class="form-control" required name="id_user" id="id_user"  value="<?= $id_users ?>">
                                 <input type="hidden" class="form-control" required name="status" id="status"  value="<?= $all['status'] ?>">
 
+                                 <div class="form-group">
+                  <label>Transaksi</label>
+                  <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
+                    <option value="">Pilih</option>
+                    <option value="Pemasukan">Pemasukan</option>
+                    <option value="Pengeluaran">Pengeluaran</option>
+                  </select>
+                </div>
                                    <div class="form-group">
                   <label>Grup</label>
                   <select class="form-control select2" name="grup" id="grup" style="width: 100%;">
+                    <option value="">Pilih</option>
                     <option value="Tunai">Tunai</option>
                     <option value="Bank">Bank</option>
                     <option value="Kartu">Kartu</option>
@@ -192,6 +201,7 @@ if (window.innerWidth <= 768) {
     // Event saat tombol "Simpan" diklik
     $("#simpanAset").on("click", function () {
         var idUsers = $("#id_user").val(); // Dapatkan nilai input id_user
+        var transaksi = $("#transaksi").val(); // Dapatkan nilai input transaksi
         var status = $("#status").val(); // Dapatkan nilai input status
         var grup = $("#grup").val(); // Dapatkan nilai input grup
         var namaAset = $("#nama").val(); // Dapatkan nilai input nama aset
@@ -204,6 +214,7 @@ if (window.innerWidth <= 768) {
             url: "aksi-aset.php", // Ganti dengan alamat file PHP yang sesuai
             data: {
                 id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
+                transaksi: transaksi, // Tambahkan transaksi ke data yang dikirimkan
                 status: status, // Tambahkan status ke data yang dikirimkan
                 grup: grup, // Tambahkan grup ke data yang dikirimkan
                 nama_aset: namaAset, // Tambahkan nama_aset ke data yang dikirimkan
@@ -354,6 +365,7 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
     const cardBody = $(this).closest('.card-body');
     const categoryId = cardBody.find('.nama_aset').data('id');
     const categoryName = cardBody.find('.nama_aset').text();
+    const Transaksi = cardBody.find('.transaksi_aset').text();
     const deskripsi = cardBody.find('.deskripsi').text();
     const total = cardBody.find('.total').text();
     const idUsers = cardBody.find('.id_user').text();
@@ -362,6 +374,10 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
     Swal.fire({
       title: 'Edit Aset',
       html: `
+      <div class="form-group">
+        <label for="transaksi_aset">Transaksi</label>
+        <select class="form-control" name="transaksi_aset" id="transaksi_aset" style="width: 100%"></select>
+      </div>
       <div class="form-group">
         <label for="grup_aset">Jenis Grup</label>
         <select class="form-control" name="grup_aset" id="grup_aset" style="width: 100%"></select>
@@ -375,6 +391,8 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
         <label for="total_aset">Total</label>
         <input type="number" class="form-control" required name="total_aset" id="total_aset" placeholder="Masukkan Total Aset" value="${total}">
       </div>
+
+      
       <div class="form-group">
         <label for="deskripsi">Deskripsi</label>
         <textarea class="form-control" rows="3" id="deskripsi_aset" name="deskripsi_aset" placeholder="Masukkan Deskripsi">${deskripsi}</textarea>
@@ -395,11 +413,23 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
             } else if (grup === 'Lainnya') {
                 selectOptions.push('Tunai', 'Bank', 'Kartu', 'Lainnya');
             }
+
+            const selectOptionsTransaksi = [];
+            if (Transaksi === 'Pemasukan') {
+                selectOptionsTransaksi.push('Pemasukan', 'Pengeluaran');
+            } else if (Transaksi === 'Pengeluaran') {
+                selectOptionsTransaksi.push('Pemasukan', 'Pengeluaran');
+            }
   
         // Perbarui select box berdasarkan nilai grup yang diperoleh
         selectOptions.forEach((option) => {
           const isSelected = option === grup ? 'selected' : '';
           $('#grup_aset').append(`<option value="${option}" ${isSelected}>${option}</option>`);
+        });
+
+        selectOptionsTransaksi.forEach((optionTransaksi) => {
+          const isSelectedTransaksi = optionTransaksi === Transaksi ? 'selected' : '';
+          $('#transaksi_aset').append(`<option value="${optionTransaksi}" ${isSelectedTransaksi}>${optionTransaksi}</option>`);
         });
       },
     }).then((result) => {
@@ -408,7 +438,8 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
         const editIdUser = $('#id_user').val();
         const total_aset = $('#total_aset').val();
         const grup_aset = $('#grup_aset').val();
-                const deskripsi_aset = $('#deskripsi_aset').val();
+        const deskripsi_aset = $('#deskripsi_aset').val();
+        const transaksi_aset = $('#transaksi_aset').val();
 
         $.ajax({
           url: 'edit_aset.php',
@@ -420,6 +451,7 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
             total_aset: total_aset,
             grup_aset: grup_aset,
             deskripsi_aset: deskripsi_aset,
+            transaksi_aset: transaksi_aset,
           },
           dataType: 'json', // Mengharapkan respons dalam format JSON
           success: function(response) {
@@ -434,6 +466,7 @@ $('#pemasukan-container, #pengeluaran-container, #kartu-container, #lainnya-cont
 
               // Untuk mengganti nama aset yang ditampilkan pada tampilan
               cardBody.find('.nama_aset').text(editedCategoryName);
+              cardBody.find('.transaksi_aset').text(Transaksi);
               cardBody.find('.total').text(total_aset);
               cardBody.find('.deskripsi').text(deskripsi_aset);
 

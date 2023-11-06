@@ -174,7 +174,7 @@ if (mysqli_num_rows($query) > 0) {
                   <tbody>
                    <?php
 $no = 1;
-$query = mysqli_query($koneksi, "SELECT * FROM keuangan WHERE id_user = $id_users");
+$query = mysqli_query($koneksi, "SELECT * FROM keuangan WHERE id_user = $id_users ORDER BY id_keuangan DESC");
 while ($row = mysqli_fetch_array($query)) {
 ?>
 <tr>
@@ -357,7 +357,7 @@ echo '<option value="">Pilih</option>';
                   <label for="aset">Aset</label>
                   <select name="aset" class="form-control select2bs4" style="width:100%;" id="aset">
                 <?php 
-                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users'");
+                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users' AND transaksi = 'Pemasukan'");
 echo '<option value="">Pilih</option>';
                 while($row_aset = mysqli_fetch_array($query_aset)) {
                       
@@ -613,7 +613,7 @@ setTimeout(() => {
                   <label for="aset">Aset</label>
                   <select name="aset_p" class="form-control select2bs4" style="width:100%;" id="aset_p">
                 <?php 
-                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users'");
+                $query_aset = mysqli_query($koneksi, "SELECT * FROM aset WHERE id_user = '$id_users' AND transaksi = 'Pengeluaran'");
                 echo '<option value="">Pilih</option>';
                 while($row_aset = mysqli_fetch_array($query_aset)) {
                   
