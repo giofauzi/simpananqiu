@@ -35,7 +35,7 @@ include "../view/sidebar_t.php";
       <div class="container-fluid">
       <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
     <li class="nav-item" id="kategoriTab" style="display: none;">
-        <a class="nav-link" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true">Kategori</a>
+        <a class="nav-link" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true">Target Menabung</a>
     </li>
   
 </ul>
@@ -47,7 +47,7 @@ include "../view/sidebar_t.php";
               
               <div class="card-header">
                  <div class="row">
-                <h3 class="card-title">Data Kategori</h3>
+                <h3 class="card-title">Data Target Menabung</h3>
                     </div>
                 <div class="row mt-2">
                     <div class="col-1" style="margin-bottom:-50px;">
@@ -122,8 +122,8 @@ include "../view/sidebar_t.php";
                     
 
                     <!-- Form -->
- <form id="TabunganForm" class="Kategori">
-                                <input type="hidden" class="form-control" required name="user_id" id="user_id"  value="<?= $id_users ?>">
+ <form id="TabunganForm" class="Kategori" method="post" enctype="multipart/form-data">
+                                <input type="hidden" class="form-control"  name="user_id" id="user_id"  value="<?= $id_users ?>">
                                 
 
                                 <div class="row">
@@ -131,16 +131,13 @@ include "../view/sidebar_t.php";
 
                                 <div class="form-group">
                                 <label for="nama_tabungan">Nama Tabungan</label>
-                                <input type="text" class="form-control" required name="nama_tabungan" id="nama_tabungan" placeholder="Masukkan Nama Tabungan">
+                                <input type="text" class="form-control"  name="nama_tabungan" id="nama_tabungan" placeholder="Masukkan Nama Tabungan">
                             </div>
 
                             <div class="form-group">
                                 <label for="target_tabungan">Target Tabungan</label>
-                                <input type="number" class="form-control" required name="target_tabungan" id="target_tabungan" placeholder="Masukkan Nama Tabungan">
+                                <input type="number" class="form-control"  name="target_tabungan" id="target_tabungan" placeholder="Masukkan Nama Tabungan">
                             </div>
-
-                           
-                            
 
                             </div>
 
@@ -170,14 +167,14 @@ include "../view/sidebar_t.php";
 
 
                              <div class="form-group">
-                                <label for="gambar">Gambar</label>
-                                <input type="file" class="form-control" required name="gambar" id="gambar" accept=".jpg, .jpeg, .png" id="gambar" placeholder="Masukkan Nama Tabungan">
+                                <label for="fileInput">Gambar</label>
+                                <input type="file" class="form-control"  name="fileInput" id="fileInput" accept=".jpg, .jpeg, .png"  placeholder="Masukkan Nama Tabungan">
                             </div>
                             <div class="text-center">
 <img id="imageValidationMessage" src="../dist/img/galeri.png" style="max-width: 300px; max-height: 300px;">
 </div>
 
-                            <button type="button" id="SimpanTabungan" class="btn btn-primary mt-3">Simpan</button>
+                            <button type="submit" class="btn btn-primary mt-3">Simpan</button>
                            <button type="button" class="btn btn-success mt-3" id="tombolKembali">Kembali</button>
 
                         </form>
@@ -186,8 +183,8 @@ include "../view/sidebar_t.php";
 
 
  // Merekam perubahan pada input file
-document.getElementById('gambar').addEventListener('change', function() {
-    // Menampilkan gambar yang dipilih
+document.getElementById('fileInput').addEventListener('change', function() {
+    // Menampilkan fileInput yang dipilih
     var previewImage = document.getElementById('imageValidationMessage');
     var file = this.files[0];
     var reader = new FileReader();
@@ -231,45 +228,49 @@ if (window.innerWidth <= 768) {
     };
 }
 
+$('#TabunganForm').on('submit', function(e) {
+    e.preventDefault(); // Menghentikan tindakan default submit form
 
-  $(document).ready(function () {
-   // Event saat tombol "Simpan" diklik
-     $("#SimpanTabungan").on("click", function () {
-        var idUsers = $("#user_id").val(); // Dapatkan nilai input id_user
-         var nama_tabungan = $("#nama_tabungan").val(); // Dapatkan nilai input nama_tabungan
-          var target_tabungan = $("#target_tabungan").val(); // Dapatkan nilai input target_tabungan
-        var rencana_pengisian = $("#rencana_pengisian").val(); // Dapatkan nilai input Rencana Pengisian
-        var nominal_pengisian = $("#nominal_pengisian").val(); // Dapatkan nilai input Nominal Pengisian
-        var gambar = $('#gambar')[0].files[0];
-        // Kirim permintaan Ajax
-        $.ajax({
-            type: "POST",
-            url: "aksi.php", // Ganti dengan alamat file PHP yang sesuai
-            data: {
-                id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
-                nama_tabungan: nama_tabungan, // Tambahkan nama_tabungan ke data yang dikirimkan
-                  target_tabungan: target_tabungan, // Tambahkan target_tabungan ke data yang dikirimkan
-                rencana_pengisian: rencana_pengisian,//Tambahkan rencana pengisian
-                nominal_pengisian: nominal_pengisian, //Tambahkan nominal pengisian
-                gambar: gambar //Tambahkan gambar
-            },
-            success: function (response) {
+    const userId = $('#user_id').val();
+    const tabungan = $('#nama_tabungan').val();
+    const target_tabungan = $('#target_tabungan').val();
+    const rencana = $('#rencana_pengisian').val();
+    const nominal = $('#nominal_pengisian').val();
+    const fileInput = $('#fileInput')[0].files[0];
+
+    // Buat objek FormData untuk mengirim data dalam bentuk form
+    const formData = new FormData();
+    formData.append('id_user', userId);
+    formData.append('nama_tabungan', tabungan);
+    formData.append('target_tabungan', target_tabungan);
+    formData.append('rencana_pengisian', rencana);
+    formData.append('nominal_pengisian', nominal);
+    formData.append('fileInput', fileInput);
+
+    $.ajax({
+        type: "POST",
+        url: "aksi.php", // Sesuaikan dengan URL yang sesuai
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
             if (response.includes("berhasil")) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sukses',
-                    text: response,
-                    showConfirmButton: false,
-                    timer: 2000
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Anda bisa mengosongkan input atau menutup modal jika berhasil
-                        $("#nama").val("");
-                        $("#modal-lg").modal("hide");
-
-                       
-                    }
-                });
+                   // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
+setTimeout(() => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Sukses',
+    text: response,
+    showConfirmButton: false,
+    timer: 1000, // Menunggu 5 detik
+    allowOutsideClick: false
+  }).then(() => {
+    // Menunggu 5 detik sebelum mereset ulang halaman
+    setTimeout(() => {
+      location.reload(); // Melakukan refresh halaman setelah 5 detik
+    }, 1000);
+  });
+}, 1000);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -281,7 +282,6 @@ if (window.innerWidth <= 768) {
             }
         },
         error: function (xhr, status, error) {
-            // Tangani kesalahan jika permintaan Ajax gagal
             Swal.fire({
                 icon: 'error',
                 title: 'Terjadi Kesalahan',
@@ -290,7 +290,66 @@ if (window.innerWidth <= 768) {
         }
     });
 });
-});
+
+//   $(document).ready(function () {
+//    // Event saat tombol "Simpan" diklik
+//      $("#SimpanTabungan").on("click", function () {
+//         var idUsers = $("#user_id").val(); // Dapatkan nilai input id_user
+//          var nama_tabungan = $("#nama_tabungan").val(); // Dapatkan nilai input nama_tabungan
+//           var target_tabungan = $("#target_tabungan").val(); // Dapatkan nilai input target_tabungan
+//         var rencana_pengisian = $("#rencana_pengisian").val(); // Dapatkan nilai input Rencana Pengisian
+//         var nominal_pengisian = $("#nominal_pengisian").val(); // Dapatkan nilai input Nominal Pengisian
+//         var gambar = $('#gambar')[0].files[0];
+//         // Kirim permintaan Ajax
+//         $.ajax({
+//             type: "POST",
+//             url: "aksi.php", // Ganti dengan alamat file PHP yang sesuai
+//             data: {
+//                 id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
+//                 nama_tabungan: nama_tabungan, // Tambahkan nama_tabungan ke data yang dikirimkan
+//                   target_tabungan: target_tabungan, // Tambahkan target_tabungan ke data yang dikirimkan
+//                 rencana_pengisian: rencana_pengisian,//Tambahkan rencana pengisian
+//                 nominal_pengisian: nominal_pengisian, //Tambahkan nominal pengisian
+//                 gambar: gambar //Tambahkan gambar
+//             },
+//             success: function (response) {
+//             if (response.includes("berhasil")) {
+//                 Swal.fire({
+//                     icon: 'success',
+//                     title: 'Sukses',
+//                     text: response,
+//                     showConfirmButton: false,
+//                     timer: 2000
+//                 }).then((result) => {
+//                     if (result.isConfirmed) {
+//                         // Anda bisa mengosongkan input atau menutup modal jika berhasil
+//                         $("#nama_tabungan").val("");
+//                         $("#modal-lg").modal("hide");
+
+                       
+//                     }
+//                 });
+//             } else {
+//                 Swal.fire({
+//                     icon: 'error',
+//                     title: 'Gagal',
+//                     text: response,
+//                     showConfirmButton: false,
+//                     timer: 2000
+//                 });
+//             }
+//         },
+//         error: function (xhr, status, error) {
+//             // Tangani kesalahan jika permintaan Ajax gagal
+//             Swal.fire({
+//                 icon: 'error',
+//                 title: 'Terjadi Kesalahan',
+//                 text: 'Terjadi kesalahan: ' + error,
+//             });
+//         }
+//     });
+// });
+// });
 
 
 </script>
@@ -348,9 +407,9 @@ setInterval(function() {
     title: 'Edit Kategori',
     html: `<div class="form-group">
       <label for="nama_kategori">Nama Kategori</label>
-      <input type="text" class="form-control" required name="nama" id="nama_kategori" placeholder="Masukkan Nama Kategori" value="${categoryName}">
-      <input type="hidden" class="form-control" required name="id_users" id="id_user" value="<?= $id_users ?>">
-      <input type="hidden" class="form-control" required name="id_admin" id="id_admin" value="${id_admin}">
+      <input type="text" class="form-control"  name="nama" id="nama_kategori" placeholder="Masukkan Nama Kategori" value="${categoryName}">
+      <input type="hidden" class="form-control"  name="id_users" id="id_user" value="<?= $id_users ?>">
+      <input type="hidden" class="form-control"  name="id_admin" id="id_admin" value="${id_admin}">
     </div>
     <div class="form-group">
       <label for="transaksi_kategori">Jenis Transaksi</label>

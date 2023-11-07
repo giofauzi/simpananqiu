@@ -122,27 +122,26 @@ include "../view/sidebar_t.php";
                     
 
                     <!-- Form -->
- <form id="kategoriForm" class="Kategori">
-                                <input type="hidden" class="form-control" required name="user_id" id="user_id"  value="<?= $id_users ?>">
-                              
+<form id="kategoriForm" class="Kategori">
+    <input type="hidden" class="form-control" required name="user_id" id="user_id" value="<?= $id_users ?>">
 
-                                   <div class="form-group">
-                  <label>Transaksi</label>
-                  <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
-                    <option value="">Pilih</option>
-                    <option value="Pemasukan">Pemasukan</option>
-                    <option value="Pengeluaran">Pengeluaran</option>
-                  </select>
-                </div>
+    <div class="form-group">
+        <label>Transaksi</label>
+        <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
+            <option value="">Pilih</option>
+            <option value="Pemasukan">Pemasukan</option>
+            <option value="Pengeluaran">Pengeluaran</option>
+        </select>
+    </div>
 
-                            <div class="form-group">
-                                <label for="nama">Nama Kategori</label>
-                                <input type="text" class="form-control"  name="nama_kategori" id="nama" placeholder="Masukkan Nama Kategori">
-                            </div>
-                            <button type="submit" id="simpanKategori" class="btn btn-primary mt-3">Simpan</button>
-                           <button type="button" class="btn btn-success mt-3" id="tombolKembali">Kembali</button>
+    <div class="form-group">
+        <label for="nama">Nama Kategori</label>
+        <input type="text" class="form-control" name="nama_kategori" id="nama" placeholder="Masukkan Nama Kategori">
+    </div>
+    <button type="submit" id="simpanKategori" class="btn btn-primary mt-3">Simpan</button>
+    <button type="button" class="btn btn-success mt-3" id="tombolKembali">Kembali</button>
+</form>
 
-                        </form>
                         
 <script>
 // Fungsi untuk mengosongkan isian formulir
@@ -176,16 +175,17 @@ if (window.innerWidth <= 768) {
     };
 }
 
+   $(document).ready(function () {
+    function kirimKategori() {
+        var idUsers = $("#user_id").val();
+        var transaksi = $("#transaksi").val();
+        var namaKategori = $("#nama").val();
 
-  $(document).ready(function () {
-   // Event saat tombol "Simpan" diklik
-    $("#kategoriForm").on("submit", function (e) {
-  e.preventDefault(); // Ini akan mencegah pengiriman standar formulir
-        var idUsers = $("#user_id").val(); // Dapatkan nilai input id_user
-          var transaksi = $("#transaksi").val(); // Dapatkan nilai input transaksi
-        var namaKategori = $("#nama").val(); // Dapatkan nilai input nama kategori
-        // Kirim permintaan Ajax
+        console.log("idUsers: " + idUsers);
+        console.log("transaksi: " + transaksi);
+        console.log("namaKategori: " + namaKategori);
 
+        // Validasi data sebelum mengirimkannya
         if (transaksi === "") {
             console.log("Transaksi harus diisi.");
             Swal.fire({
@@ -205,53 +205,67 @@ if (window.innerWidth <= 768) {
                 timer: 2000
             });
         } else {
-        $.ajax({
-            type: "POST",
-            url: "aksi.php", // Ganti dengan alamat file PHP yang sesuai
-            data: {
-                user_id: idUsers, // Tambahkan id_user ke data yang dikirimkan
-                  transaksi: transaksi, // Tambahkan transaksi ke data yang dikirimkan
-                nama_kategori: namaKategori
-            },
-            success: function (response) {
-            if (response.includes("berhasil")) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sukses',
-                    text: response,
-                    showConfirmButton: false,
-                    timer: 2000
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Anda bisa mengosongkan input atau menutup modal jika berhasil
-                        $("#nama").val("");
-                        $("#modal-lg").modal("hide");
-
-                       
+            // Kirim permintaan Ajax jika data sudah lengkap
+            console.log("Mengirim permintaan Ajax...");
+            $.ajax({
+                type: "POST",
+                url: "aksi.php",
+                data: {
+                    user_id: idUsers,
+                    transaksi: transaksi,
+                    nama_kategori: namaKategori
+                },
+                success: function (response) {
+                    console.log("Respon dari server: " + response);
+                    if (response.includes("berhasil")) {
+                        console.log("Kategori berhasil ditambahkan.");
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sukses',
+                            text: response,
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Anda bisa mengosongkan input atau menutup modal jika berhasil
+                                $("#nama").val("");
+                                $("#modal-lg").modal("hide");
+                            }
+                        });
+                    } else {
+                        console.log("Gagal menambahkan kategori.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
                     }
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: response,
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            }
-        },
-        error: function (xhr, status, error) {
-            // Tangani kesalahan jika permintaan Ajax gagal
-            Swal.fire({
-                icon: 'error',
-                title: 'Terjadi Kesalahan',
-                text: 'Terjadi kesalahan: ' + error,
+                },
+                error: function (xhr, status, error) {
+                    console.log("Terjadi kesalahan: " + error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Terjadi kesalahan: ' + error,
+                    });
+                }
             });
         }
+    }
+
+    $("#kategoriForm").on("submit", function (e) {
+        e.preventDefault(); // Menghentikan aksi default pengiriman formulir
+        kirimKategori(); // Panggil fungsi pengiriman saat formulir di-submit
     });
-  }
+
+    $("#simpanKategori").on("click", function () {
+        kirimKategori(); // Panggil fungsi pengiriman saat tombol "Simpan" diklik
+    });
 });
-});
+
+
 
 
 </script>

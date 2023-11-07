@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $countRow = mysqli_fetch_assoc($kategoriCountResult);
         $kategoriCount = $countRow['count'];
 
-    if ($userStatus == '0') {
+    if ($userStatus == 1) {
     // Jika status pengguna adalah 0 dan jumlah kategori mencapai batasan, tampilkan pesan harus menjadi premium
     if ($kategoriCount >= 5) {
         echo "Anda harus upgrade akun ke premium";

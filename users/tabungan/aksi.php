@@ -3,7 +3,7 @@ include "../../koneksi.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data yang diterima
-   if (empty($_POST['id_user'])) {
+    if (empty($_POST['id_user'])) {
         echo "Id User tidak boleh kosong.";
     } else if (empty($_POST['nama_tabungan'])) {
         echo "Nama Tabungan tidak boleh kosong.";
@@ -19,61 +19,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $target_tabungan = mysqli_real_escape_string($koneksi, $_POST['target_tabungan']);
         $rencana_pengisian = mysqli_real_escape_string($koneksi, $_POST['rencana_pengisian']);
         $nominal_pengisian = mysqli_real_escape_string($koneksi, $_POST['nominal_pengisian']);
+        
+        // Inisialisasi variabel fileInput
+        $fileInput = NULL;
 
         // Check if the user has selected both description and image
-        if (!empty($_FILES['gambar']['name'])) {
+        if (!empty($_FILES['fileInput']['name'])) {
             // Both description and image selected, handle as desired
-            $gambarDir = "../../data/img/tabungan/";
-            $gambar = $_FILES['gambar']['name'];
-            $gambarTmp = $_FILES['gambar']['tmp_name'];
-            $gambarName = time() . '_' . $gambar;
+            $fileInputDir = "../../data/img/tabungan/";
+             $fileInput = $_FILES['fileInput']['name'];
+            $fileInputTmp = $_FILES['fileInput']['tmp_name'];
+            $fileInputName = time() . '_' . $fileInput;
 
-            move_uploaded_file($gambarTmp, $gambarDir . $gambarName);
+            move_uploaded_file($fileInputTmp, $fileInputDir . $fileInputName);
 
-            // Setel gambar ke nama file yang diunggah
-            $gambar = $gambarName;
-        }  
-         // Periksa apakah status pengguna dengan id_user yang sesuai adalah 0
-            $statusQuery = "SELECT status FROM users WHERE id_user = '$id_user'";
-            $statusResult = mysqli_query($koneksi, $statusQuery);
-            $statusRow = mysqli_fetch_assoc($statusResult);
-            $userStatus = $statusRow['status'];
-
-            // Query untuk menghitung jumlah tabungan dengan id_user dan nama_tabungan tertentu
-            $tabunganCountQuery = "SELECT COUNT(*) as count FROM tabungan WHERE id_user = '$id_user' AND nama_tabungan = '$nama_tabungan' AND tgl_b != '0000-00-00 00:00:00'";
-            $tabunganCountResult = mysqli_query($koneksi, $tabunganCountQuery);
-            $countRow = mysqli_fetch_assoc($tabunganCountResult);
-            $tabunganCount = $countRow['count'];
-
-            if ($userStatus == '1') {
-                // Jika status pengguna adalah 0 dan jumlah tabungan mencapai batasan, tampilkan pesan harus menjadi premium
-                if ($tabunganCount >= 5 ) {
-                    echo "Anda harus upgrade akun ke premium";
-                } else {
-                   // Lanjutkan dengan query untuk mengubah data
-        date_default_timezone_set('Asia/Jakarta');
-        $currentDateTime = date('Y-m-d H:i:s');
-        $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$gambar', '$currentDateTime')";
-
-        if (mysqli_query($koneksi, $query)) {
-            echo "Data tabungan berhasil diubah.";
-        } else {
-            echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+            // Setel fileInput ke nama file yang diunggah
+            $fileInput = $fileInputName;
         }
-                }
+
+        // Periksa apakah status pengguna dengan id_user yang sesuai adalah 0
+        $statusQuery = "SELECT status FROM users WHERE id_user = '$id_user'";
+        $statusResult = mysqli_query($koneksi, $statusQuery);
+        $statusRow = mysqli_fetch_assoc($statusResult);
+        $userStatus = $statusRow['status'];
+
+        // Query untuk menghitung jumlah tabungan dengan id_user dan nama_tabungan tertentu
+        $tabunganCountQuery = "SELECT COUNT(*) as count FROM tabungan WHERE id_user = '$id_user' AND nama_tabungan = '$nama_tabungan' AND tgl_b != '0000-00-00 00:00:00'";
+        $tabunganCountResult = mysqli_query($koneksi, $tabunganCountQuery);
+        $countRow = mysqli_fetch_assoc($tabunganCountResult);
+        $tabunganCount = $countRow['count'];
+
+        if ($userStatus == '1') {
+            // Jika status pengguna adalah 0 dan jumlah tabungan mencapai batasan, tampilkan pesan harus menjadi premium
+            if ($tabunganCount >= 5 ) {
+                echo "Anda harus upgrade akun ke premium";
             } else {
-               // Lanjutkan dengan query untuk mengubah data
-        date_default_timezone_set('Asia/Jakarta');
-        $currentDateTime = date('Y-m-d H:i:s');
-        $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$gambar', '$currentDateTime')";
+                 // Query untuk memeriksa apakah nama tabungan sudah ada dalam database dengan transaksi yang sesuai
+    $checkQuery = "SELECT COUNT(*) as count FROM tabungan WHERE id_user = '$id_user' AND nama_tabungan = '$nama_tabungan'";
+    $checkResult = mysqli_query($koneksi, $checkQuery);
+    $row = mysqli_fetch_assoc($checkResult);
+    $tabunganCount = $row['count'];
+    
+    if ($tabunganCount > 0) {
+        echo "Tabungan Sudah Ada!";
+    } else {
+                // Lanjutkan dengan query untuk mengubah data
+                date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$fileInput', '$currentDateTime')";
 
-        if (mysqli_query($koneksi, $query)) {
-            echo "Data tabungan berhasil diubah.";
-        } else {
-            echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
-        }
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data tabungan berhasil diubah.";
+                } else {
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                }
             }
+        }
+        } else {
+             // Query untuk memeriksa apakah nama tabungan sudah ada dalam database dengan transaksi yang sesuai
+    $checkQuery = "SELECT COUNT(*) as count FROM tabungan WHERE id_user = '$id_user' AND nama_tabungan = '$nama_tabungan'";
+    $checkResult = mysqli_query($koneksi, $checkQuery);
+    $row = mysqli_fetch_assoc($checkResult);
+    $tabunganCount = $row['count'];
+    
+    if ($tabunganCount > 0) {
+        echo "Tabungan Sudah Ada!";
+    } else {
+            // Lanjutkan dengan query untuk mengubah data
+            date_default_timezone_set('Asia/Jakarta');
+            $currentDateTime = date('Y-m-d H:i:s');
+            
+            // Gabungkan query untuk menghindari duplikasi
+            $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$fileInput', '$currentDateTime')";
+
+            if (mysqli_query($koneksi, $query)) {
+                echo "Data tabungan berhasil diubah.";
+            } else {
+                echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+            }
+        }
     }
+}
 } else {
     // Permintaan bukan dari metode POST
     echo "Permintaan tidak valid.";
