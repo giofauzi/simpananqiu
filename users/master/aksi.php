@@ -6,14 +6,14 @@ include "../../koneksi.php";
 // Cek apakah permintaan datang dari metode POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data yang diterima
-    if (empty($_POST['id_user'])) {
+    if (empty($_POST['user_id'])) {
         echo "Id User tidak boleh kosong.";
     } else if (empty($_POST['transaksi'])) {
         echo "Transaksi tidak boleh kosong.";
     } else if (empty($_POST['nama_kategori'])) {
         echo "Nama kategori tidak boleh kosong.";
     } else {
-        $id_user = mysqli_real_escape_string($koneksi, $_POST['id_user']);
+        $id_user = mysqli_real_escape_string($koneksi, $_POST['user_id']);
         $transaksi = mysqli_real_escape_string($koneksi, $_POST['transaksi']);
         $nama_kategori = mysqli_real_escape_string($koneksi, $_POST['nama_kategori']);
 
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lanjutkan dengan query untuk menambahkan data
             date_default_timezone_set('Asia/Jakarta');
             $currentDateTime = date('Y-m-d H:i:s');
-            $query = "INSERT INTO kategori (id_user, transaksi, nama_kategori, tgl_b) VALUES ('$id_user', '$transaksi', '$nama_kategori', '$currentDateTime')";
+            $query = "INSERT INTO kategori (id_user, transaksi, nama_kategori, tgl_b, tgl_e) VALUES ('$id_user', '$transaksi', '$nama_kategori', '$currentDateTime', '$currentDateTime')";
 
             if (mysqli_query($koneksi, $query)) {
                 echo "Kategori berhasil ditambahkan.";
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Jika status pengguna bukan 0, lanjutkan tanpa memeriksa batasan kategori
         date_default_timezone_set('Asia/Jakarta');
         $currentDateTime = date('Y-m-d H:i:s');
-        $query = "INSERT INTO kategori (id_user, transaksi, nama_kategori, tgl_b) VALUES ('$id_user', '$transaksi', '$nama_kategori', '$currentDateTime')";
+        $query = "INSERT INTO kategori (id_user, transaksi, nama_kategori, tgl_b, tgl_e) VALUES ('$id_user', '$transaksi', '$nama_kategori', '$currentDateTime', '$currentDateTime')";
 
         if (mysqli_query($koneksi, $query)) {
             echo "Kategori berhasil ditambahkan.";

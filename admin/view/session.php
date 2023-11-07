@@ -42,7 +42,7 @@ if (isset($_SESSION['admin_last_activity'])) {
         session_destroy();
 
        
-        header("Location: ../back_login.php"); // Ganti dengan halaman login yang sesuai
+        header("Location: ../view/back_login.php"); // Ganti dengan halaman login yang sesuai
         exit();
     }
 }

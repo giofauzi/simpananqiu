@@ -18,7 +18,7 @@ include "../view/sidebar_t.php";
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Kategori</h1>
+            <h1>Menabung</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -126,19 +126,86 @@ include "../view/sidebar_t.php";
                                 <input type="hidden" class="form-control" required name="user_id" id="user_id"  value="<?= $id_users ?>">
                                 <input type="hidden" class="form-control" required name="status" id="status"  value="<?= $all['status'] ?>">
 
-                                   <div class="form-group">
-                  <label>Transaksi</label>
-                  <select class="form-control select2" name="transaksi" id="transaksi" style="width: 100%;">
-                    <option value="">Pilih</option>
-                    <option value="Pemasukan">Pemasukan</option>
-                    <option value="Pengeluaran">Pengeluaran</option>
-                  </select>
-                </div>
+                                <div class="row">
+                                <div class="col-sm-6">
+
+                                <div class="form-group">
+                                <label for="nama_tabungan">Nama Tabungan</label>
+                                <input type="text" class="form-control" required name="nama_tabungan" id="nama_tabungan" placeholder="Masukkan Nama Tabungan">
+                            </div>
 
                             <div class="form-group">
-                                <label for="nama">Nama Kategori</label>
-                                <input type="text" class="form-control" required name="nama_kategori" id="nama" placeholder="Masukkan Nama Kategori">
+                                <label for="target_tabungan">Target Tabungan</label>
+                                <input type="number" class="form-control" required name="target_tabungan" id="target_tabungan" placeholder="Masukkan Nama Tabungan">
                             </div>
+
+                            </div>
+
+                            <div class="col-sm-6">
+                               <div class="form-group">
+                  <label for="rencana_pengisian">Rencana Pengisian</label>
+                  <select class="form-control select2" name="rencana_pengisian" id="rencana_pengisian" style="width: 100%;">
+                    <option value="Harian">Harian</option>
+                    <option value="Mingguan">Mingguan</option>
+                    <option value="Bulanan">Bulanan</option>
+                  </select>
+                </div>
+                  
+               <div class="form-group">
+    <label for="nominal_pengisian">Nominal Pengisian</label>
+    <div class="input-group">
+        <input type="number" name="nominal_pengisian" id="nominal_pengisian" class="form-control">
+        <div class="input-group-append">
+  <span class="input-group-text" data-toggle="modal" data-target="#estimasiModal" id="tampilkanEstimasiButton"><i class="fas fa-calendar"></i></span>
+</div>
+
+    </div>
+</div>
+
+<script>
+  // Fungsi untuk menampilkan hasil estimasi dalam modal
+  function tampilkanEstimasiTercapai() {
+    const targetTabungan = parseFloat(document.getElementById('target_tabungan').value);
+    const rencanaPengisian = document.getElementById('rencana_pengisian').value;
+    const nominalPengisian = parseFloat(document.getElementById('nominal_pengisian').value);
+    let estimasiTercapai = '';
+
+    if (rencanaPengisian === 'Harian') {
+      const jumlahHari = targetTabungan / nominalPengisian;
+      const tanggalEstimasi = new Date();
+      tanggalEstimasi.setDate(tanggalEstimasi.getDate() + jumlahHari);
+      estimasiTercapai = tanggalEstimasi.toDateString();
+    }
+
+    // Menampilkan hasil estimasi dalam modal
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = 'Target Tabungan: ' + targetTabungan.toLocaleString() + '<br>Rencana Pengisian: ' + nominalPengisian.toLocaleString() + ' per ' + rencanaPengisian + '<br>Estimasi Tercapai: ' + estimasiTercapai;
+    $('#estimasiModal').modal('show'); // Menampilkan modal
+  }
+</script>
+<div class="modal fade" id="estimasiModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Estimasi Tabungan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-content">
+        <!-- Hasil estimasi akan ditampilkan di sini -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                            </div>
+                            </div>
+
                             <button type="button" id="simpanKategori" class="btn btn-primary mt-3">Simpan</button>
                            <button type="button" class="btn btn-success mt-3" id="tombolKembali">Kembali</button>
 

@@ -110,6 +110,16 @@ $master = [
         </a>
     </li>
 
+    <li class="nav-item">
+    <a href="../tabungan/tabungan.php" class="nav-link <?= ($current_page === 'tabungan.php') ? 'active' : ''; ?>">
+        <i class="nav-icon fas fa-piggy-bank"></i>
+        <p>
+            Target Menabung
+        </p>
+    </a>
+</li>
+
+
     
     
      <li class="nav-item">

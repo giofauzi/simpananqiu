@@ -17,6 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $transaksi = mysqli_real_escape_string($koneksi, $_POST['transaksi']);
         $nama_kategori = mysqli_real_escape_string($koneksi, $_POST['nama_kategori']);
 
+          // Query untuk memeriksa apakah nama kategori sudah ada dalam database dengan transaksi yang sesuai
+        $checkQuery = "SELECT COUNT(*) as count FROM kategori WHERE id_admin = '$id_admin' AND  nama_kategori = '$nama_kategori' AND transaksi = '$transaksi'";
+        $checkResult = mysqli_query($koneksi, $checkQuery);
+        $row = mysqli_fetch_assoc($checkResult);
+        $kategoriCount = $row['count'];
+        
+        if ($kategoriCount > 0) {
+            echo "Kategori Sudah Ada!";
+        } else {
+
             // Lanjutkan dengan query untuk menambahkan data
             date_default_timezone_set('Asia/Jakarta');
             $currentDateTime = date('Y-m-d H:i:s');
@@ -29,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
- else {
+} else {
     // Permintaan bukan dari metode POST
     echo "Permintaan tidak valid.";
 }
