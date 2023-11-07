@@ -236,18 +236,22 @@ if (window.innerWidth <= 768) {
    // Event saat tombol "Simpan" diklik
      $("#SimpanTabungan").on("click", function () {
         var idUsers = $("#user_id").val(); // Dapatkan nilai input id_user
-         var status = $("#status").val(); // Dapatkan nilai input status
-          var transaksi = $("#transaksi").val(); // Dapatkan nilai input transaksi
-        var namaKategori = $("#nama").val(); // Dapatkan nilai input nama kategori
+         var nama_tabungan = $("#nama_tabungan").val(); // Dapatkan nilai input nama_tabungan
+          var target_tabungan = $("#target_tabungan").val(); // Dapatkan nilai input target_tabungan
+        var rencana_pengisian = $("#rencana_pengisian").val(); // Dapatkan nilai input Rencana Pengisian
+        var nominal_pengisian = $("#nominal_pengisian").val(); // Dapatkan nilai input Nominal Pengisian
+        var gambar = $('#gambar')[0].files[0];
         // Kirim permintaan Ajax
         $.ajax({
             type: "POST",
             url: "aksi.php", // Ganti dengan alamat file PHP yang sesuai
             data: {
-                user_id: idUsers, // Tambahkan id_user ke data yang dikirimkan
-                status: status, // Tambahkan status ke data yang dikirimkan
-                  transaksi: transaksi, // Tambahkan transaksi ke data yang dikirimkan
-                nama_kategori: namaKategori
+                id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
+                nama_tabungan: nama_tabungan, // Tambahkan nama_tabungan ke data yang dikirimkan
+                  target_tabungan: target_tabungan, // Tambahkan target_tabungan ke data yang dikirimkan
+                rencana_pengisian: rencana_pengisian,//Tambahkan rencana pengisian
+                nominal_pengisian: nominal_pengisian, //Tambahkan nominal pengisian
+                gambar: gambar //Tambahkan gambar
             },
             success: function (response) {
             if (response.includes("berhasil")) {
@@ -294,41 +298,7 @@ if (window.innerWidth <= 768) {
                 <!-- /.form group -->
                   </div>
                 </div>
-              <!-- <button class="btn btn-primary" id="openModal">Buka Modal</button> -->
-<div class="modal modal-bottom" id="myModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-     <div class="modal-header">
-  <h4 class="modal-title">Judul Modal</h4>
-  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-
-      <div class="modal-body">
-        <!-- Isi modal di sini -->
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium ad voluptatibus magnam obcaecati, aliquam dolore pariatur cupiditate quis perferendis earum nulla nihil sunt quibusdam ab adipisci, corrupti, atque perspiciatis nisi.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium ad voluptatibus magnam obcaecati, aliquam dolore pariatur cupiditate quis perferendis earum nulla nihil sunt quibusdam ab adipisci, corrupti, atque perspiciatis nisi.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium ad voluptatibus magnam obcaecati, aliquam dolore pariatur cupiditate quis perferendis earum nulla nihil sunt quibusdam ab adipisci, corrupti, atque perspiciatis nisi.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium ad voluptatibus magnam obcaecati, aliquam dolore pariatur cupiditate quis perferendis earum nulla nihil sunt quibusdam ab adipisci, corrupti, atque perspiciatis nisi.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium ad voluptatibus magnam obcaecati, aliquam dolore pariatur cupiditate quis perferendis earum nulla nihil sunt quibusdam ab adipisci, corrupti, atque perspiciatis nisi.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-primary">Simpan Perubahan</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  $(document).ready(function() {
-  $("#openModal").click(function() {
-    $("#myModal").modal("show");
-  });
-});
-
-</script>
+          
 
               </div>
               </div>
