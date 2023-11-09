@@ -150,6 +150,7 @@ if ($user['status'] == 1) {
 }
 
 
+
 .modal.modal-bottom .modal-dialog {
   position: fixed;
   bottom: -100%;

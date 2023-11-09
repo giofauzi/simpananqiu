@@ -23,7 +23,7 @@ include "../view/sidebar_t.php";
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="../index.php">Dashboard</a></li>
-              <li class="breadcrumb-item active">Kategori</li>
+              <li class="breadcrumb-item active">Menabung</li>
             </ol>
           </div>
         </div>
@@ -365,13 +365,20 @@ setTimeout(() => {
             
                
 <script>
+  
 $(document).ready(function() {
+
+  $(document).on('click', '.edit-tabungan', function() {
+    // Redirect to catat_tabungan.php
+    window.location.href = 'catat_tabungan.php';
+});
+
   function loadData(transaksi, containerId) {
   var idUsers = <?= $id_users ?>; // Ambil id_users dari PHP dan sisipkan ke dalam JavaScript
 
   // Lakukan permintaan AJAX untuk mengambil data kategori, termasuk id_users
   $.ajax({
-    url: 'muncul_kategori.php',
+    url: 'muncul_target.php',
     method: 'GET',
     data: {
       id_users: idUsers,
@@ -383,14 +390,14 @@ $(document).ready(function() {
   });
 }
 
-// Load data for "Pemasukan" and "Pengeluaran" initially
-loadData("Pemasukan", "pemasukan-container");
-loadData("Pengeluaran", "pengeluaran-container");
+// Load data for "Berlangsung" and "Tercapai" initially
+loadData("Berlangsung", "pemasukan-container");
+loadData("Tercapai", "pengeluaran-container");
 
-// Atur penyegaran setiap 3 detik (3000 milidetik) untuk data "Pemasukan" dan "Pengeluaran"
+// Atur penyegaran setiap 3 detik (3000 milidetik) untuk data "Berlangsung" dan "Teracpai"
 setInterval(function() {
-  loadData("Pemasukan", "pemasukan-container");
-  loadData("Pengeluaran", "pengeluaran-container");
+  loadData("Berlangsung", "pemasukan-container");
+  loadData("Tercapai", "pengeluaran-container");
 }, 3000);
 
 
@@ -534,12 +541,12 @@ $('#pengeluaran-container, #pemasukan-container').on('click', '.delete-category'
               <div class="card card-primary card-tabs">
               <div class="card-header p-0 pt-1">
                 <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
-                  <li class="pt-2 px-3"><h3 class="card-title">Kategori</h3></li>
+                  <li class="pt-2 px-3"><h3 class="card-title">Target Menabung</h3></li>
                   <li class="nav-item">
-                    <a class="nav-link active" id="custom-tabs-two-home-tab" data-toggle="pill" href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home" aria-selected="true">Pemasukan</a>
+                    <a class="nav-link active" id="custom-tabs-two-home-tab" data-toggle="pill" href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home" aria-selected="true">Berlangsung</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" id="custom-tabs-two-profile-tab" data-toggle="pill" href="#custom-tabs-two-profile" role="tab" aria-controls="custom-tabs-two-profile" aria-selected="false">Pengeluaran</a>
+                    <a class="nav-link" id="custom-tabs-two-profile-tab" data-toggle="pill" href="#custom-tabs-two-profile" role="tab" aria-controls="custom-tabs-two-profile" aria-selected="false">Tercapai</a>
                   </li>
                 </ul>
               </div>
@@ -556,6 +563,52 @@ $('#pengeluaran-container, #pemasukan-container').on('click', '.delete-category'
               <!-- /.card -->
             </div>
             </div>
+
+
+            <?php 
+            $query_t = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users");
+            while($tabungan = mysqli_fetch_array($query_t)) {
+            ?>
+              <!-- Modal -->
+<div class="modal fade" id="gambarModal_t<?= $tabungan['id_tabungan'] ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $tabungan['id_tabungan'] ?>" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        
+        <h5 class="modal-title" id="gambarModalLabel<?= $tabungan['id_tabungan'] ?>">Gambar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
+        <?php
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+            if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                $gambarPath = "../dist/img/galeri.png";
+            }
+            // Tampilkan gambar jika file gambar ada
+            echo '<img src="' . $gambarPath . '" alt="Gambar Tabungan" "  width="100%" height="auto">';
+        ?>
+        
+      </div>
+      <div class="modal-footer">
+        <?php
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+        if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" style="display:none;" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            } else {
+              echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            }
+        ?>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php } ?>
            
           </div>
           <!-- /.col -->
