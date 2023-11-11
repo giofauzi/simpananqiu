@@ -1,56 +1,36 @@
- <?php 
-include "../view/header_t.php";
-?>
-
-  <?php 
-include "../view/navbar_t.php";
-?>
-
 <?php 
+include "../view/header_t.php";
+include "../view/navbar_t.php";
 include "../view/sidebar_t.php";
-?>
-<?php
 
-if (isset($_SESSION['id_tabungan'])) {
-    $id_tabungan = $_SESSION['id_tabungan'];
-} else {
-    // Handle the case when id_tabungan is not set in the session
-    // For example, redirect to an error page or the homepage
-    header('Location: ../tabungan/');
-    exit();
-}
 
-// Detect the user agent to determine if it's a mobile device
-$userAgent = $_SERVER['HTTP_USER_AGENT'];
+// Pastikan bahwa $_GET['nama'] dan $_GET['no'] telah di-set dan bukan kosong
+if (isset($_GET['nama']) && isset($_GET['no'])) {
+    $id_user_from_url = $_GET['nama'];
+    $id_tabungan_from_url = $_GET['no'];
 
-// Check if the user agent indicates a mobile device
-$isMobile = (strpos($userAgent, 'Mobile') !== false || strpos($userAgent, 'Android') !== false);
+    // Lakukan pengecekan apakah id_user dan id_tabungan sesuai
+    // Gantilah kondisi ini sesuai dengan cara Anda menyimpan id_user dan id_tabungan
+    $query = "SELECT * FROM tabungan WHERE id_user = '$id_user_from_url' AND id_tabungan = '$id_tabungan_from_url'";
+    $result = mysqli_query($koneksi, $query);
+    $row = mysqli_fetch_array($result);
 
-// Use switch case to execute code based on the result
-switch ($isMobile) {
-    case true:
-        // Code for mobile devices
-        ?>
-       
-        <?php
-        break;
-    case false:
-        // Code for desktop/laptop devices
+    if ($result && mysqli_num_rows($result) > 0) {
         ?>
         
-         <!-- Content Wrapper. Contains page content -->
+        <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Profil</h1>
+            <h1>Tabungan - <?= $row['nama_tabungan'] ?></h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="../index.php">Home</a></li>
-              <li class="breadcrumb-item active">Target Menabung <?= $_SESSION['id_tabungan'] ?></li>
+              <li class="breadcrumb-item"><a href="../">Home</a></li>
+              <li class="breadcrumb-item active">Target Menabung</li>
             </ol>
           </div>
         </div>
@@ -61,127 +41,281 @@ switch ($isMobile) {
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-3">
+          <div class="col-md-4">
 
             <!-- Profile Image -->
-          <div id="profile-container" class="card card-primary card-outline">
-  <!-- Konten profile -->
-</div>
-<script>
-  // Fungsi untuk memperbarui profil
-function updateProfile() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
-    $.ajax({
-        url: 'update-profile.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#profile-container').html(data.profileData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
+            <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <?php
+                  $gambarPath = "../../data/img/tabungan/" . $row['gambar']; // Path gambar sesuai dengan data dalam database
+            if (empty($row['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                $gambarPath = "../dist/img/galeri.png";
+            }
+
+            echo '<a href="#" data-toggle="modal" title="Klik Gambar" class="edit-modal modal-gambar" data-target="#gambarModal_t'.$row['id_tabungan'].'">
+            <img style="width:250px;height:250px;border-radius:20px;margin-bottom:5px;"
+                 src="'.$gambarPath.'"
+                 alt="Gambar Tabungan">
+                 </a>';
+                 ?>
+                </div>
+                <?php 
+               $formatTarget = 'Rp' . number_format($row['target'], 2, ',', '.');
+                ?>
+                <div class="profile-info">
+    <h3 class="profile-username"><?= $formatTarget ?></h3>
+    <div style="margin-bottom:-13px;">   
+    <?php 
+$id_tabungan = $row['id_tabungan'];
+
+// Query untuk menghitung total nominal pada tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+$catat = mysqli_fetch_array($query_catat);
+
+if ($catat) {
+    // Data catat_tabungan ditemukan
+    $total_nominal = $catat['total_nominal'];
+    $hitung_persen = min(($total_nominal / $row['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+
+    // Tampilkan input knob dengan nilai persen progres
+   echo '<input type="text" class="knob" value="'.number_format($hitung_persen, 0, '', '').'" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
+
+} else {
+    // Data catat_tabungan tidak ditemukan, progres 0%
+    echo '<input type="text" class="knob" value="0" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
 }
-  // Memanggil fungsi pembaruan setiap 1 detik
-  setInterval(updateProfile, 1000);
-</script>
+?>
+
+    </div>
+                    
+</div>
+<?php
+$formatUang = 'Rp' . number_format($row['nominal'], 2, ',', '.');
+if($row['rencana'] === 'Harian') {
+ echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perhari</p>';
+} else if($row['rencana'] === 'Mingguan') {
+  echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perminggu</p>';
+} else if($row['rencana'] === 'Bulanan') {
+  echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perbulan</p>';
+}
+?>
+    
+
+
+                <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>Tanggal Dibuat</b> <a class="float-right"><?=  date('d F Y H.i', strtotime($row['tgl_b'])) ?></a>
+                  </li>
+                  <li class="list-group-item">
+                    <?php 
+                    $id_tabungan = $row['id_tabungan'];
+            // ...
+$query_catat = mysqli_query($koneksi, "SELECT id_tabungan, SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan GROUP BY id_tabungan");
+$catat = mysqli_fetch_array($query_catat);
+
+if ($catat) {
+    // Data catat_tabungan ditemukan
+    $hitungan = $row['target'] - $catat['total_nominal'];
+    $hitung = floor($hitungan / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+
+    // Tampilkan data sesuai kebutuhan
+   
+    if ($row['rencana'] === 'Harian') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Hari Lagi</a>';
+    } elseif ($row['rencana'] === 'Mingguan') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Minggu Lagi</a>';
+    } elseif ($row['rencana'] === 'Bulanan') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Bulan Lagi</a>';
+    }
+   
+} else {
+    // Data catat_tabungan tidak ditemukan
+    $hitung_a = floor($row['target'] / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+   
+    if ($row['rencana'] === 'Harian') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Hari Lagi</a>';
+    } elseif ($row['rencana'] === 'Mingguan') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Minggu Lagi</a>';
+    } elseif ($row['rencana'] === 'Bulanan') {
+        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Bulan Lagi</a>';
+    }
+ 
+}
+// ...
+                    ?>
+                   
+                  </li>
+                  
+                </ul>
+
+               
+              </div>
+              <!-- /.card-body -->
+            </div>
             <!-- /.card -->
 
             <!-- About Me Box -->
-            <div id="profile-about" >
-               </div>
-              <script>
-  // Fungsi untuk memperbarui profil
-function updateAbout() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
-    $.ajax({
-        url: 'update-about.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#profile-about').html(data.aboutData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Kondisi</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <strong><i class="fas fa-arrow-up mr-1" style="color:green"></i> Terkumpul</strong>
+
+                
+                  <?php
+                  $id_tabungan = $row['id_tabungan'];
+$query_catat = mysqli_query($koneksi, "SELECT id_tabungan, SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan GROUP BY id_tabungan");
+$catat = mysqli_fetch_array($query_catat);
+if ($catat) {
+$hitungan = $row['target'] - $catat['total_nominal'];
+echo ' <p class="text-muted">'.$hitungan.'</p>';
+} else {
+echo ' <p class="text-muted">0</p>';
+
 }
+                  ?>
+              
 
-  // Memanggil fungsi pembaruan setiap 1 detik
-  setInterval(updateAbout, 1000);
-</script>
+                <hr>
 
-   
+                <strong><i class="fas fa-arrow-down mr-1" style="color:red;"></i> Kekurangan</strong>
 
-             <!-- Modal -->
-<div class="modal fade" id="gambarModal<?= $id_users ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $id_users ?>" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        
-        <h5 class="modal-title" id="gambarModalLabel<?= $id_users ?>">Gambar</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        
-      </div>
-      <div class="modal-body">
-        <img src="../../data/img/users/<?= $all['foto'] ?>" alt="Gambar Modal" style="max-width: 100%; height: auto;">
-      </div>
-      <div class="modal-footer">
-       <a href="../../data/img/users/<?= $all['foto'] ?>" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-      </div>
-    </div>
-  </div>
-</div>
+                <p class="text-muted"></p>
+
+                <hr>
+              </div>
+              <!-- /.card-body -->
+            </div>
             <!-- /.card -->
           </div>
           <!-- /.col -->
-          <div class="col-md-9">
+          <div class="col-md-8">
             <div class="card">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktivitas</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Waktu</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Pengaturan Akun</a></li>
-                  <li class="nav-item"><a class="nav-link" href="../vr/" >Verifikasi 2 Langkah</a></li>
+                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
-                
                 <div class="tab-content">
-                  <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
+                  <div class="active tab-pane" id="activity">
                     <!-- Post -->
-                   <div id="aktifitas" class="post">
-               </div>
-              <script>
-  // Fungsi untuk memperbarui profil
-function Aktivitas() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
-    $.ajax({
-        url: 'aktifitas.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#aktifitas').html(data.ActivityData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
-}
+                    <div class="post">
+                      <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
+                        <span class="username">
+                          <a href="#">Jonathan Burke Jr.</a>
+                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
+                        </span>
+                        <span class="description">Shared publicly - 7:30 PM today</span>
+                      </div>
+                      <!-- /.user-block -->
+                      <p>
+                        Lorem ipsum represents a long-held tradition for designers,
+                        typographers and the like. Some people hate it and argue for
+                        its demise, but others ignore the hate as they create awesome
+                        tools to help create filler text for everyone from bacon lovers
+                        to Charlie Sheen fans.
+                      </p>
 
-  // Memanggil fungsi pembaruan setiap 1 detik
-  setInterval(Aktivitas, 1000);
-</script>
-              
+                      <p>
+                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
+                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
+                        <span class="float-right">
+                          <a href="#" class="link-black text-sm">
+                            <i class="far fa-comments mr-1"></i> Comments (5)
+                          </a>
+                        </span>
+                      </p>
+
+                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
+                    </div>
                     <!-- /.post -->
 
+                    <!-- Post -->
+                    <div class="post clearfix">
+                      <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
+                        <span class="username">
+                          <a href="#">Sarah Ross</a>
+                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
+                        </span>
+                        <span class="description">Sent you a message - 3 days ago</span>
+                      </div>
+                      <!-- /.user-block -->
+                      <p>
+                        Lorem ipsum represents a long-held tradition for designers,
+                        typographers and the like. Some people hate it and argue for
+                        its demise, but others ignore the hate as they create awesome
+                        tools to help create filler text for everyone from bacon lovers
+                        to Charlie Sheen fans.
+                      </p>
+
+                      <form class="form-horizontal">
+                        <div class="input-group input-group-sm mb-0">
+                          <input class="form-control form-control-sm" placeholder="Response">
+                          <div class="input-group-append">
+                            <button type="submit" class="btn btn-danger">Send</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <!-- /.post -->
+
+                    <!-- Post -->
+                    <div class="post">
+                      <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="../../dist/img/user6-128x128.jpg" alt="User Image">
+                        <span class="username">
+                          <a href="#">Adam Jones</a>
+                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
+                        </span>
+                        <span class="description">Posted 5 photos - 5 days ago</span>
+                      </div>
+                      <!-- /.user-block -->
+                      <div class="row mb-3">
+                        <div class="col-sm-6">
+                          <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-sm-6">
+                          <div class="row">
+                            <div class="col-sm-6">
+                              <img class="img-fluid mb-3" src="../../dist/img/photo2.png" alt="Photo">
+                              <img class="img-fluid" src="../../dist/img/photo3.jpg" alt="Photo">
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-sm-6">
+                              <img class="img-fluid mb-3" src="../../dist/img/photo4.jpg" alt="Photo">
+                              <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
+                            </div>
+                            <!-- /.col -->
+                          </div>
+                          <!-- /.row -->
+                        </div>
+                        <!-- /.col -->
+                      </div>
+                      <!-- /.row -->
+
+                      <p>
+                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
+                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
+                        <span class="float-right">
+                          <a href="#" class="link-black text-sm">
+                            <i class="far fa-comments mr-1"></i> Comments (5)
+                          </a>
+                        </span>
+                      </p>
+
+                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
+                    </div>
+                    <!-- /.post -->
                   </div>
                   <!-- /.tab-pane -->
                   <div class="tab-pane" id="timeline">
@@ -280,289 +414,61 @@ function Aktivitas() {
                   </div>
                   <!-- /.tab-pane -->
 
-
                   <div class="tab-pane" id="settings">
-
-                   <form class="form-horizontal" id="editForm" enctype="multipart/form-data">
-                    <input type="hidden" class="form-control id_users" name="id_user" value="<?= $all['id_user'] ?>" id="id_user" placeholder="Name">
+                    <form class="form-horizontal">
                       <div class="form-group row">
-                        <label for="nama_user" class="col-sm-2 col-form-label">Nama User</label>
+                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" name="nama_user" value="<?= $all['nama_user'] ?>" id="nama_user" placeholder="Nama Lengkap">
+                          <input type="email" class="form-control" id="inputName" placeholder="Name">
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" name="username" value="<?= $all['username'] ?>" id="username" placeholder="Username">
+                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
                         </div>
                       </div>
-                     <div class="form-group row">
-    <label for="inputName2" class="col-sm-2 col-form-label">Jenis Kelamin</label>
-    <div class="col-sm-10">
-        <div class="custom-control custom-radio">
-            <input class="custom-control-input" type="radio" id="customRadio1" name="gender" value="Laki-Laki" <?php if($all['gender']=='Laki-Laki') echo 'checked'?>>
-            <label for="customRadio1" class="custom-control-label">Laki-Laki</label>
-        </div>
-        <div class="custom-control custom-radio">
-            <input class="custom-control-input" type="radio" id="customRadio2" name="gender" value="Perempuan" <?php if($all['gender']=='Perempuan') echo 'checked'?>>
-            <label for="customRadio2" class="custom-control-label">Perempuan</label>
-        </div>
-    </div>
-</div>
-
-                       <div class="form-group row">
-                        <label for="nohp" class="col-sm-2 col-form-label">No Handphone</label>
-                        <div class="col-sm-10">
-                          <input type="number" class="form-control"  name="no_hp" value="<?= $all['no_hp'] ?>" id="nohp" placeholder="Nomor Handphone">
-                        </div>
-                      </div>
-                       <div class="form-group row">
-                        <label for="email" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" name="email"  value="<?= $all['email'] ?>" id="email" placeholder="Email">
-                        </div>
-                      </div>
-
                       <div class="form-group row">
-                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                        <div class="col-sm-10 input-container">
-                           <input type="password" class="form-control" value="" name="password" id="password" placeholder="Password">
-            <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                        <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
                         </div>
                       </div>
-
-                       <div class="form-group row">
-                        <label for="fileInput" class="col-sm-2 col-form-label">Foto</label>
-
-                         <div class="col-sm-10 input-container">
-<input type="file" class="form-control-file" id="fileInput" name="fileInput" required onchange="validateAndPreviewImage()">
-<img id="imgPreview" src="../../data/img/users/<?= $all['foto'] ?>"  style="max-width: 300px; max-height: 300px; margin-top: 10px;">
-
+                      <div class="form-group row">
+                        <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
+                        <div class="col-sm-10">
+                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                        </div>
                       </div>
+                      <div class="form-group row">
+                        <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                        </div>
                       </div>
-                     <!-- Ini adalah gambar pratinjau -->
-
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                        <button type="button" class="btn btn-primary editSetting" id="">Simpan</button>
-
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <div class="offset-sm-2 col-sm-10">
+                          <button type="submit" class="btn btn-danger">Submit</button>
                         </div>
                       </div>
                     </form>
-                 
-  
-<script>
- function validateAndPreviewImage() {
-    const allowedExtensions = ["jpg", "jpeg", "png"];
-    const fileInput = document.getElementById("fileInput");
-    const imgPreview = document.getElementById('imgPreview');
-   
-
-    if (fileInput.files.length > 0) {
-        const selectedFile = fileInput.files[0];
-        const fileName = selectedFile.name;
-        const fileExtension = fileName.split('.').pop().toLowerCase();
-
-        if (allowedExtensions.includes(fileExtension)) {
-            // File extension is allowed
-            imgPreview.src = URL.createObjectURL(selectedFile); // Menampilkan gambar pratinjau
-            document.getElementById("validationMessage").textContent = "";
-           
-        } else {
-            // File extension is not allowed
-            Swal.fire({
-                position: 'center',
-                icon: 'error',
-                title: 'File harus berupa JPG, JPEG, atau PNG.',
-                showConfirmButton: false,
-                timer: 3000,
-            });
-            fileInput.value = ""; // Clear the selected file
-            imgPreview.src = ""; // Hapus gambar pratinjau
-           
-        }
-    } else {
-        imgPreview.src = ""; // Hapus gambar pratinjau jika tidak ada file yang dipilih
-        document.getElementById("validationMessage").textContent = "";
-       
-    }
-}
-
-
-// Edit data
-$('#editForm').on('click', '.editSetting', function(e) {
-   e.preventDefault(); // Menghentikan tindakan default tombol submit
-
-   const userId = $('#id_user').val(); // Dapatkan ID pengguna
-   const nama_user = $('#nama_user').val();
-   const fileInput = $('#fileInput')[0].files[0]; // Mengambil objek file yang dipilih
-   const username = $('#username').val();
-   const gender = $("input[name='gender']:checked").val();
-   const no_hp = $('#nohp').val();
-   const email = $('#email').val();
-   const password = $('#password').val();
-
-   // Buat objek FormData untuk mengirim data yang sesuai dengan tipe FormData
-   const formData = new FormData();
-   formData.append('id_user', userId);
-   formData.append('nama_user', nama_user);
-   formData.append('fileInput', fileInput);
-   formData.append('username', username);
-   formData.append('gender', gender);
-   formData.append('no_hp', no_hp);
-   formData.append('email', email);
-   formData.append('password', password);
-
-   Swal.fire({
-     title: 'Konfirmasi Mengubah Data',
-     text: 'Anda yakin ingin menguah?',
-     icon: 'question',
-     showCancelButton: true,
-     confirmButtonText: 'Simpan',
-     cancelButtonText: 'Batal',
-     
-   }).then((result) => {
-     if (result.isConfirmed) {
-       // Kirim permintaan AJAX untuk mengedit data pengguna
-       $.ajax({
-         url: 'edit_user.php', // Ganti dengan URL yang sesuai
-         method: 'POST',
-         data: formData, // Mengirim objek FormData
-         dataType: 'json',
-         processData: false, // Jangan memproses data
-         contentType: false, // Jangan mengatur tipe konten
-         success: function(response) {
-           if (response.status === 'success') {
-           // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
-setTimeout(() => {
-  Swal.fire({
-    title: 'Data Pengguna Telah Diubah',
-    text: 'Perubahan berhasil disimpan.',
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1000, // Menunggu 5 detik
-    allowOutsideClick: false
-  }).then(() => {
-    // Menunggu 5 detik sebelum mereset ulang halaman
-    setTimeout(() => {
-      location.reload(); // Melakukan refresh halaman setelah 5 detik
-    }, 3000);
-  });
-}, 1000);
-
-           } else if (response.status === 'error') {
-             Swal.fire({
-               title: 'Gagal Mengedit Data Pengguna',
-               html: response.message.join('<br>'),
-               icon: 'error',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-           }
-         }
-       });
-     }
-   });
- });
-
-</script>
-
-
-
-
                   </div>
-<!-- /.tab-pane -->
-
-<div class="tab-pane" id="verifikasi">
- <form class="form-horizontal" id="editVerifikasi">
-                    <input type="hidden" class="form-control id_users" name="id_user" value="<?= $all['id_user'] ?>" id="id_user" placeholder="Name">
-                      <div class="form-group row">
-                        <label for="vr" class="col-sm-2 col-form-label">Verifikasi 2 Langkah</label>
-                        <div class="col-sm-10">
-                          <input type="password" class="form-control" name="vr" id="vr" placeholder="Masukkan Verifikasi 2 Langkah">
-                           <span toggle="#vr" class="fa fa-fw fa-eye field-icon toggle-password2"></span>
-                        </div>
-                      </div>
-                     
-
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                        <button type="button" class="btn btn-primary EditVer" id="">Simpan</button>
-
-                        </div>
-                      </div>
-                    </form>
-                 
-  
-<script>
-// Edit data
-$('#editVerifikasi').on('click', '.EditVer', function(e) {
-   e.preventDefault(); // Menghentikan tindakan default tombol submit
-
-   const userId = $('#id_user').val(); // Dapatkan ID pengguna
-   const vr = $('#vr').val();
-
-   // Buat objek FormData untuk mengirim data yang sesuai dengan tipe FormData
-   const formData = new FormData();
-   formData.append('id_user', userId);
-   formData.append('vr', vr);
-
-   Swal.fire({
-     title: 'Konfirmasi Mengubah Data',
-     text: 'Anda yakin ingin menguah?',
-     icon: 'question',
-     showCancelButton: true,
-     confirmButtonText: 'Simpan',
-     cancelButtonText: 'Batal',
-     
-   }).then((result) => {
-     if (result.isConfirmed) {
-       // Kirim permintaan AJAX untuk mengedit data pengguna
-       $.ajax({
-         url: 'edit_vr.php', // Ganti dengan URL yang sesuai
-         method: 'POST',
-         data: formData, // Mengirim objek FormData
-         dataType: 'json',
-         processData: false, // Jangan memproses data
-         contentType: false, // Jangan mengatur tipe konten
-         success: function(response) {
-          if (response.status === 'success') {
-             Swal.fire({
-               title: 'Data Verifikasi Telah Diedit',
-               text: 'Perubahan berhasil disimpan.',
-               icon: 'success',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-
-           } else if (response.status === 'error') {
-             Swal.fire({
-               title: 'Gagal Mengedit Data Verifikasi',
-               html: response.message.join('<br>'),
-               icon: 'error',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-           }
-         }
-       });
-     }
-   });
- });
-
-</script>
-</div>
-
-</div>
-<!-- /.tab-content -->
-</div><!-- /.card-body -->
-</div>
-<!-- /.card -->
-</div>
+                  <!-- /.tab-pane -->
+                </div>
+                <!-- /.tab-content -->
+              </div><!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
           <!-- /.col -->
         </div>
         <!-- /.row -->
@@ -572,17 +478,62 @@ $('#editVerifikasi').on('click', '.EditVer', function(e) {
   </div>
   <!-- /.content-wrapper -->
    
+  <?php 
+            $query_t = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users");
+            while($tabungan = mysqli_fetch_array($query_t)) {
+            ?>
+              <!-- Modal -->
+<div class="modal fade" id="gambarModal_t<?= $tabungan['id_tabungan'] ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $tabungan['id_tabungan'] ?>" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        
+        <h5 class="modal-title" id="gambarModalLabel<?= $tabungan['id_tabungan'] ?>">Gambar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
         <?php
-        break;
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+            if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                $gambarPath = "../dist/img/galeri.png";
+            }
+            // Tampilkan gambar jika file gambar ada
+            echo '<img src="' . $gambarPath . '" alt="Gambar Tabungan" "  width="100%" height="auto">';
+        ?>
         
-    default:
-        // Handle other cases, you can redirect to a default page or show an error
-        header('Location: ../tabungan/');
-        exit();
+      </div>
+      <div class="modal-footer">
+        <?php
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+        if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" style="display:none;" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            } else {
+              echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            }
+        ?>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php } ?>
+      
 
-        
+    <?php 
+    } else {
+        // Tidak sesuai, redirect ke halaman yang sesuai
+        $_SESSION['gagal'] = 'Opps, Anda Gagal!';
+        echo '<script>window.location.href = "tabungan.php";</script>';
+    }
+} else {
+    // Parameter tidak lengkap, redirect ke halaman yang sesuai
+    $_SESSION['gagal'] = 'Opps, Anda Gagal!';
+    echo '<script>window.location.href = "tabungan.php";</script>';
 }
-?>
-<?php 
 include "../view/footer_t.php";
 ?>

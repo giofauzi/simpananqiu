@@ -92,6 +92,13 @@ if ($user['status'] == 1) {
   
   <style>
 
+    .profile-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
  .input-container {
     position: relative;
   }
