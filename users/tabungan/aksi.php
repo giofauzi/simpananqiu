@@ -63,7 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($tabunganCount > 0) {
         echo "Tabungan Sudah Ada!";
     } else {
-                // Lanjutkan dengan query untuk mengubah data
+        if($nominal_pengisian > $target_tabungan) {
+            echo 'Nominal pengisian tidak boleh melebihi target pengisian';
+        } else {
+            // Lanjutkan dengan query untuk menambah data
                 date_default_timezone_set('Asia/Jakarta');
                 $currentDateTime = date('Y-m-d H:i:s');
                 
@@ -71,10 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$fileInput', '$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data tabungan berhasil ditambah.";
                 } else {
-                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                    echo "Terjadi kesalahan saat menambah data tabungan: " . mysqli_error($koneksi);
                 }
+        }
             }
         }
         } else {
@@ -87,18 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($tabunganCount > 0) {
         echo "Tabungan Sudah Ada!";
     } else {
-            // Lanjutkan dengan query untuk mengubah data
-            date_default_timezone_set('Asia/Jakarta');
-            $currentDateTime = date('Y-m-d H:i:s');
-            
-            // Gabungkan query untuk menghindari duplikasi
-            $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$fileInput', '$currentDateTime')";
+            if($nominal_pengisian > $target_tabungan) {
+            echo 'Nominal pengisian tidak boleh melebihi target pengisian';
+        } else {
+            // Lanjutkan dengan query untuk menambah data
+                date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO tabungan (id_user, nama_tabungan, target, rencana, nominal, gambar, tgl_b) VALUES ('$id_user', '$nama_tabungan', '$target_tabungan', '$rencana_pengisian', '$nominal_pengisian', '$fileInput', '$currentDateTime')";
 
-            if (mysqli_query($koneksi, $query)) {
-                echo "Data tabungan berhasil diubah.";
-            } else {
-                echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
-            }
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data tabungan berhasil ditambah.";
+                } else {
+                    echo "Terjadi kesalahan saat menambah data tabungan: " . mysqli_error($koneksi);
+                }
+        }
         }
     }
 }

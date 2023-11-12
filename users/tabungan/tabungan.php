@@ -291,66 +291,6 @@ setTimeout(() => {
     });
 });
 
-//   $(document).ready(function () {
-//    // Event saat tombol "Simpan" diklik
-//      $("#SimpanTabungan").on("click", function () {
-//         var idUsers = $("#user_id").val(); // Dapatkan nilai input id_user
-//          var nama_tabungan = $("#nama_tabungan").val(); // Dapatkan nilai input nama_tabungan
-//           var target_tabungan = $("#target_tabungan").val(); // Dapatkan nilai input target_tabungan
-//         var rencana_pengisian = $("#rencana_pengisian").val(); // Dapatkan nilai input Rencana Pengisian
-//         var nominal_pengisian = $("#nominal_pengisian").val(); // Dapatkan nilai input Nominal Pengisian
-//         var gambar = $('#gambar')[0].files[0];
-//         // Kirim permintaan Ajax
-//         $.ajax({
-//             type: "POST",
-//             url: "aksi.php", // Ganti dengan alamat file PHP yang sesuai
-//             data: {
-//                 id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
-//                 nama_tabungan: nama_tabungan, // Tambahkan nama_tabungan ke data yang dikirimkan
-//                   target_tabungan: target_tabungan, // Tambahkan target_tabungan ke data yang dikirimkan
-//                 rencana_pengisian: rencana_pengisian,//Tambahkan rencana pengisian
-//                 nominal_pengisian: nominal_pengisian, //Tambahkan nominal pengisian
-//                 gambar: gambar //Tambahkan gambar
-//             },
-//             success: function (response) {
-//             if (response.includes("berhasil")) {
-//                 Swal.fire({
-//                     icon: 'success',
-//                     title: 'Sukses',
-//                     text: response,
-//                     showConfirmButton: false,
-//                     timer: 2000
-//                 }).then((result) => {
-//                     if (result.isConfirmed) {
-//                         // Anda bisa mengosongkan input atau menutup modal jika berhasil
-//                         $("#nama_tabungan").val("");
-//                         $("#modal-lg").modal("hide");
-
-                       
-//                     }
-//                 });
-//             } else {
-//                 Swal.fire({
-//                     icon: 'error',
-//                     title: 'Gagal',
-//                     text: response,
-//                     showConfirmButton: false,
-//                     timer: 2000
-//                 });
-//             }
-//         },
-//         error: function (xhr, status, error) {
-//             // Tangani kesalahan jika permintaan Ajax gagal
-//             Swal.fire({
-//                 icon: 'error',
-//                 title: 'Terjadi Kesalahan',
-//                 text: 'Terjadi kesalahan: ' + error,
-//             });
-//         }
-//     });
-// });
-// });
-
 
 </script>
 
@@ -367,121 +307,46 @@ setTimeout(() => {
 <script>
 $(document).ready(function() {
 
-  $('#pemasukan-container,  #pengeluaran-container').on('click', '.edit-category', function() {
-  const categoryId = $(this).closest('.card-body').find('.nama_kategori').data('id');
-  const categoryName = $(this).closest('.card-body').find('.nama_kategori').text();
-  const transaksi = $(this).closest('.card-body').find('.transaksi').text();
-  const id_admin = $(this).closest('.card-body').find('.id_admin').text();
-
-  Swal.fire({
-    title: 'Edit Kategori',
-    html: `<div class="form-group">
-      <label for="nama_kategori">Nama Kategori</label>
-      <input type="text" class="form-control"  name="nama" id="nama_kategori" placeholder="Masukkan Nama Kategori" value="${categoryName}">
-      <input type="hidden" class="form-control"  name="id_users" id="id_user" value="<?= $id_users ?>">
-      <input type="hidden" class="form-control"  name="id_admin" id="id_admin" value="${id_admin}">
-    </div>
-    <div class="form-group">
-      <label for="transaksi_kategori">Jenis Transaksi</label>
-      <select class="form-control" name="transaksi_kategori" id="transaksi_kategori" style="width: 100%"></select>
-    </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Simpan',
-    cancelButtonText: 'Batal',
-    didOpen: () => {
-      // Buat opsi-opsi untuk elemen select
-      const selectOptions = ['Pemasukan', 'Pengeluaran'];
-
-      // Perbarui select box berdasarkan nilai transaksi yang diperoleh
-      selectOptions.forEach((option) => {
-        const isSelected = option === transaksi ? 'selected' : '';
-        $('#transaksi_kategori').append(`<option value="${option}" ${isSelected}>${option}</option>`);
-      });
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const editedCategoryName = $('#nama_kategori').val();
-      const editIdUser = $('#id_user').val();
-      const transaksi_kategori = $('#transaksi_kategori').val();
-      const id_admin = $('#id_admin').val();
-
-      $.ajax({
-    url: 'edit.php',
-    method: 'POST',
-    data: {
-        id: categoryId,
-        id_users: editIdUser,
-        nama: editedCategoryName,
-        transaksi_kategori: transaksi_kategori,
-        id_admin: id_admin,
-    },
-    dataType: 'json', // Mengharapkan respons dalam format JSON
-    success: function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                title: 'Kategori Telah Diedit',
-                icon: 'success',
-                showConfirmButton: false,
-                timer: 2000,
-                allowOutsideClick: false,
-            });
-            loadCategories();
-        } else if (response.status === 'error') {
-            Swal.fire({
-                title: 'Gagal Mengedit Kategori',
-                text: response.message.join('<br>'), // Menampilkan pesan kesalahan dalam bentuk daftar
-                icon: 'error',
-                showConfirmButton: false,
-                timer: 2000,
-                allowOutsideClick: false,
-            });
-        }
-    },
-});
-
-    }
-  });
-});
-
-
-
-
-
 // Tambahkan event handler untuk tombol "Delete"
-$('#pengeluaran-container, #pemasukan-container').on('click', '.delete-category', function() {
+$('#berlangsung-container, #tercapai-container').on('click', '.delete-tabungan', function() {
   // Dapatkan ID kategori yang akan dihapus
-  const categoryId = $(this).data('id');
+  const id_tabungan = $(this).data('id');
 
   // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
   Swal.fire({
     title: 'Konfirmasi Penghapusan',
-    text: 'Anda yakin ingin menghapus kategori ini?',
+    text: 'Anda yakin ingin menghapus tabungan ini?',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya',
     cancelButtonText: 'Batal'
   }).then((result) => {
     if (result.isConfirmed) {
-      // Lakukan permintaan AJAX untuk menghapus kategori
+      // Lakukan permintaan AJAX untuk menghapus tabungan
       $.ajax({
-        url: 'delete_pengeluaran.php', // Ganti dengan URL yang sesuai
+        url: 'delete_tabungan.php', // Ganti dengan URL yang sesuai
         method: 'POST',
-        data: { id: categoryId },
+        data: { id: id_tabungan },
         success: function(response) {
   if (response === 'success') {
-    // Berhasil mengedit kategori
+    // Berhasil mengedit tabungan
+    setTimeout(() => {
     Swal.fire({
-      title: 'Kategori Telah Dihapus!',
+      title: 'Tabungan Telah Dihapus!',
       icon: 'success',
       showConfirmButton: false, // Menghilangkan tombol OK
       timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
       allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
-    });
-    loadCategories(); // Muat ulang data kategori setelah mengedit
+    }).then(() => {
+    // Menunggu 5 detik sebelum mereset ulang halaman
+    setTimeout(() => {
+      location.reload(); // Melakukan refresh halaman setelah 5 detik
+    }, 1000);
+  });
+}, 1000);
   } else {
     Swal.fire({
-      title: 'Gagal Menghapus Kategori',
+      title: 'Gagal Menghapus Tabungan',
       icon: 'error',
       showConfirmButton: false, // Menghilangkan tombol OK
       timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
@@ -518,7 +383,7 @@ $('#pengeluaran-container, #pemasukan-container').on('click', '.delete-category'
               <div class="card-body" style="max-height: 700px; overflow-y: auto;">
                 <div class="tab-content" id="custom-tabs-two-tabContent">
                   <div class="tab-pane fade show active" id="custom-tabs-two-home" role="tabpanel" aria-labelledby="custom-tabs-two-home-tab">
-                    <div class="row">
+                    <div id="berlangsung-container" class="row">
                       <?php 
                         $result = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users");
         $dataDitemukan = false; // Variabel penanda
@@ -648,7 +513,7 @@ $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untu
            echo '<a href="catat_tabungan.php?nama=' . $id_users . '&no=' . $d['id_tabungan'] . '" class="btn btn-warning"><i class="fa fa-pen"></i></a>';
 
 
-            echo '     <a href="#" class="btn btn-danger delete-category" data-id="' . $d['id_tabungan'] . '"><i class="fa fa-trash"></i></a>';
+            echo '     <a href="#" class="btn btn-danger delete-tabungan" data-id="' . $d['id_tabungan'] . '"><i class="fa fa-trash"></i></a>';
             echo '    </div>';
             echo '  </div>';
             echo '</div>';
@@ -757,7 +622,7 @@ $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untu
 
             echo '</div>';
             echo '      <a href="#" class="btn btn-warning edit-category"><i class="fa fa-pen"></i></a>';
-            echo '     <a href="#" class="btn btn-danger delete-category" data-id="' . $d['id_tabungan'] . '"><i class="fa fa-trash"></i></a>';
+            echo '     <a href="#" class="btn btn-danger delete-tabungan" data-id="' . $d['id_tabungan'] . '"><i class="fa fa-trash"></i></a>';
             echo '    </div>';
             echo '  </div>';
             echo '</div>';

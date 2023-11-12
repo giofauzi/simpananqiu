@@ -198,7 +198,8 @@ if ($row['rencana'] === 'Harian') {
         }
     }
 
-    echo '<p  style="color:green;">' . $total_positif . '</p>';
+    $format ='Rp '. number_format($total_positif,2,'.',',');
+    echo '<p  style="color:green;">' . $format . '</p>';
     ?>
 
     <hr>
@@ -224,7 +225,8 @@ if ($row['rencana'] === 'Harian') {
     }
 
     $hitungan = $row['target'] - $total_negatif;
-    echo '<p style="color:red;">' . $hitungan . '</p>';
+    $format ='Rp '. number_format($hitungan, 2, '.', ',');
+    echo '<p style="color:red;"> ' . $format . '</p>';
     ?>
 
     <hr>
@@ -241,42 +243,54 @@ if ($row['rencana'] === 'Harian') {
                 <ul class="nav nav-pills">
                   <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktifitas</a></li>
                   <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Alur</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab"><i class='fas fa-edit'></i></a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
                 <div class="tab-content">
                   <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
                     <!-- Post -->
-                    
-                   <div id="aktifitas" class="post">
-               </div>
-             <script>
-// Fungsi untuk memperbarui profil
-function Aktivitas() {
+                    <div class="form-group">
+  <label for="pilih_tipe">Pilih Tipe</label>
+  <select class="form-control select2 tipe1" style="width:100%;">
+    <option value="pilih">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="ubah">Ubah</option>
+  </select>
+</div>
+<div id="aktifitas" class="post"></div>
+<script>
+  // Fungsi untuk memperbarui profil
+  function Aktivitas() {
     var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
     var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
-    
-    $.ajax({
-        url: 'aktifitas.php',
-        method: 'GET',
-        data: { 
-            id_users: id_users,
-            id_tabungan: id_tabungan
-        }, // Kirim parameter ID pengguna dan ID tabungan
-        dataType: 'json',
-        success: function(data) {
-            $('#aktifitas').html(data.ActivityData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
-}
+    var selectedOption = $('.tipe1').val(); // Ambil nilai yang dipilih dari select
 
-// Memanggil fungsi pembaruan setiap 1 detik
-setInterval(Aktivitas, 1000);
+    $.ajax({
+      url: 'aktifitas.php',
+      method: 'GET',
+      data: {
+        id_users: id_users,
+        id_tabungan: id_tabungan,
+        tipe_aktifitas: selectedOption // Kirim tipe aktifitas sebagai parameter
+      },
+      dataType: 'json',
+      success: function (data) {
+        $('#aktifitas').html(data.ActivityData);
+      },
+      error: function () {
+        // Penanganan kesalahan jika terjadi
+      }
+    });
+  }
+
+  // Tambahkan event listener ke elemen select
+  $('.tipe1').on('change', Aktivitas);
+
+  // Memanggil fungsi pembaruan setiap 1 detik
+  setInterval(Aktivitas, 1000);
 </script>
+
 
               
                     <!-- /.post -->
@@ -285,86 +299,109 @@ setInterval(Aktivitas, 1000);
                   <!-- /.tab-pane -->
                   <div class="tab-pane" style="max-height: 700px; overflow-y: auto;" id="timeline">
                     <!-- The timeline -->
+                    <div class="form-group">
+  <label for="pilih_tipe">Pilih Tipe</label>
+  <select class="form-control select2 tipe2" style="width:100%;">
+    <option value="pilih">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="ubah">Ubah</option>
+  </select>
+</div>
                     <div id="alur" class="post">
                </div>
              <script>
 // Fungsi untuk memperbarui profil
-function Aktivitas() {
+function Alur() {
     var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
     var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
-    
-    $.ajax({
-        url: 'alur.php',
-        method: 'GET',
-        data: { 
-            id_users: id_users,
-            id_tabungan: id_tabungan
-        }, // Kirim parameter ID pengguna dan ID tabungan
-        dataType: 'json',
-        success: function(data) {
-            $('#alur').html(data.AlurData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
-}
+    var selectedOption = $('.tipe2').val(); // Ambil nilai yang dipilih dari select
 
-// Memanggil fungsi pembaruan setiap 1 detik
-setInterval(Aktivitas, 1000);
+    $.ajax({
+      url: 'alur.php',
+      method: 'GET',
+      data: {
+        id_users: id_users,
+        id_tabungan: id_tabungan,
+        tipe_alur: selectedOption // Kirim tipe alur sebagai parameter
+      },
+      dataType: 'json',
+      success: function (data) {
+        $('#alur').html(data.AlurData);
+      },
+      error: function () {
+        // Penanganan kesalahan jika terjadi
+      }
+    });
+  }
+
+  // Tambahkan event listener ke elemen select
+  $('.tipe2').on('change', Alur);
+
+  // Memanggil fungsi pembaruan setiap 1 detik
+  setInterval(Alur, 1000);
 </script>
                     
                   </div>
                   <!-- /.tab-pane -->
 
                   <div class="tab-pane" id="settings">
-                    <form class="form-horizontal">
+                    <form id="CatatForm" class="form-horizontal">
+                      <?php 
+$id_tabungan = $row['id_tabungan'];
+
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+// Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
+    }
+}
+
+// Hitung sisa target
+$sisa_target = max(0, $row['target'] - $total_nominal);
+
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+echo '<input type="hidden" class="form-control" name="estimasi" value="'.$estimasi_waktu.'" id="estimasi">';
+?>
+                      <input type="hidden" class="form-control" name="nomor" value="<?= $id_users ?>" id="nomor">
+                      <input type="hidden" class="form-control" name="nama" value="<?= $id_tabungan_from_url ?>" id="nama">
                       <div class="form-group row">
-                        <?php 
-                        date_default_timezone_set('Asia/Jakarta');
-        $currentDateTime = date('Y-m-d H:i:s');
-                        ?>
-                        <label for="inputName" class="col-sm-2 col-form-label"><?= $currentDateTime ?></label>
+                        <label for="nama_catat" class="col-sm-2 col-form-label">Nama Catat</label>
                         <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputName" placeholder="Name">
+                          <select class="form-control select2 tipe" name="tipe" style="width:100%;">
+    <option value="">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="kurangi">Kurangi</option>
+  </select>
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                        <label for="noninal" class="col-sm-2 col-form-label">Nominal</label>
                         <div class="col-sm-10">
-                          <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                          <input type="number" class="form-control" name="nominal" id="nominal" placeholder="Nominal">
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
+                        <label for="keterangan" class="col-sm-2 col-form-label">Keterangan</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                        <div class="col-sm-10">
-                          <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                          <textarea class="form-control" name="keterangan" id="keterangan" placeholder="Keterangan"></textarea>
                         </div>
                       </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                          <div class="checkbox">
-                            <label>
-                              <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-danger">Submit</button>
+                          <button type="submit" class="btn btn-primary">Kirim</button>
                         </div>
                       </div>
                     </form>
@@ -384,6 +421,95 @@ setInterval(Aktivitas, 1000);
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+
+
+<script>
+  $(document).ready(function () {
+   // Event saat tombol "Simpan" diklik
+    $("#CatatForm").on("submit", function (e) {
+  e.preventDefault(); 
+        var estimasi = $("#estimasi").val(); 
+        var id_tabungan = $("#nama").val(); 
+        var idUsers = $("#nomor").val(); 
+          var tipe = $(".tipe").val(); 
+        var nominal = $("#nominal").val(); 
+        var keterangan = $("#keterangan").val(); 
+        // Kirim permintaan Ajax
+
+        if (tipe === "") {
+            console.log("Tipe harus diisi.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Tipe harus diisi.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        } else if (nominal === "") {
+            console.log("Nominal harus diisi.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Nominal harus diisi.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        } else {
+        $.ajax({
+            type: "POST",
+            url: "aksi_catat.php", // Ganti dengan alamat file PHP yang sesuai
+            data: {
+                id_tabungan: id_tabungan, // Tambahkan id_tabungan ke data yang dikirimkan
+                estimasi: estimasi, // Tambahkan estimasi ke data yang dikirimkan
+                id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
+                  tipe: tipe, // Tambahkan tipe ke data yang dikirimkan
+                nominal: nominal,
+                keterangan: keterangan
+            },
+            success: function (response) {
+            if (response.includes("berhasil")) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Anda bisa mengosongkan input atau menutup modal jika berhasil
+                        $("#nama").val("");
+                        $("#modal-lg").modal("hide");
+
+                       
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            // Tangani kesalahan jika permintaan Ajax gagal
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Terjadi kesalahan: ' + error,
+            });
+        }
+    });
+  }
+});
+});
+</script>
+
+
+
+
    
   <?php 
             $query_t = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users");

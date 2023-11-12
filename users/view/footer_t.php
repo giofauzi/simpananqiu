@@ -24,6 +24,11 @@ if (window.location.href.indexOf("update.php") > -1) {
   document.querySelector('#tombol1').style.display = "none";
 }
 
+if (window.location.href.indexOf("catat_tabungan.php") > -1) {
+  // Jika URL adalah "catat_tabungan.php," sembunyikan elemen
+  document.querySelector('#tombol1').style.display = "none";
+}
+
 if (window.location.href.indexOf("transaksi.php") > -1) {
   // Jika URL adalah "profile.php," sembunyikan elemen
   document.querySelector('#tombol1').style.bottom = "60px";
