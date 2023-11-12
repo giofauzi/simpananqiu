@@ -537,7 +537,7 @@ $_SESSION['id_tabungan'] = $d['id_tabungan'];
                
                 echo '<div class="col-md-4">';
             echo '  <div class="card mb-4">';
-            echo '    <div class="card-body clickable">';
+            echo '    <div class="card-body">';
             echo '      <h5 class="card-text nama_tabungan"  data-id="' . $d['id_tabungan'] . '">' . $d['nama_tabungan'] . '</h5>';
             echo '<div class="text-center mb-2">';
             $gambarPath = "../../data/img/tabungan/" . $d['gambar']; // Path gambar sesuai dengan data dalam database
@@ -552,53 +552,94 @@ $_SESSION['id_tabungan'] = $d['id_tabungan'];
                  alt="Gambar Tabungan">
                  </a>';
             echo '</div>';
-            echo '      <p class="card-text id_user" style="display:none;">' . $d['id_user'] . '</p>';
-             $formattedTarget = 'Rp ' . number_format($d['target'], 2, ',', '.');
-            echo '      <h6 class="card-text text-bold" style="font-size:20px;">' . $formattedTarget. '</h6>';
-            $FormatNominal = 'Rp ' . number_format($d['nominal'], 2, ',', '.');
-            if($d['rencana'] === 'Harian') {
-                            echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perhari</h6>';
+             
+$formatTarget = 'Rp' . number_format($d['target'], 2, ',', '.');
+$formatUang = 'Rp' . number_format($d['nominal'], 2, ',', '.');
+?>
 
-            } else if($d['rencana'] === 'Mingguan') {
-                            echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perminggu</h6>';
-            } else if($d['rencana'] === 'Bulanan') {
-                            echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perbulan</h6>';
+<div class="profile-info">
+    <h3 class="profile-username text-bold"><?= $formatTarget ?></h3>
+    <div style="margin-bottom:-13px;">
+        <?php
+        $id_tabungan = $d['id_tabungan'];
+
+        // Query untuk mengambil data dari tabel catat_tabungan
+        $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+        // Inisialisasi variabel untuk menyimpan total nominal positif dan negatif
+        $total_positif = 0;
+        $total_negatif = 0;
+
+        while ($catat = mysqli_fetch_assoc($query_catat)) {
+            // Pisahkan tanda dan nilai
+            $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+            $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+            // Lakukan perhitungan berdasarkan tanda
+            if ($tanda === '+') {
+                $total_positif += $nilai;
+            } elseif ($tanda === '-') {
+                $total_negatif += $nilai;
             }
+        }
+
+        // Hitung total nominal
+        $total_nominal = $total_positif - $total_negatif;
+
+        // Hitung persentase progres
+        $hitung_persen = min(($total_nominal / $d['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+        ?>
+
+        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" data-width="60" data-height="60" data-fgColor="#3c8dbc">
+    </div>
+</div>
+
+<p style="margin-top:-20px; font-weight:bold; color:black;"><?= $formatUang ?> 
+    <?php
+    if ($d['rencana'] === 'Harian') {
+        echo 'Perhari';
+    } elseif ($d['rencana'] === 'Mingguan') {
+        echo 'Perminggu';
+    } elseif ($d['rencana'] === 'Bulanan') {
+        echo 'Perbulan';
+    }
+    ?>
+</p>
+<?php 
+
             echo '<hr>';
              echo '<div class="text-center">';
              $id_tabungan = $d['id_tabungan'];
-            // ...
-$query_catat = mysqli_query($koneksi, "SELECT id_tabungan, SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan GROUP BY id_tabungan");
-$catat = mysqli_fetch_array($query_catat);
+           // Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+            // Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
 
-if ($catat) {
-    // Data catat_tabungan ditemukan
-    $hitungan = $d['target'] - $catat['total_nominal'];
-    $hitung = floor($hitungan / $d['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
 
-    // Tampilkan data sesuai kebutuhan
-    echo '<div class="text-center">';
-    if ($d['rencana'] === 'Harian') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung . ' Perhari</h6>';
-    } elseif ($d['rencana'] === 'Mingguan') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung . ' Perminggu</h6>';
-    } elseif ($d['rencana'] === 'Bulanan') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung . ' Perbulan</h6>';
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
     }
-    echo '</div>';
-} else {
-    // Data catat_tabungan tidak ditemukan
-    $hitung_a = floor($d['target'] / $d['nominal']); // Menggunakan floor untuk membulatkan ke bawah
-    echo '<div class="text-center">';
-    if ($d['rencana'] === 'Harian') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung_a . ' Perhari</h6>';
-    } elseif ($d['rencana'] === 'Mingguan') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung_a . ' Perminggu</h6>';
-    } elseif ($d['rencana'] === 'Bulanan') {
-        echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung_a . ' Perbulan</h6>';
-    }
-    echo '</div>';
 }
+
+// Hitung sisa target
+$sisa_target = max(0, $d['target'] - $total_nominal);
+
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+            if($d['rencana'] === 'Harian') {
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perhari</h6>';
+            } else if($d['rencana'] === 'Mingguan') {
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perminggu</h6>';
+            } else if($d['rencana'] === 'Bulanan') {
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perbulan</h6>';
+            }
 // ...
 
 
@@ -683,18 +724,35 @@ if ($catat) {
             echo '<hr>';
             echo '<div class="text-center">';
             $id_tabungan = $d['id_tabungan'];
-            $query_catat = mysqli_query($koneksi, "SELECT * FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-            $catat = mysqli_fetch_array($query_catat);
-            if($catat['nama_catat'] === 'Tambah') {
-                $hitungan = $d['target'] - $catat['nominal'];
-                $hitung = $hitungan / $d['nominal'];
-            } 
+           // Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+            // Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
+    }
+}
+
+// Hitung sisa target
+$sisa_target = max(0, $d['target'] - $total_nominal);
+
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untuk membulatkan ke bawah
             if($d['rencana'] === 'Harian') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung. ' Perhari</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perhari</h6>';
             } else if($d['rencana'] === 'Mingguan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung. ' Perminggu</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perminggu</h6>';
             } else if($d['rencana'] === 'Bulanan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $hitung. ' Perbulan</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perbulan</h6>';
             }
 
             echo '</div>';

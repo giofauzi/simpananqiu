@@ -8,6 +8,7 @@ include "../view/sidebar_t.php";
 if (isset($_GET['nama']) && isset($_GET['no'])) {
     $id_user_from_url = $_GET['nama'];
     $id_tabungan_from_url = $_GET['no'];
+    
 
     // Lakukan pengecekan apakah id_user dan id_tabungan sesuai
     // Gantilah kondisi ini sesuai dengan cara Anda menyimpan id_user dan id_tabungan
@@ -65,40 +66,52 @@ if (isset($_GET['nama']) && isset($_GET['no'])) {
                $formatTarget = 'Rp' . number_format($row['target'], 2, ',', '.');
                 ?>
                 <div class="profile-info">
-    <h3 class="profile-username"><?= $formatTarget ?></h3>
+    <h3 class="profile-username text-bold"><?= $formatTarget ?></h3>
     <div style="margin-bottom:-13px;">   
-    <?php 
+   <?php 
 $id_tabungan = $row['id_tabungan'];
 
-// Query untuk menghitung total nominal pada tabel catat_tabungan
-$query_catat = mysqli_query($koneksi, "SELECT SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-$catat = mysqli_fetch_array($query_catat);
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
 
-if ($catat) {
-    // Data catat_tabungan ditemukan
-    $total_nominal = $catat['total_nominal'];
-    $hitung_persen = min(($total_nominal / $row['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+// Inisialisasi variabel untuk menyimpan total nominal positif dan negatif
+$total_positif = 0;
+$total_negatif = 0;
 
-    // Tampilkan input knob dengan nilai persen progres
-   echo '<input type="text" class="knob" value="'.number_format($hitung_persen, 0, '', '').'" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
 
-} else {
-    // Data catat_tabungan tidak ditemukan, progres 0%
-    echo '<input type="text" class="knob" value="0" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_positif += $nilai;
+    } elseif ($tanda === '-') {
+        $total_negatif += $nilai;
+    }
 }
+
+// Hitung total nominal
+$total_nominal = $total_positif - $total_negatif;
+
+// Hitung persentase progres
+$hitung_persen = min(($total_nominal / $row['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+
+// Tampilkan input knob dengan nilai persen progres
+echo '<input type="text" class="knob" value="'.number_format($hitung_persen, 0, '', '').'" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
 ?>
 
-    </div>
-                    
+
+    </div>            
 </div>
 <?php
 $formatUang = 'Rp' . number_format($row['nominal'], 2, ',', '.');
 if($row['rencana'] === 'Harian') {
- echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perhari</p>';
+ echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perhari</p>';
 } else if($row['rencana'] === 'Mingguan') {
-  echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perminggu</p>';
+  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perminggu</p>';
 } else if($row['rencana'] === 'Bulanan') {
-  echo '<p class="text-muted" style="margin-top:-20px;">'.$formatUang.' Perbulan</p>';
+  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perbulan</p>';
 }
 ?>
     
@@ -106,45 +119,47 @@ if($row['rencana'] === 'Harian') {
 
                 <ul class="list-group list-group-unbordered mb-3">
                   <li class="list-group-item">
-                    <b>Tanggal Dibuat</b> <a class="float-right"><?=  date('d F Y H.i', strtotime($row['tgl_b'])) ?></a>
+                    <b>Tanggal Dibuat</b> <a class="float-right" style="color:black;"><?=  date('d F Y H.i', strtotime($row['tgl_b'])) ?></a>
                   </li>
                   <li class="list-group-item">
                     <?php 
-                    $id_tabungan = $row['id_tabungan'];
-            // ...
-$query_catat = mysqli_query($koneksi, "SELECT id_tabungan, SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan GROUP BY id_tabungan");
-$catat = mysqli_fetch_array($query_catat);
+$id_tabungan = $row['id_tabungan'];
 
-if ($catat) {
-    // Data catat_tabungan ditemukan
-    $hitungan = $row['target'] - $catat['total_nominal'];
-    $hitung = floor($hitungan / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
 
-    // Tampilkan data sesuai kebutuhan
-   
-    if ($row['rencana'] === 'Harian') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Hari Lagi</a>';
-    } elseif ($row['rencana'] === 'Mingguan') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Minggu Lagi</a>';
-    } elseif ($row['rencana'] === 'Bulanan') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung . ' Bulan Lagi</a>';
+// Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
     }
-   
-} else {
-    // Data catat_tabungan tidak ditemukan
-    $hitung_a = floor($row['target'] / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
-   
-    if ($row['rencana'] === 'Harian') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Hari Lagi</a>';
-    } elseif ($row['rencana'] === 'Mingguan') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Minggu Lagi</a>';
-    } elseif ($row['rencana'] === 'Bulanan') {
-        echo '<b>Estimasi</b> <a class="float-right">' . $hitung_a . ' Bulan Lagi</a>';
-    }
- 
 }
-// ...
-                    ?>
+
+// Hitung sisa target
+$sisa_target = max(0, $row['target'] - $total_nominal);
+
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+
+// Tampilkan data sesuai kebutuhan
+if ($row['rencana'] === 'Harian') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Hari Lagi</a>';
+} elseif ($row['rencana'] === 'Mingguan') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Minggu Lagi</a>';
+} elseif ($row['rencana'] === 'Bulanan') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Bulan Lagi</a>';
+}
+?>
+
                    
                   </li>
                   
@@ -163,31 +178,58 @@ if ($catat) {
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <strong><i class="fas fa-arrow-up mr-1" style="color:green"></i> Terkumpul</strong>
+    <strong><i class="fas fa-arrow-up mr-1" style="color:green"></i> Terkumpul</strong>
 
-                
-                  <?php
-                  $id_tabungan = $row['id_tabungan'];
-$query_catat = mysqli_query($koneksi, "SELECT id_tabungan, SUM(nominal) AS total_nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan GROUP BY id_tabungan");
-$catat = mysqli_fetch_array($query_catat);
-if ($catat) {
-$hitungan = $row['target'] - $catat['total_nominal'];
-echo ' <p class="text-muted">'.$hitungan.'</p>';
-} else {
-echo ' <p class="text-muted">0</p>';
+    <?php
+    $id_tabungan = $row['id_tabungan'];
+    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
 
-}
-                  ?>
-              
+    // Inisialisasi variabel untuk menyimpan total nominal positif
+    $total_positif = 0;
 
-                <hr>
+    while ($catat = mysqli_fetch_assoc($query_catat)) {
+        // Pisahkan tanda dan nilai
+        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
 
-                <strong><i class="fas fa-arrow-down mr-1" style="color:red;"></i> Kekurangan</strong>
+        // Lakukan perhitungan berdasarkan tanda
+        if ($tanda === '+') {
+            $total_positif += $nilai;
+        }
+    }
 
-                <p class="text-muted"></p>
+    echo '<p  style="color:green;">' . $total_positif . '</p>';
+    ?>
 
-                <hr>
-              </div>
+    <hr>
+
+    <strong><i class="fas fa-arrow-down mr-1" style="color:red;"></i> Kekurangan</strong>
+
+    <?php
+    $id_tabungan = $row['id_tabungan'];
+    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+    // Inisialisasi variabel untuk menyimpan total nominal negatif
+    $total_negatif = 0;
+
+    while ($catat = mysqli_fetch_assoc($query_catat)) {
+        // Pisahkan tanda dan nilai
+        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+        // Lakukan perhitungan berdasarkan tanda
+        if ($tanda === '+') {
+            $total_negatif += $nilai;
+        }
+    }
+
+    $hitungan = $row['target'] - $total_negatif;
+    echo '<p style="color:red;">' . $hitungan . '</p>';
+    ?>
+
+    <hr>
+</div>
+
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
@@ -197,227 +239,92 @@ echo ' <p class="text-muted">0</p>';
             <div class="card">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
+                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktifitas</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Alur</a></li>
                   <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
                 <div class="tab-content">
-                  <div class="active tab-pane" id="activity">
+                  <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
                     <!-- Post -->
-                    <div class="post">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
-                        <span class="username">
-                          <a href="#">Jonathan Burke Jr.</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Shared publicly - 7:30 PM today</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <p>
-                        Lorem ipsum represents a long-held tradition for designers,
-                        typographers and the like. Some people hate it and argue for
-                        its demise, but others ignore the hate as they create awesome
-                        tools to help create filler text for everyone from bacon lovers
-                        to Charlie Sheen fans.
-                      </p>
+                    
+                   <div id="aktifitas" class="post">
+               </div>
+             <script>
+// Fungsi untuk memperbarui profil
+function Aktivitas() {
+    var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
+    var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
+    
+    $.ajax({
+        url: 'aktifitas.php',
+        method: 'GET',
+        data: { 
+            id_users: id_users,
+            id_tabungan: id_tabungan
+        }, // Kirim parameter ID pengguna dan ID tabungan
+        dataType: 'json',
+        success: function(data) {
+            $('#aktifitas').html(data.ActivityData);
+        },
+        error: function() {
+            // Penanganan kesalahan jika terjadi
+        }
+    });
+}
 
-                      <p>
-                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
-                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
-                        <span class="float-right">
-                          <a href="#" class="link-black text-sm">
-                            <i class="far fa-comments mr-1"></i> Comments (5)
-                          </a>
-                        </span>
-                      </p>
+// Memanggil fungsi pembaruan setiap 1 detik
+setInterval(Aktivitas, 1000);
+</script>
 
-                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
-                    </div>
+              
                     <!-- /.post -->
 
-                    <!-- Post -->
-                    <div class="post clearfix">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
-                        <span class="username">
-                          <a href="#">Sarah Ross</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Sent you a message - 3 days ago</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <p>
-                        Lorem ipsum represents a long-held tradition for designers,
-                        typographers and the like. Some people hate it and argue for
-                        its demise, but others ignore the hate as they create awesome
-                        tools to help create filler text for everyone from bacon lovers
-                        to Charlie Sheen fans.
-                      </p>
-
-                      <form class="form-horizontal">
-                        <div class="input-group input-group-sm mb-0">
-                          <input class="form-control form-control-sm" placeholder="Response">
-                          <div class="input-group-append">
-                            <button type="submit" class="btn btn-danger">Send</button>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                    <!-- /.post -->
-
-                    <!-- Post -->
-                    <div class="post">
-                      <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="../../dist/img/user6-128x128.jpg" alt="User Image">
-                        <span class="username">
-                          <a href="#">Adam Jones</a>
-                          <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
-                        </span>
-                        <span class="description">Posted 5 photos - 5 days ago</span>
-                      </div>
-                      <!-- /.user-block -->
-                      <div class="row mb-3">
-                        <div class="col-sm-6">
-                          <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-sm-6">
-                          <div class="row">
-                            <div class="col-sm-6">
-                              <img class="img-fluid mb-3" src="../../dist/img/photo2.png" alt="Photo">
-                              <img class="img-fluid" src="../../dist/img/photo3.jpg" alt="Photo">
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-sm-6">
-                              <img class="img-fluid mb-3" src="../../dist/img/photo4.jpg" alt="Photo">
-                              <img class="img-fluid" src="../../dist/img/photo1.png" alt="Photo">
-                            </div>
-                            <!-- /.col -->
-                          </div>
-                          <!-- /.row -->
-                        </div>
-                        <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-
-                      <p>
-                        <a href="#" class="link-black text-sm mr-2"><i class="fas fa-share mr-1"></i> Share</a>
-                        <a href="#" class="link-black text-sm"><i class="far fa-thumbs-up mr-1"></i> Like</a>
-                        <span class="float-right">
-                          <a href="#" class="link-black text-sm">
-                            <i class="far fa-comments mr-1"></i> Comments (5)
-                          </a>
-                        </span>
-                      </p>
-
-                      <input class="form-control form-control-sm" type="text" placeholder="Type a comment">
-                    </div>
-                    <!-- /.post -->
                   </div>
                   <!-- /.tab-pane -->
-                  <div class="tab-pane" id="timeline">
+                  <div class="tab-pane" style="max-height: 700px; overflow-y: auto;" id="timeline">
                     <!-- The timeline -->
-                    <div class="timeline timeline-inverse">
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-danger">
-                          10 Feb. 2014
-                        </span>
-                      </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-envelope bg-primary"></i>
+                    <div id="alur" class="post">
+               </div>
+             <script>
+// Fungsi untuk memperbarui profil
+function Aktivitas() {
+    var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
+    var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
+    
+    $.ajax({
+        url: 'alur.php',
+        method: 'GET',
+        data: { 
+            id_users: id_users,
+            id_tabungan: id_tabungan
+        }, // Kirim parameter ID pengguna dan ID tabungan
+        dataType: 'json',
+        success: function(data) {
+            $('#alur').html(data.AlurData);
+        },
+        error: function() {
+            // Penanganan kesalahan jika terjadi
+        }
+    });
+}
 
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 12:05</span>
-
-                          <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>
-
-                          <div class="timeline-body">
-                            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                            weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                            jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                            quora plaxo ideeli hulu weebly balihoo...
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                            <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-user bg-info"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-
-                          <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request
-                          </h3>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-comments bg-warning"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-
-                          <div class="timeline-body">
-                            Take me to your leader!
-                            Switzerland is small and neutral!
-                            We are more like Germany, ambitious and misunderstood!
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-success">
-                          3 Jan. 2014
-                        </span>
-                      </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-camera bg-purple"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>
-
-                          <div class="timeline-body">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <div>
-                        <i class="far fa-clock bg-gray"></i>
-                      </div>
-                    </div>
+// Memanggil fungsi pembaruan setiap 1 detik
+setInterval(Aktivitas, 1000);
+</script>
+                    
                   </div>
                   <!-- /.tab-pane -->
 
                   <div class="tab-pane" id="settings">
                     <form class="form-horizontal">
                       <div class="form-group row">
-                        <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                        <?php 
+                        date_default_timezone_set('Asia/Jakarta');
+        $currentDateTime = date('Y-m-d H:i:s');
+                        ?>
+                        <label for="inputName" class="col-sm-2 col-form-label"><?= $currentDateTime ?></label>
                         <div class="col-sm-10">
                           <input type="email" class="form-control" id="inputName" placeholder="Name">
                         </div>
