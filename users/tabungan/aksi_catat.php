@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil diubah.";
+                    echo "Data catat tabungan berhasil ditambah!";
                 } else {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }

@@ -1,56 +1,37 @@
- <?php 
-include "../view/header_t.php";
-?>
-
-  <?php 
-include "../view/navbar_t.php";
-?>
-
 <?php 
+include "../view/header_t.php";
+include "../view/navbar_t.php";
 include "../view/sidebar_t.php";
-?>
-<?php
 
-if (isset($_SESSION['id_tabungan'])) {
-    $id_tabungan = $_SESSION['id_tabungan'];
-} else {
-    // Handle the case when id_tabungan is not set in the session
-    // For example, redirect to an error page or the homepage
-    header('Location: ../tabungan/');
-    exit();
-}
 
-// Detect the user agent to determine if it's a mobile device
-$userAgent = $_SERVER['HTTP_USER_AGENT'];
+// Pastikan bahwa $_GET['nama'] dan $_GET['no'] telah di-set dan bukan kosong
+if (isset($_GET['nama']) && isset($_GET['no'])) {
+    $id_user_from_url = $_GET['nama'];
+    $id_tabungan_from_url = $_GET['no'];
+    
 
-// Check if the user agent indicates a mobile device
-$isMobile = (strpos($userAgent, 'Mobile') !== false || strpos($userAgent, 'Android') !== false);
+    // Lakukan pengecekan apakah id_user dan id_tabungan sesuai
+    // Gantilah kondisi ini sesuai dengan cara Anda menyimpan id_user dan id_tabungan
+    $query = "SELECT * FROM tabungan WHERE id_user = '$id_user_from_url' AND id_tabungan = '$id_tabungan_from_url'";
+    $result = mysqli_query($koneksi, $query);
+    $row = mysqli_fetch_array($result);
 
-// Use switch case to execute code based on the result
-switch ($isMobile) {
-    case true:
-        // Code for mobile devices
-        ?>
-       
-        <?php
-        break;
-    case false:
-        // Code for desktop/laptop devices
+    if ($result && mysqli_num_rows($result) > 0) {
         ?>
         
-         <!-- Content Wrapper. Contains page content -->
+        <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Profil</h1>
+            <h1>Tabungan - <?= $row['nama_tabungan'] ?></h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="../index.php">Home</a></li>
-              <li class="breadcrumb-item active">Target Menabung <?= $_SESSION['id_tabungan'] ?></li>
+              <li class="breadcrumb-item"><a href="../">Home</a></li>
+              <li class="breadcrumb-item active">Target Menabung</li>
             </ol>
           </div>
         </div>
@@ -61,508 +42,381 @@ switch ($isMobile) {
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-3">
+          <div class="col-md-4">
 
             <!-- Profile Image -->
-          <div id="profile-container" class="card card-primary card-outline">
-  <!-- Konten profile -->
-</div>
-<script>
-  // Fungsi untuk memperbarui profil
-function updateProfile() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
-    $.ajax({
-        url: 'update-profile.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#profile-container').html(data.profileData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
-    });
+            <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <?php
+                  $gambarPath = "../../data/img/tabungan/" . $row['gambar']; // Path gambar sesuai dengan data dalam database
+            if (empty($row['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                $gambarPath = "../dist/img/galeri.png";
+            }
+
+            echo '<a href="#" data-toggle="modal" title="Klik Gambar" class="edit-modal modal-gambar" data-target="#gambarModal_t'.$row['id_tabungan'].'">
+            <img style="width:250px;height:250px;border-radius:20px;margin-bottom:5px;"
+                 src="'.$gambarPath.'"
+                 alt="Gambar Tabungan">
+                 </a>';
+                 ?>
+                </div>
+                <?php 
+               $formatTarget = 'Rp' . number_format($row['target'], 2, ',', '.');
+                ?>
+                <div class="profile-info">
+    <h3 class="profile-username text-bold"><?= $formatTarget ?></h3>
+    <div style="margin-bottom:-13px;">   
+   <?php 
+$id_tabungan = $row['id_tabungan'];
+
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+// Inisialisasi variabel untuk menyimpan total nominal positif dan negatif
+$total_positif = 0;
+$total_negatif = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_positif += $nilai;
+    } elseif ($tanda === '-') {
+        $total_negatif += $nilai;
+    }
 }
-  // Memanggil fungsi pembaruan setiap 1 detik
-  setInterval(updateProfile, 1000);
-</script>
+
+// Hitung total nominal
+$total_nominal = $total_positif - $total_negatif;
+
+// Hitung persentase progres
+$hitung_persen = min(($total_nominal / $row['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+
+// Tampilkan input knob dengan nilai persen progres
+echo '<input type="text" class="knob" value="'.number_format($hitung_persen, 0, '', '').'" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
+?>
+
+
+    </div>            
+</div>
+<?php
+$formatUang = 'Rp' . number_format($row['nominal'], 2, ',', '.');
+if($row['rencana'] === 'Harian') {
+ echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perhari</p>';
+} else if($row['rencana'] === 'Mingguan') {
+  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perminggu</p>';
+} else if($row['rencana'] === 'Bulanan') {
+  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perbulan</p>';
+}
+?>
+    
+
+
+                <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>Tanggal Dibuat</b> <a class="float-right" style="color:black;"><?=  date('d F Y H.i', strtotime($row['tgl_b'])) ?></a>
+                  </li>
+                  <li class="list-group-item">
+                    <?php 
+$id_tabungan = $row['id_tabungan'];
+
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+// Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
+    }
+}
+
+// Hitung sisa target
+$sisa_target = max(0, $row['target'] - $total_nominal);
+
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+
+// Tampilkan data sesuai kebutuhan
+if ($row['rencana'] === 'Harian') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Hari Lagi</a>';
+} elseif ($row['rencana'] === 'Mingguan') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Minggu Lagi</a>';
+} elseif ($row['rencana'] === 'Bulanan') {
+    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Bulan Lagi</a>';
+}
+?>
+
+                   
+                  </li>
+                  
+                </ul>
+
+               
+              </div>
+              <!-- /.card-body -->
+            </div>
             <!-- /.card -->
 
             <!-- About Me Box -->
-            <div id="profile-about" >
-               </div>
-              <script>
-  // Fungsi untuk memperbarui profil
-function updateAbout() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
-    $.ajax({
-        url: 'update-about.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#profile-about').html(data.aboutData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Kondisi</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+    <strong><i class="fas fa-arrow-up mr-1" style="color:green"></i> Terkumpul</strong>
+
+    <?php
+    $id_tabungan = $row['id_tabungan'];
+    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+    // Inisialisasi variabel untuk menyimpan total nominal positif
+    $total_positif = 0;
+
+    while ($catat = mysqli_fetch_assoc($query_catat)) {
+        // Pisahkan tanda dan nilai
+        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+        // Lakukan perhitungan berdasarkan tanda
+        if ($tanda === '+') {
+            $total_positif += $nilai;
+        } else if($tanda === '-') {
+          $total_positif -= $nilai;
         }
-    });
-}
+    }
 
-  // Memanggil fungsi pembaruan setiap 1 detik
-  setInterval(updateAbout, 1000);
-</script>
+    $format ='Rp '. number_format($total_positif,2,'.',',');
+    echo '<p  style="color:green;">' . $format . '</p>';
+    ?>
 
-   
+    <hr>
 
-             <!-- Modal -->
-<div class="modal fade" id="gambarModal<?= $id_users ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $id_users ?>" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        
-        <h5 class="modal-title" id="gambarModalLabel<?= $id_users ?>">Gambar</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        
-      </div>
-      <div class="modal-body">
-        <img src="../../data/img/users/<?= $all['foto'] ?>" alt="Gambar Modal" style="max-width: 100%; height: auto;">
-      </div>
-      <div class="modal-footer">
-       <a href="../../data/img/users/<?= $all['foto'] ?>" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-      </div>
-    </div>
-  </div>
+    <strong><i class="fas fa-arrow-down mr-1" style="color:red;"></i> Kekurangan</strong>
+
+    <?php
+    $id_tabungan = $row['id_tabungan'];
+    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+    // Inisialisasi variabel untuk menyimpan total nominal negatif
+    $total_negatif = 0;
+
+    while ($catat = mysqli_fetch_assoc($query_catat)) {
+        // Pisahkan tanda dan nilai
+        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+        // Lakukan perhitungan berdasarkan tanda
+        if ($tanda === '+') {
+            $total_negatif += $nilai;
+        } else if($tanda === '-') {
+          $total_negatif -= $nilai;
+        }
+    }
+
+    $hitungan = $row['target'] - $total_negatif;
+    $format ='Rp '. number_format($hitungan, 2, '.', ',');
+    echo '<p style="color:red;"> ' . $format . '</p>';
+    ?>
+
+    <hr>
 </div>
+
+              <!-- /.card-body -->
+            </div>
             <!-- /.card -->
           </div>
           <!-- /.col -->
-          <div class="col-md-9">
+          <div class="col-md-8">
             <div class="card">
               <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktivitas</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Waktu</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Pengaturan Akun</a></li>
-                  <li class="nav-item"><a class="nav-link" href="../vr/" >Verifikasi 2 Langkah</a></li>
+                  <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktifitas</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Alur</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab"><i class='fas fa-edit'></i></a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
-                
                 <div class="tab-content">
                   <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
                     <!-- Post -->
-                   <div id="aktifitas" class="post">
-               </div>
-              <script>
+                    <div class="form-group">
+  <label for="pilih_tipe">Pilih Tipe</label>
+  <select class="form-control select2 tipe1" style="width:100%;">
+    <option value="pilih">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="ubah">Ubah</option>
+  </select>
+</div>
+<div id="aktifitas" class="post"></div>
+<script>
   // Fungsi untuk memperbarui profil
-function Aktivitas() {
-    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
+  function Aktivitas() {
+    var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
+    var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
+    var selectedOption = $('.tipe1').val(); // Ambil nilai yang dipilih dari select
+
     $.ajax({
-        url: 'aktifitas.php',
-        method: 'GET',
-        data: { id_users: id_users }, // Kirim parameter ID pengguna
-        dataType: 'json',
-        success: function(data) {
-            $('#aktifitas').html(data.ActivityData);
-        },
-        error: function() {
-            // Penanganan kesalahan jika terjadi
-        }
+      url: 'aktifitas.php',
+      method: 'GET',
+      data: {
+        id_users: id_users,
+        id_tabungan: id_tabungan,
+        tipe_aktifitas: selectedOption // Kirim tipe aktifitas sebagai parameter
+      },
+      dataType: 'json',
+      success: function (data) {
+        $('#aktifitas').html(data.ActivityData);
+      },
+      error: function () {
+        // Penanganan kesalahan jika terjadi
+      }
     });
-}
+  }
+
+  // Tambahkan event listener ke elemen select
+  $('.tipe1').on('change', Aktivitas);
 
   // Memanggil fungsi pembaruan setiap 1 detik
   setInterval(Aktivitas, 1000);
 </script>
+
+
               
                     <!-- /.post -->
 
                   </div>
                   <!-- /.tab-pane -->
-                  <div class="tab-pane" id="timeline">
+                  <div class="tab-pane" style="max-height: 700px; overflow-y: auto;" id="timeline">
                     <!-- The timeline -->
-                    <div class="timeline timeline-inverse">
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-danger">
-                          10 Feb. 2014
-                        </span>
-                      </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-envelope bg-primary"></i>
+                    <div class="form-group">
+  <label for="pilih_tipe">Pilih Tipe</label>
+  <select class="form-control select2 tipe2" style="width:100%;">
+    <option value="pilih">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="ubah">Ubah</option>
+  </select>
+</div>
+                    <div id="alur" class="post">
+               </div>
+             <script>
+// Fungsi untuk memperbarui profil
+function Alur() {
+    var id_users = <?= json_encode($id_users) ?>; // Ganti dengan nilai ID pengguna yang sesuai
+    var id_tabungan = <?= json_encode($id_tabungan_from_url) ?>; // Ganti dengan nilai ID tabungan yang sesuai
+    var selectedOption = $('.tipe2').val(); // Ambil nilai yang dipilih dari select
 
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 12:05</span>
+    $.ajax({
+      url: 'alur.php',
+      method: 'GET',
+      data: {
+        id_users: id_users,
+        id_tabungan: id_tabungan,
+        tipe_alur: selectedOption // Kirim tipe alur sebagai parameter
+      },
+      dataType: 'json',
+      success: function (data) {
+        $('#alur').html(data.AlurData);
+      },
+      error: function () {
+        // Penanganan kesalahan jika terjadi
+      }
+    });
+  }
 
-                          <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>
+  // Tambahkan event listener ke elemen select
+  $('.tipe2').on('change', Alur);
 
-                          <div class="timeline-body">
-                            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                            weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                            jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                            quora plaxo ideeli hulu weebly balihoo...
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                            <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-user bg-info"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-
-                          <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request
-                          </h3>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-comments bg-warning"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-
-                          <div class="timeline-body">
-                            Take me to your leader!
-                            Switzerland is small and neutral!
-                            We are more like Germany, ambitious and misunderstood!
-                          </div>
-                          <div class="timeline-footer">
-                            <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <!-- timeline time label -->
-                      <div class="time-label">
-                        <span class="bg-success">
-                          3 Jan. 2014
-                        </span>
-                      </div>
-                      <!-- /.timeline-label -->
-                      <!-- timeline item -->
-                      <div>
-                        <i class="fas fa-camera bg-purple"></i>
-
-                        <div class="timeline-item">
-                          <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-
-                          <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>
-
-                          <div class="timeline-body">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                            <img src="https://placehold.it/150x100" alt="...">
-                          </div>
-                        </div>
-                      </div>
-                      <!-- END timeline item -->
-                      <div>
-                        <i class="far fa-clock bg-gray"></i>
-                      </div>
-                    </div>
+  // Memanggil fungsi pembaruan setiap 1 detik
+  setInterval(Alur, 1000);
+</script>
+                    
                   </div>
                   <!-- /.tab-pane -->
 
-
                   <div class="tab-pane" id="settings">
+                    <form id="CatatForm" class="form-horizontal">
+                      <?php 
+$id_tabungan = $row['id_tabungan'];
 
-                   <form class="form-horizontal" id="editForm" enctype="multipart/form-data">
-                    <input type="hidden" class="form-control id_users" name="id_user" value="<?= $all['id_user'] ?>" id="id_user" placeholder="Name">
-                      <div class="form-group row">
-                        <label for="nama_user" class="col-sm-2 col-form-label">Nama User</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" name="nama_user" value="<?= $all['nama_user'] ?>" id="nama_user" placeholder="Nama Lengkap">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="username" class="col-sm-2 col-form-label">Username</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" name="username" value="<?= $all['username'] ?>" id="username" placeholder="Username">
-                        </div>
-                      </div>
-                     <div class="form-group row">
-    <label for="inputName2" class="col-sm-2 col-form-label">Jenis Kelamin</label>
-    <div class="col-sm-10">
-        <div class="custom-control custom-radio">
-            <input class="custom-control-input" type="radio" id="customRadio1" name="gender" value="Laki-Laki" <?php if($all['gender']=='Laki-Laki') echo 'checked'?>>
-            <label for="customRadio1" class="custom-control-label">Laki-Laki</label>
-        </div>
-        <div class="custom-control custom-radio">
-            <input class="custom-control-input" type="radio" id="customRadio2" name="gender" value="Perempuan" <?php if($all['gender']=='Perempuan') echo 'checked'?>>
-            <label for="customRadio2" class="custom-control-label">Perempuan</label>
-        </div>
-    </div>
-</div>
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
 
-                       <div class="form-group row">
-                        <label for="nohp" class="col-sm-2 col-form-label">No Handphone</label>
-                        <div class="col-sm-10">
-                          <input type="number" class="form-control"  name="no_hp" value="<?= $all['no_hp'] ?>" id="nohp" placeholder="Nomor Handphone">
-                        </div>
-                      </div>
-                       <div class="form-group row">
-                        <label for="email" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                          <input type="email" class="form-control" name="email"  value="<?= $all['email'] ?>" id="email" placeholder="Email">
-                        </div>
-                      </div>
+// Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
 
-                      <div class="form-group row">
-                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                        <div class="col-sm-10 input-container">
-                           <input type="password" class="form-control" value="" name="password" id="password" placeholder="Password">
-            <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                        </div>
-                      </div>
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
 
-                       <div class="form-group row">
-                        <label for="fileInput" class="col-sm-2 col-form-label">Foto</label>
-
-                         <div class="col-sm-10 input-container">
-<input type="file" class="form-control-file" id="fileInput" name="fileInput" required onchange="validateAndPreviewImage()">
-<img id="imgPreview" src="../../data/img/users/<?= $all['foto'] ?>"  style="max-width: 300px; max-height: 300px; margin-top: 10px;">
-
-                      </div>
-                      </div>
-                     <!-- Ini adalah gambar pratinjau -->
-
-                      <div class="form-group row">
-                        <div class="offset-sm-2 col-sm-10">
-                        <button type="button" class="btn btn-primary editSetting" id="">Simpan</button>
-
-                        </div>
-                      </div>
-                    </form>
-                 
-  
-<script>
- function validateAndPreviewImage() {
-    const allowedExtensions = ["jpg", "jpeg", "png"];
-    const fileInput = document.getElementById("fileInput");
-    const imgPreview = document.getElementById('imgPreview');
-   
-
-    if (fileInput.files.length > 0) {
-        const selectedFile = fileInput.files[0];
-        const fileName = selectedFile.name;
-        const fileExtension = fileName.split('.').pop().toLowerCase();
-
-        if (allowedExtensions.includes(fileExtension)) {
-            // File extension is allowed
-            imgPreview.src = URL.createObjectURL(selectedFile); // Menampilkan gambar pratinjau
-            document.getElementById("validationMessage").textContent = "";
-           
-        } else {
-            // File extension is not allowed
-            Swal.fire({
-                position: 'center',
-                icon: 'error',
-                title: 'File harus berupa JPG, JPEG, atau PNG.',
-                showConfirmButton: false,
-                timer: 3000,
-            });
-            fileInput.value = ""; // Clear the selected file
-            imgPreview.src = ""; // Hapus gambar pratinjau
-           
-        }
-    } else {
-        imgPreview.src = ""; // Hapus gambar pratinjau jika tidak ada file yang dipilih
-        document.getElementById("validationMessage").textContent = "";
-       
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
     }
 }
 
+// Hitung sisa target
+$sisa_target = max(0, $row['target'] - $total_nominal);
 
-// Edit data
-$('#editForm').on('click', '.editSetting', function(e) {
-   e.preventDefault(); // Menghentikan tindakan default tombol submit
-
-   const userId = $('#id_user').val(); // Dapatkan ID pengguna
-   const nama_user = $('#nama_user').val();
-   const fileInput = $('#fileInput')[0].files[0]; // Mengambil objek file yang dipilih
-   const username = $('#username').val();
-   const gender = $("input[name='gender']:checked").val();
-   const no_hp = $('#nohp').val();
-   const email = $('#email').val();
-   const password = $('#password').val();
-
-   // Buat objek FormData untuk mengirim data yang sesuai dengan tipe FormData
-   const formData = new FormData();
-   formData.append('id_user', userId);
-   formData.append('nama_user', nama_user);
-   formData.append('fileInput', fileInput);
-   formData.append('username', username);
-   formData.append('gender', gender);
-   formData.append('no_hp', no_hp);
-   formData.append('email', email);
-   formData.append('password', password);
-
-   Swal.fire({
-     title: 'Konfirmasi Mengubah Data',
-     text: 'Anda yakin ingin menguah?',
-     icon: 'question',
-     showCancelButton: true,
-     confirmButtonText: 'Simpan',
-     cancelButtonText: 'Batal',
-     
-   }).then((result) => {
-     if (result.isConfirmed) {
-       // Kirim permintaan AJAX untuk mengedit data pengguna
-       $.ajax({
-         url: 'edit_user.php', // Ganti dengan URL yang sesuai
-         method: 'POST',
-         data: formData, // Mengirim objek FormData
-         dataType: 'json',
-         processData: false, // Jangan memproses data
-         contentType: false, // Jangan mengatur tipe konten
-         success: function(response) {
-           if (response.status === 'success') {
-           // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
-setTimeout(() => {
-  Swal.fire({
-    title: 'Data Pengguna Telah Diubah',
-    text: 'Perubahan berhasil disimpan.',
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1000, // Menunggu 5 detik
-    allowOutsideClick: false
-  }).then(() => {
-    // Menunggu 5 detik sebelum mereset ulang halaman
-    setTimeout(() => {
-      location.reload(); // Melakukan refresh halaman setelah 5 detik
-    }, 3000);
-  });
-}, 1000);
-
-           } else if (response.status === 'error') {
-             Swal.fire({
-               title: 'Gagal Mengedit Data Pengguna',
-               html: response.message.join('<br>'),
-               icon: 'error',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-           }
-         }
-       });
-     }
-   });
- });
-
-</script>
-
-
-
-
-                  </div>
-<!-- /.tab-pane -->
-
-<div class="tab-pane" id="verifikasi">
- <form class="form-horizontal" id="editVerifikasi">
-                    <input type="hidden" class="form-control id_users" name="id_user" value="<?= $all['id_user'] ?>" id="id_user" placeholder="Name">
+// Hitung estimasi waktu
+$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+echo '<input type="hidden" class="form-control" name="estimasi" value="'.$estimasi_waktu.'" id="estimasi">';
+?>
+                      <input type="hidden" class="form-control" name="nomor" value="<?= $id_users ?>" id="nomor">
+                      <input type="hidden" class="form-control" name="nama" value="<?= $id_tabungan_from_url ?>" id="nama">
                       <div class="form-group row">
-                        <label for="vr" class="col-sm-2 col-form-label">Verifikasi 2 Langkah</label>
+                        <label for="nama_catat" class="col-sm-2 col-form-label">Nama Catat</label>
                         <div class="col-sm-10">
-                          <input type="password" class="form-control" name="vr" id="vr" placeholder="Masukkan Verifikasi 2 Langkah">
-                           <span toggle="#vr" class="fa fa-fw fa-eye field-icon toggle-password2"></span>
+                          <select class="form-control select2 tipe" name="tipe" style="width:100%;">
+    <option value="">Pilih</option>
+    <option value="tambah">Tambah</option>
+    <option value="kurangi">Kurangi</option>
+  </select>
                         </div>
                       </div>
-                     
-
+                      <div class="form-group row">
+                        <label for="noninal" class="col-sm-2 col-form-label">Nominal</label>
+                        <div class="col-sm-10">
+                          <input type="number" class="form-control" name="nominal" id="nominal" placeholder="Nominal">
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="keterangan" class="col-sm-2 col-form-label">Keterangan</label>
+                        <div class="col-sm-10">
+                          <textarea class="form-control" name="keterangan" id="keterangan" placeholder="Keterangan"></textarea>
+                        </div>
+                      </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                        <button type="button" class="btn btn-primary EditVer" id="">Simpan</button>
-
+                          <button type="submit" class="btn btn-primary">Kirim</button>
                         </div>
                       </div>
                     </form>
-                 
-  
-<script>
-// Edit data
-$('#editVerifikasi').on('click', '.EditVer', function(e) {
-   e.preventDefault(); // Menghentikan tindakan default tombol submit
-
-   const userId = $('#id_user').val(); // Dapatkan ID pengguna
-   const vr = $('#vr').val();
-
-   // Buat objek FormData untuk mengirim data yang sesuai dengan tipe FormData
-   const formData = new FormData();
-   formData.append('id_user', userId);
-   formData.append('vr', vr);
-
-   Swal.fire({
-     title: 'Konfirmasi Mengubah Data',
-     text: 'Anda yakin ingin menguah?',
-     icon: 'question',
-     showCancelButton: true,
-     confirmButtonText: 'Simpan',
-     cancelButtonText: 'Batal',
-     
-   }).then((result) => {
-     if (result.isConfirmed) {
-       // Kirim permintaan AJAX untuk mengedit data pengguna
-       $.ajax({
-         url: 'edit_vr.php', // Ganti dengan URL yang sesuai
-         method: 'POST',
-         data: formData, // Mengirim objek FormData
-         dataType: 'json',
-         processData: false, // Jangan memproses data
-         contentType: false, // Jangan mengatur tipe konten
-         success: function(response) {
-          if (response.status === 'success') {
-             Swal.fire({
-               title: 'Data Verifikasi Telah Diedit',
-               text: 'Perubahan berhasil disimpan.',
-               icon: 'success',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-
-           } else if (response.status === 'error') {
-             Swal.fire({
-               title: 'Gagal Mengedit Data Verifikasi',
-               html: response.message.join('<br>'),
-               icon: 'error',
-               showConfirmButton: false,
-               timer: 2000,
-               allowOutsideClick: false
-             });
-           }
-         }
-       });
-     }
-   });
- });
-
-</script>
-</div>
-
-</div>
-<!-- /.tab-content -->
-</div><!-- /.card-body -->
-</div>
-<!-- /.card -->
-</div>
+                  </div>
+                  <!-- /.tab-pane -->
+                </div>
+                <!-- /.tab-content -->
+              </div><!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
           <!-- /.col -->
         </div>
         <!-- /.row -->
@@ -571,18 +425,152 @@ $('#editVerifikasi').on('click', '.EditVer', function(e) {
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-   
-        <?php
-        break;
-        
-    default:
-        // Handle other cases, you can redirect to a default page or show an error
-        header('Location: ../tabungan/');
-        exit();
 
+
+<script>
+  $(document).ready(function () {
+   // Event saat tombol "Simpan" diklik
+    $("#CatatForm").on("submit", function (e) {
+  e.preventDefault(); 
+        var estimasi = $("#estimasi").val(); 
+        var id_tabungan = $("#nama").val(); 
+        var idUsers = $("#nomor").val(); 
+          var tipe = $(".tipe").val(); 
+        var nominal = $("#nominal").val(); 
+        var keterangan = $("#keterangan").val(); 
+        // Kirim permintaan Ajax
+
+        if (tipe === "") {
+            console.log("Tipe harus diisi.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Tipe harus diisi.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        } else if (nominal === "") {
+            console.log("Nominal harus diisi.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Nominal harus diisi.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        } else {
+        $.ajax({
+            type: "POST",
+            url: "aksi_catat.php", // Ganti dengan alamat file PHP yang sesuai
+            data: {
+                id_tabungan: id_tabungan, // Tambahkan id_tabungan ke data yang dikirimkan
+                estimasi: estimasi, // Tambahkan estimasi ke data yang dikirimkan
+                id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
+                  tipe: tipe, // Tambahkan tipe ke data yang dikirimkan
+                nominal: nominal,
+                keterangan: keterangan
+            },
+            success: function (response) {
+            if (response.includes("berhasil")) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Anda bisa mengosongkan input atau menutup modal jika berhasil
+                        $("#nama").val("");
+                        $("#modal-lg").modal("hide");
+
+                       
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            // Tangani kesalahan jika permintaan Ajax gagal
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Terjadi kesalahan: ' + error,
+            });
+        }
+    });
+  }
+});
+});
+</script>
+
+
+
+
+   
+  <?php 
+            $query_t = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users");
+            while($tabungan = mysqli_fetch_array($query_t)) {
+            ?>
+              <!-- Modal -->
+<div class="modal fade" id="gambarModal_t<?= $tabungan['id_tabungan'] ?>" tabindex="-1" role="dialog" aria-labelledby="gambarModalLabel<?= $tabungan['id_tabungan'] ?>" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
         
+        <h5 class="modal-title" id="gambarModalLabel<?= $tabungan['id_tabungan'] ?>">Gambar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        
+      </div>
+      <div class="modal-body">
+        <?php
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+            if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                $gambarPath = "../dist/img/galeri.png";
+            }
+            // Tampilkan gambar jika file gambar ada
+            echo '<img src="' . $gambarPath . '" alt="Gambar Tabungan" "  width="100%" height="auto">';
+        ?>
+        
+      </div>
+      <div class="modal-footer">
+        <?php
+        $gambarPath = "../../data/img/tabungan/" . $tabungan['gambar']; // Path gambar sesuai dengan data dalam database
+        if (empty($tabungan['gambar']) || !file_exists($gambarPath)) {
+                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
+                echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" style="display:none;" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            } else {
+              echo '<a href="../../data/img/tabungan/'. $tabungan['gambar'] .'" download title="Download Gambar" class="btn btn-success"><i class="fas fa-download"></i> Download</a>';
+            }
+        ?>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php } ?>
+      
+
+    <?php 
+    } else {
+        // Tidak sesuai, redirect ke halaman yang sesuai
+        $_SESSION['gagal'] = 'Opps, Anda Gagal!';
+        echo '<script>window.location.href = "tabungan.php";</script>';
+    }
+} else {
+    // Parameter tidak lengkap, redirect ke halaman yang sesuai
+    $_SESSION['gagal'] = 'Opps, Anda Gagal!';
+    echo '<script>window.location.href = "tabungan.php";</script>';
 }
-?>
-<?php 
 include "../view/footer_t.php";
 ?>
