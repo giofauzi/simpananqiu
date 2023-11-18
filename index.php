@@ -666,7 +666,7 @@ if (isset($_SESSION['subscribe_error'])) {
               <div class="member-info">
                 <h4>Fajar Maulana Nugroho Sutardi</h4>
                 <span>Leader, Front End, Back End</span>
-                <p>Pergunakanlah nalurimu untuk berbuat baik, meskipun orang yang kamu bantu mungkin tidak memiliki nalar.</p>
+                <p>Use your instincts to do good, even though the person you are helping may not have reason.</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -683,7 +683,7 @@ if (isset($_SESSION['subscribe_error'])) {
               <div class="member-info">
                 <h4>Farish Augie Yukeza</h4>
                 <span>UI/UX Designer</span>
-                <p>Kalo mereka bisa kenapa harus saya</p>
+                <p>If they can, why should I?</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -696,11 +696,11 @@ if (isset($_SESSION['subscribe_error'])) {
 
           <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="300">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-3.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/gio.jpeg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Giofany Fauziano</h4>
                 <span>Databases, Front End, Back End</span>
-                <p>Quisquam facilis cum velit laborum corrupti fuga rerum quia</p>
+                <p>Learn as if you will live forever, live as if you will die tomorrow</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -713,11 +713,11 @@ if (isset($_SESSION['subscribe_error'])) {
 
           <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="400">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-4.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/nafkah.jpeg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Nafkha Fauziah</h4>
                 <span>System Analyst, QA Tester</span>
-                <p>Dolorum tempora officiis odit laborum officiis et et accusamus</p>
+                <p>Will always love fictional characters</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -730,11 +730,11 @@ if (isset($_SESSION['subscribe_error'])) {
 
            <div class="col-lg-6 mt-4" data-aos="zoom-in" data-aos-delay="400">
             <div class="member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/team/team-4.jpg" class="img-fluid" alt=""></div>
+              <div class="pic"><img src="assets/img/najla.jpeg" class="img-fluid" alt=""></div>
               <div class="member-info">
                 <h4>Najla Salsabila Putri Patiary</h4>
                 <span>System Analyst, QA Tester</span>
-                <p>Dolorum tempora officiis odit laborum officiis et et accusamus</p>
+                <p>When you give joy to others, you get more joy in return. You need to think carefully about the happiness you can give.</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>
@@ -751,7 +751,7 @@ if (isset($_SESSION['subscribe_error'])) {
               <div class="member-info">
                 <h4>Riska Lia Amaliah Siagian</h4>
                 <span>UI/UX Designer</span>
-                <p>Ketika kamu terjatuh, cobalah untuk bangkit dan lihat kebelakang sudah sejauh mana kamu berjalan</p>
+                <p>When you fall, try to get up and look back at how far you have come</p>
                 <div class="social">
                   <a href=""><i class="ri-twitter-fill"></i></a>
                   <a href=""><i class="ri-facebook-fill"></i></a>

@@ -529,7 +529,7 @@ $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untu
             echo '<img style="width:300px;height:300px;border-radius:20px;margin: auto;"';
             echo 'src="../dist/img/no_data.jpg" alt="Gambar Tabungan">';
             echo '</a>';
-            echo '<p>Tidak ada data yang belum terpenuhi untuk ditampilkan.</p>';
+            echo '<p>Tidak ada data untuk ditampilkan.</p>';
             echo '</div>';
         }
                       ?>
@@ -544,16 +544,27 @@ $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untu
     while ($d = mysqli_fetch_array($result)) {
         $id_tabungan = $d['id_tabungan'];
 
-        // Menghitung jumlah nominal untuk 'tambah' dalam catat_tabungan
-        $query_tambah = mysqli_query($koneksi, "SELECT SUM(nominal) AS total_tambah FROM catat_tabungan WHERE id_tabungan = $id_tabungan AND nama_catat = 'Tambah'");
-        $total_tambah = mysqli_fetch_assoc($query_tambah)['total_tambah'];
+            // Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+            // Inisialisasi variabel untuk menyimpan total nominal
+$total_tambah = 0;
+$total_kurang = 0;
 
-        // Menghitung jumlah nominal untuk 'kurang' dalam catat_tabungan
-        $query_kurang = mysqli_query($koneksi, "SELECT SUM(nominal) AS total_kurang FROM catat_tabungan WHERE id_tabungan = $id_tabungan AND nama_catat = 'Kurang'");
-        $total_kurang = mysqli_fetch_assoc($query_kurang)['total_kurang'];
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
 
-        $totalNominal = $total_tambah - $total_kurang; // Selisih total 'tambah' dan 'kurang'
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_tambah += $nilai;
+    } elseif ($tanda === '-') {
+        $total_kurang -= $nilai;
+    }
 
+}
+
+        $totalNominal = $total_tambah + $total_kurang; // Selisih total 'tambah' dan 'kurang
         $target = $d['target'];
         $toleransi = 0.01; // Toleransi (misalnya, 1 sen)
 

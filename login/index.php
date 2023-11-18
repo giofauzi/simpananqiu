@@ -131,6 +131,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- Dibawah ini untuk hasil input dari register  -->
 <?php
+
+// Hasil Delete Account
+if (isset($_SESSION['delete-account'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "success",';
+    echo '    title: "' . $_SESSION['delete-account'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 3000'; //Ini 2 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['delete-account']); // Hapus pesan dari session
+}
+
 // Hasil Register
 if (isset($_SESSION['success_message'])) {
     echo '<script>';

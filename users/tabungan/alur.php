@@ -12,7 +12,7 @@ $query = "SELECT t.*, u.foto, u.nama_user, ct.*
           JOIN users u ON t.id_user = u.id_user
           LEFT JOIN catat_tabungan ct ON t.id_tabungan = ct.id_tabungan
           WHERE t.id_tabungan = $id_tabungan AND u.id_user = $id_users
-          AND ct.tgl_b";
+          AND ct.tgl_b ORDER BY ct.id_catat DESC";
 
 $result = mysqli_query($koneksi, $query);
 

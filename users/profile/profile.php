@@ -319,7 +319,7 @@ function Aktivitas() {
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
                         <button type="button" class="btn btn-primary editSetting" id="">Simpan</button>
-
+                        <a class=" btn btn-md btn-danger" href="#DeleteAccount" data-toggle="tab">Hapus Akun</a>
                         </div>
                       </div>
                     </form>
@@ -389,7 +389,7 @@ $('#editForm').on('click', '.editSetting', function(e) {
 
    Swal.fire({
      title: 'Konfirmasi Mengubah Data',
-     text: 'Anda yakin ingin menguah?',
+     text: 'Anda yakin ingin mengubah?',
      icon: 'question',
      showCancelButton: true,
      confirmButtonText: 'Simpan',
@@ -445,6 +445,133 @@ setTimeout(() => {
 
 
 
+                  </div>
+<!-- /.tab-pane -->
+
+ <div class="tab-pane" id="DeleteAccount">
+
+                   <div class="col-md-12">
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">Sedih Mendengarnya, <?= $all['nama_user'] ?></h3>
+
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool" ><i class="fas fa-info"></i></a>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <div class="mailbox-read-info">
+                <h5>Pesan Admin SimpananQiu</h5>
+                <h6>From: simpananqiu@gmail.com
+                  <?php 
+                  date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+          
+                  ?>
+                  <span class="mailbox-read-time float-right"><?= date('d F Y H.i', strtotime($currentDateTime)) ?></span></h6>
+              </div>
+           
+              <div class="mailbox-read-message">
+               <?php
+date_default_timezone_set('Asia/Jakarta');
+$waktu = date('H:i');
+
+if ($waktu >= '00:00' && $waktu < '10:59') {
+    $ucapan = "Selamat Pagi";
+} elseif ($waktu >= '1q:00' && $waktu < '14:59') {
+    $ucapan = "Selamat Siang";
+} elseif ($waktu >= '15:00' && $waktu < '17:59') {
+    $ucapan = "Selamat Sore";
+} else {
+    $ucapan = "Selamat Malam";
+}
+?>
+
+<p><?= $ucapan ?> <?= $all['nama_user'] ?></p>
+
+
+                <p>Kami sangat sedih mendengar bahwa Anda berencana untuk menghapus akun SimpananQiu Anda. Kami memahami bahwa setiap keputusan ini dibuat dengan pertimbangan yang matang. Sebagai bagian dari komunitas SimpananQiu, Anda telah memberikan kontribusi yang berarti, dan kami ingin memastikan bahwa Anda merasa didengar dan dihargai. Kepergian Anda akan meninggalkan kekosongan yang dirasakan oleh kami dan komunitas.</p>
+
+                <p>Mungkin ada aspek atau pengalaman tertentu yang membuat Anda merasa perlu untuk mengambil langkah ini. Jika Anda bersedia, kami ingin mendengar lebih lanjut tentang pengalaman Anda agar kami dapat terus memperbaiki layanan kami. Apakah ada sesuatu yang dapat kami lakukan untuk membuat pengalaman Anda lebih baik? Bisakah kami membantu memecahkan masalah atau kekhawatiran yang mungkin Anda hadapi?</p>
+                
+                <p>Jika Anda merasa bahwa ini adalah langkah yang harus diambil, kami ingin mengucapkan terima kasih atas waktu dan kontribusi Anda di SimpananQiu. Kami akan merindukan kehadiran Anda di sini. Semua yang terbaik untuk masa depan Anda, dan mungkin suatu saat kita akan bersua kembali.</p>
+                
+                <div>
+                  <div style="float:right;margin-right:10px;">
+                     <p>Dengan penuh kebersamaan,<br>Admin SimpananQiu </p>
+                  </div>
+                  <div style="float:left;">
+                    
+                  </div>
+                </div>
+               
+               
+              </div>
+              <!-- /.mailbox-read-message -->
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer delete-akun">
+              <button type="button" class="btn btn-danger delete-account" data-id="<?= $id_users ?>"><i class="far fa-trash-alt"></i> Hapus Akun</button>
+            </div>
+            <!-- /.card-footer -->
+
+            <script>
+              
+// Tambahkan event handler untuk tombol "Delete"
+$('.delete-akun').on('click', '.delete-account', function() {
+  // Dapatkan ID kategori yang akan dihapus
+  const ID = $(this).data('id');
+
+  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi Penghapusan',
+    text: 'Anda yakin ingin menghapus akun ini?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Lakukan permintaan AJAX untuk menghapus kategori
+      $.ajax({
+        url: 'delete-account.php', // Ganti dengan URL yang sesuai
+        method: 'POST',
+        data: { id: ID },
+        success: function(response) {
+  if (response === 'success') {
+    // Berhasil mengedit kategori
+    Swal.fire({
+  title: 'Akun Telah Dihapus!',
+  icon: 'success',
+  showConfirmButton: false, // Menghilangkan tombol OK
+  timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+  allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+});
+
+// Setelah 2 detik, redirect ke halaman back_login.php
+setTimeout(function () {
+  window.location.href = 'back_login.php';
+}, 2000);
+} else {
+    Swal.fire({
+      title: 'Gagal Menghapus Akun',
+      icon: 'error',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    });
+  }
+}
+      });
+    }
+  });
+});
+            </script>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
                   </div>
 <!-- /.tab-pane -->
 

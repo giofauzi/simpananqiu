@@ -63,7 +63,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
             }
-    } 
+    } else if($tipe === 'kurangi') {
+                if (!empty($keterangan)) {
+        // Lanjutkan dengan query untuk tambah data
+                date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', '$keterangan','$currentDateTime')";
+
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data catat tabungan berhasil ditambah!";
+                } else {
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                }
+            } else {
+                 date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', NULL,'$currentDateTime')";
+
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data catat tabungan berhasil ditambah!";
+                } else {
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                }
+            }
+            }
         }
         } else {
             if ($tipe === 'Tambah') {
@@ -93,7 +120,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
             }
-    } 
+    } else if($tipe === 'kurangi') {
+                if (!empty($keterangan)) {
+        // Lanjutkan dengan query untuk tambah data
+                date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', '$keterangan','$currentDateTime')";
+
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data catat tabungan berhasil ditambah!";
+                } else {
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                }
+            } else {
+                 date_default_timezone_set('Asia/Jakarta');
+                $currentDateTime = date('Y-m-d H:i:s');
+                
+                // Gabungkan query untuk menghindari duplikasi
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '-$nominal', NULL,'$currentDateTime')";
+
+                if (mysqli_query($koneksi, $query)) {
+                    echo "Data catat tabungan berhasil ditambah!";
+                } else {
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                }
+            }
+            }
     }
 }
 } else {
