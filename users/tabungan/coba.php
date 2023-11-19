@@ -1,115 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Knobs</title>
-    <!-- Sertakan jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- Sertakan jQuery Knob -->
-    <script src="https://cdn.jsdelivr.net/jquery.knob/1.2.13/jquery.knob.min.js"></script>
-    <style>
-        /* Tambahkan gaya CSS sesuai kebutuhan Anda */
-        .knob {
-            display: inline-block;
+<?php 
+include "../../koneksi.php";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Inisialisasi variabel untuk pesan kesalahan
+    $errors = [];
+
+    // Periksa apakah semua data yang diperlukan ada
+    
+    if (empty($_POST['id'])) {
+        $errors[] = " ID Tidak boleh kosong.";
+    }
+    if (empty($_POST['nomor_nominal'])) {
+        $errors[] = "Nominal tidak boleh kosong.";
+    }
+    if (empty($_POST['id_tabungan'])) {
+        $errors[] = "Id Tabungan Tidak boleh kosong.";
+    } else {
+        // Dapatkan data yang dikirimkan dari AJAX
+        $id_catat = mysqli_real_escape_string($koneksi, $_POST['id']);
+        $id_users = mysqli_real_escape_string($koneksi, $_POST['nomor_user']);
+        $id_tabungan = mysqli_real_escape_string($koneksi, $_POST['id_tabungan']);
+        $nominal = mysqli_real_escape_string($koneksi, $_POST['nomor_nominal']);
+        $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan_catat']);
+
+
+        $QueryTabungan = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_tabungan = $id_tabungan");
+        $d = mysqli_fetch_assoc($QueryTabungan);
+
+        // Query untuk mengambil data dari tabel catat_tabungan
+        $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_catat = $id_catat AND id_tabungan = $id_tabungan");
+        $total_nominal = 0;
+
+        $catat = mysqli_fetch_assoc($query_catat);
+        $tanda = substr($catat['nominal'], 0, 1);
+        $nilai = (int) substr($catat['nominal'], 1);
+
+        // Lakukan perhitungan berdasarkan tanda
+        if ($tanda === '+') {
+            $total_nominal += $nilai;
+        } elseif ($tanda === '-') {
+            $total_nominal -= $nilai;
         }
-    </style>
-</head>
-<body>
 
-<!-- Tambahkan elemen knob -->
-<input class="knob animated" value="0" rel="60" readonly>
-<input class="knob animated" value="0" rel="70">
-<input class="knob animated" value="0" rel="90">
+        // Hitung sisa target
+        $sisa_target = max(0, $d['target'] - $total_nominal);
 
-<script>
-    // Tunggu hingga dokumen selesai dimuat
-    $(document).ready(function () {
-        // Iterasi melalui setiap elemen dengan kelas 'knob'
-        $('.knob').each(function () {
-            var $this = $(this);
-            var myVal = $this.attr("rel");
-            
-            // Inisialisasi knob
-            $this.knob();
+        // Hitung estimasi waktu
+        $estimasi_waktu = floor($sisa_target / $d['nominal']);
 
-            // Animasi knob
-            $({ value: 0 }).animate({
-                value: myVal
-            }, {
-                duration: 2000,
-                easing: 'swing',
-                step: function () {
-                    $this.val(Math.ceil(this.value)).trigger('change');
-                }
-            });
-        });
-    });
-</script>
 
-</body>
-</html>
+            // Periksa apakah status pengguna dengan id_user yang sesuai adalah 0
+            $statusQuery = "SELECT status FROM users WHERE id_user = '$id_users'";
+            $statusResult = mysqli_query($koneksi, $statusQuery);
+            $statusRow = mysqli_fetch_assoc($statusResult);
+            $userStatus = $statusRow['status'];
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Custom Knob</title>
-  <style>
-    .knob-container {
-      position: relative;
-      width: 60px;
-      height: 60px;
+            // Query untuk menghitung jumlah kategori dengan id_tabungan tertentu
+            $CatatCountQuery = "SELECT COUNT(*) as count FROM catat_tabungan WHERE id_tabungan = '$id_tabungan' AND tgl_b != '0000-00-00 00:00:00'";
+            $CatatCountResult = mysqli_query($koneksi, $CatatCountQuery);
+            $countRow = mysqli_fetch_assoc($CatatCountResult);
+            $CatatCount = $countRow['count'];
+
+            if ($userStatus == 1) {
+                // Jika status pengguna adalah 0 dan jumlah kategori mencapai batasan, tampilkan pesan harus menjadi premium
+                if ($CatatCount >= $estimasi_waktu) {
+                     echo "Anda harus upgrade akun ke premium";
+            } else {
+              if(!empty($keterangan)) {
+                            date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                     $query = "UPDATE catat_tabungan SET id_tabungan = '$id_tabungan', nominal = '+$nominal', keterangan = '$keterangan', tgl_e = '$currentDateTime' WHERE id_catat = '$id_catat'";
+                      if (mysqli_query($koneksi, $query)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo "Data keuangan berhasil diubah.";
+        } else {
+            echo "Terjadi kesalahan saat mengubah data keuangan: " . mysqli_error($koneksi);
+        }
+                        } else {
+
+                        date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                     $query = "UPDATE catat_tabungan SET id_tabungan = '$id_tabungan', nominal = '+$nominal', keterangan = NULL, tgl_e = '$currentDateTime' WHERE id_catat = '$id_catat'";
+                      if (mysqli_query($koneksi, $query)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo "Data keuangan berhasil diubah.";
+        } else {
+            echo "Terjadi kesalahan saat mengubah data keuangan: " . mysqli_error($koneksi);
+        }
+
+                    }
+
+            }
+            } else {
+                 if(!empty($keterangan)) {
+                            date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    $query = "UPDATE catat_tabungan SET id_tabungan = '$id_tabungan', nominal = '+$nominal', keterangan = '$keterangan', tgl_e = '$currentDateTime' WHERE id_catat = '$id_catat'";
+                      if (mysqli_query($koneksi, $query)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                        echo "Data keuangan berhasil diubah.";
+        } else {
+            echo "Terjadi kesalahan saat mengubah data keuangan: " . mysqli_error($koneksi);
+        }
+                        } else {
+
+                        date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                       $query = "UPDATE catat_tabungan SET id_tabungan = '$id_tabungan', nominal = '+$nominal', keterangan = NULL, tgl_e = '$currentDateTime' WHERE id_catat = '$id_catat'";
+                      if (mysqli_query($koneksi, $query)) {
+                        // Berhasil menyimpan perubahan, kirim respons sukses ke klien
+                         echo "Data keuangan berhasil diubah.";
+        } else {
+            echo "Terjadi kesalahan saat mengubah data keuangan: " . mysqli_error($koneksi);
+        }
+
+                    }
+            }
+        
     }
+} else {
+    // Permintaan bukan dari metode POST
+    echo "Permintaan tidak valid.";
+}
 
-    .knob {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background-color: #eee;
-      text-align: center;
-      line-height: 60px;
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body>
-
-<div class="knob-container">
-  <div  id="customKnob" data-value="<?= number_format($hitung_persen, 0, '', '') ?>">0%</div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var knobElement = document.getElementById('customKnob');
-    var knobValue = knobElement.getAttribute('data-value');
-    var duration = 2000; // Animation duration in milliseconds
-    var startValue = 0;
-
-    function updateKnob() {
-      var currentTime = Date.now();
-      var deltaTime = currentTime - startTime;
-      var progress = Math.min(1, deltaTime / duration);
-      var animatedValue = Math.ceil(startValue + progress * (knobValue - startValue));
-      knobElement.textContent = animatedValue + '%';
-
-      if (progress < 1) {
-        requestAnimationFrame(updateKnob);
-      }
-    }
-
-    function animateKnob() {
-      startTime = Date.now();
-      requestAnimationFrame(updateKnob);
-    }
-
-    animateKnob();
-  });
-</script>
-
-</body>
-</html>
+mysqli_close($koneksi);
+?>

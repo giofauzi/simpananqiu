@@ -16,6 +16,8 @@ if (isset($_GET['nama']) && isset($_GET['no'])) {
     $result = mysqli_query($koneksi, $query);
     $row = mysqli_fetch_array($result);
 
+     
+
     if ($result && mysqli_num_rows($result) > 0) {
         ?>
         
@@ -45,199 +47,62 @@ if (isset($_GET['nama']) && isset($_GET['no'])) {
           <div class="col-md-4">
 
             <!-- Profile Image -->
-            <div class="card card-primary card-outline">
-              <div class="card-body box-profile">
-                <div class="text-center">
-                  <?php
-                  $gambarPath = "../../data/img/tabungan/" . $row['gambar']; // Path gambar sesuai dengan data dalam database
-            if (empty($row['gambar']) || !file_exists($gambarPath)) {
-                // Tampilkan "galeri.png" jika kolom gambar kosong atau file gambar tidak ada
-                $gambarPath = "../dist/img/galeri.png";
-            }
 
-            echo '<a href="#" data-toggle="modal" title="Klik Gambar" class="edit-modal modal-gambar" data-target="#gambarModal_t'.$row['id_tabungan'].'">
-            <img style="width:250px;height:250px;border-radius:20px;margin-bottom:5px;"
-                 src="'.$gambarPath.'"
-                 alt="Gambar Tabungan">
-                 </a>';
-                 ?>
-                </div>
-                <?php 
-               $formatTarget = 'Rp' . number_format($row['target'], 2, ',', '.');
-                ?>
-                <div class="profile-info">
-    <h3 class="profile-username text-bold"><?= $formatTarget ?></h3>
-    <div style="margin-bottom:-13px;">   
-   <?php 
-$id_tabungan = $row['id_tabungan'];
-
-// Query untuk mengambil data dari tabel catat_tabungan
-$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-
-// Inisialisasi variabel untuk menyimpan total nominal positif dan negatif
-$total_positif = 0;
-$total_negatif = 0;
-
-while ($catat = mysqli_fetch_assoc($query_catat)) {
-    // Pisahkan tanda dan nilai
-    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
-
-    // Lakukan perhitungan berdasarkan tanda
-    if ($tanda === '+') {
-        $total_positif += $nilai;
-    } elseif ($tanda === '-') {
-        $total_negatif += $nilai;
-    }
-}
-
-// Hitung total nominal
-$total_nominal = $total_positif - $total_negatif;
-
-// Hitung persentase progres
-$hitung_persen = min(($total_nominal / $row['target']) * 100, 100); // Persen tidak boleh lebih dari 100
-
-// Tampilkan input knob dengan nilai persen progres
-echo '<input type="text" class="knob" value="'.number_format($hitung_persen, 0, '', '').'" data-width="60" data-height="60" data-fgColor="#3c8dbc">';
-?>
-
-
-    </div>            
+             <div id="Kontent">
+  <!-- Konten Info -->
 </div>
-<?php
-$formatUang = 'Rp' . number_format($row['nominal'], 2, ',', '.');
-if($row['rencana'] === 'Harian') {
- echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perhari</p>';
-} else if($row['rencana'] === 'Mingguan') {
-  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perminggu</p>';
-} else if($row['rencana'] === 'Bulanan') {
-  echo '<p style="margin-top:-20px;font-weight:bold;color:black;">'.$formatUang.' Perbulan</p>';
-}
-?>
-    
-
-
-                <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item">
-                    <b>Tanggal Dibuat</b> <a class="float-right" style="color:black;"><?=  date('d F Y H.i', strtotime($row['tgl_b'])) ?></a>
-                  </li>
-                  <li class="list-group-item">
-                    <?php 
-$id_tabungan = $row['id_tabungan'];
-
-// Query untuk mengambil data dari tabel catat_tabungan
-$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-
-// Inisialisasi variabel untuk menyimpan total nominal
-$total_nominal = 0;
-
-while ($catat = mysqli_fetch_assoc($query_catat)) {
-    // Pisahkan tanda dan nilai
-    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
-
-    // Lakukan perhitungan berdasarkan tanda
-    if ($tanda === '+') {
-        $total_nominal += $nilai;
-    } elseif ($tanda === '-') {
-        $total_nominal -= $nilai;
-    }
+            <script>
+function updateInfo() {
+    var id_users = <?= $id_users ?>;
+    var id_tabungan = <?= $id_tabungan_from_url ?>;
+    $.ajax({
+        url: 'content-tabungan.php',
+        method: 'GET',
+        data: { id_users: id_users, id_tabungan: id_tabungan },
+        dataType: 'json',
+        success: function(data) {
+            $('#Kontent').html(data.konten);
+            initializeKnob();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('Error fetching data:', textStatus, errorThrown);
+        }
+    });
 }
 
-// Hitung sisa target
-$sisa_target = max(0, $row['target'] - $total_nominal);
+setInterval(updateInfo, 1000);
 
-// Hitung estimasi waktu
-$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
 
-// Tampilkan data sesuai kebutuhan
-if ($row['rencana'] === 'Harian') {
-    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Hari Lagi</a>';
-} elseif ($row['rencana'] === 'Mingguan') {
-    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Minggu Lagi</a>';
-} elseif ($row['rencana'] === 'Bulanan') {
-    echo '<b>Estimasi</b> <a class="float-right" style="color:black;">' . $estimasi_waktu . ' Bulan Lagi</a>';
-}
-?>
-
-                   
-                  </li>
-                  
-                </ul>
-
-               
-              </div>
-              <!-- /.card-body -->
-            </div>
+</script>
+            
             <!-- /.card -->
 
-            <!-- About Me Box -->
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Kondisi</h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-    <strong><i class="fas fa-arrow-up mr-1" style="color:green"></i> Terkumpul</strong>
-
-    <?php
-    $id_tabungan = $row['id_tabungan'];
-    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-
-    // Inisialisasi variabel untuk menyimpan total nominal positif
-    $total_positif = 0;
-
-    while ($catat = mysqli_fetch_assoc($query_catat)) {
-        // Pisahkan tanda dan nilai
-        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
-
-        // Lakukan perhitungan berdasarkan tanda
-        if ($tanda === '+') {
-            $total_positif += $nilai;
-        } else if($tanda === '-') {
-          $total_positif -= $nilai;
-        }
-    }
-
-    $format ='Rp '. number_format($total_positif,2,'.',',');
-    echo '<p  style="color:green;">' . $format . '</p>';
-    ?>
-
-    <hr>
-
-    <strong><i class="fas fa-arrow-down mr-1" style="color:red;"></i> Kekurangan</strong>
-
-    <?php
-    $id_tabungan = $row['id_tabungan'];
-    $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-
-    // Inisialisasi variabel untuk menyimpan total nominal negatif
-    $total_negatif = 0;
-
-    while ($catat = mysqli_fetch_assoc($query_catat)) {
-        // Pisahkan tanda dan nilai
-        $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-        $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
-
-        // Lakukan perhitungan berdasarkan tanda
-        if ($tanda === '+') {
-            $total_negatif += $nilai;
-        } else if($tanda === '-') {
-          $total_negatif -= $nilai;
-        }
-    }
-
-    $hitungan = $row['target'] - $total_negatif;
-    $format ='Rp '. number_format($hitungan, 2, '.', ',');
-    echo '<p style="color:red;"> ' . $format . '</p>';
-    ?>
-
-    <hr>
+           <!-- Untuk Info -->
+          <div id="Content">
+  <!-- Konten Info -->
 </div>
-
-              <!-- /.card-body -->
-            </div>
+<script>
+  // Fungsi untuk memperbarui profil
+function updateInfo() {
+    var id_users = <?= $id_users ?>; // Ganti dengan nilai ID pengguna yang sesuai
+    var id_tabungan = <?= $id_tabungan_from_url ?>;
+    $.ajax({
+        url: 'content.php',
+        method: 'GET',
+        data: { id_users: id_users,
+        id_tabungan: id_tabungan }, // Kirim parameter ID pengguna
+        dataType: 'json',
+        success: function(data) {
+            $('#Content').html(data.konten);
+        },
+        error: function() {
+            // Penanganan kesalahan jika terjadi
+        }
+    });
+}
+  // Memanggil fungsi pembaruan setiap 1 detik
+  setInterval(updateInfo, 1000);
+</script>
             <!-- /.card -->
           </div>
           <!-- /.col -->
@@ -247,12 +112,13 @@ if ($row['rencana'] === 'Harian') {
                 <ul class="nav nav-pills">
                   <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Aktifitas</a></li>
                   <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Alur</a></li>
-                  <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab"><i class='fas fa-edit'></i></a></li>
+                  <li class="nav-item"><a class="nav-link" href="#tambah" data-toggle="tab"><i class='fas fa-edit'></i></a></li>
+                  <li class="nav-item"><a class="nav-link" href="#pengaturan" data-toggle="tab">Pengaturan</a></li>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
                 <div class="tab-content">
-                  <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
+                  <div class="active tab-pane"  style="max-height: 550px; overflow-y: auto;" id="activity">
                     <!-- Post -->
                     <div class="form-group">
   <label for="pilih_tipe">Pilih Tipe</label>
@@ -301,7 +167,7 @@ if ($row['rencana'] === 'Harian') {
 
                   </div>
                   <!-- /.tab-pane -->
-                  <div class="tab-pane" style="max-height: 700px; overflow-y: auto;" id="timeline">
+                  <div class="tab-pane" style="max-height: 550px; overflow-y: auto;" id="timeline">
                     <!-- The timeline -->
                     <div class="form-group">
   <label for="pilih_tipe">Pilih Tipe</label>
@@ -348,7 +214,7 @@ function Alur() {
                   </div>
                   <!-- /.tab-pane -->
 
-                  <div class="tab-pane" id="settings">
+                  <div class="tab-pane" id="tambah">
                     <form id="CatatForm" class="form-horizontal">
                       <?php 
 $id_tabungan = $row['id_tabungan'];
@@ -402,80 +268,391 @@ echo '<input type="hidden" class="form-control" name="estimasi" value="'.$estima
                       </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-primary">Kirim</button>
+                          <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
                       </div>
                     </form>
                     <hr>
-                   <!-- Tambahkan class 'example2' ke tabel -->
-<table class="table table-bordered table-hover example2">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Tanggal</th>
-            <th>Nominal</th>
-            <th>Keterangan</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody class="tbody"></tbody> <!-- Hapus semua baris tbody -->
-</table>
+                    <?php 
+          $query_catat_edit = mysqli_query($koneksi, "SELECT * FROM catat_tabungan");
+          while($c = mysqli_fetch_array($query_catat_edit)) {
+                    ?>
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop<?= $c['id_catat'] ?>" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Edit Catat Tabungan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form class="EditCatat" method="post">
+  <input type="text" class="form-control id_catat_tabungan" name="id_catat_tabungan"  value="<?= $c['id_catat'] ?>">
+  <input type="text" class="form-control id_users_catat" name="id_users_catat"  value="<?= $id_users ?>">
+  <input type="text" class="form-control nomor_tabungan" name="nomor_tabungan" value="<?= $id_tabungan_from_url ?>">
 
-<!-- Script Ajax -->
-<script>
-    $(document).ready(function() {
-        // Fungsi untuk memperbarui tabel
-        function getData() {
-            var id_tabungan = <?= $row['id_tabungan']; ?>;
+          <div class="mb-3">
+  <label for="nomor_nominal" class="form-label">Nominal</label>
+  <input type="number" class="form-control nomor_nominal" name="nomor_nominal" value="<?= abs($c['nominal']) ?>" id="nomor_nominal" placeholder="Masukkan Nonimal">
+</div>
+<div class="mb-3">
+  <label for="keterangan_catat" class="form-label">Keterangan</label>
+  <textarea class="form-control keterangan_catat" id="keterangan_catat" placeholder="Masukkan Keterangan" rows="3"><?= $c['keterangan'] ?></textarea>
+</div>
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Ubah</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<?php } ?>
+ <div id="catat-tabungan" style="max-height: 450px; overflow-y: auto;" class="row"></div>
+                    <script>
+$(document).ready(function() {
+  function loadData(containerId) {
+  var IDTabungan = <?= $id_tabungan_from_url ?>; // Ambil id_tabungan dari PHP dan sisipkan ke dalam JavaScript
 
-            $.ajax({
-                type: 'GET',
-                url: 'get_data.php',
-                data: { id_tabungan: id_tabungan },
-                dataType: 'json',
-                success: function(response) {
-                    // Dapatkan referensi ke tbody tabel
-                    var tbody = $('.tbody');
+  // Lakukan permintaan AJAX untuk mengambil data kategori, termasuk id_tabungan
+  $.ajax({
+    url: 'get_data.php',
+    method: 'GET',
+    data: {
+      id_tabungan: IDTabungan,
+    },
+    success: function(data) {
+      $('#' + containerId).html(data);
+    }
+  });
+}
 
-                    // Hapus semua baris pada tabel
-                    tbody.empty();
+// Load data for "Pemasukan" and "Pengeluaran" initially
+loadData("catat-tabungan");
+// Atur penyegaran setiap 3 detik (3000 milidetik) untuk data "Pemasukan" dan "Pengeluaran"
+setInterval(function() {
+  loadData("catat-tabungan");
+}, 1000);
 
-                    // Loop melalui data dan tambahkan baris baru ke tbody
-                    $.each(response.getData, function(index, item) {
-    var keteranganValue = item.keterangan ? item.keterangan : 'Data tidak tersedia';
 
-    var newRow = '<tr>' +
-        '<td>' + (index + 1) + '</td>' +
-        '<td>' + item.tgl_b + '</td>' +
-        '<td>' + item.nominal + '</td>' +
-        '<td>' + keteranganValue + '</td>' +
-        '<td>' +
-            '<button class="btn btn-sm btn-info">Edit</button>' +
-            '<button class="btn btn-sm btn-danger" >Hapus</button>' +
-        '</td>' +
-        '</tr>';
 
-    tbody.append(newRow);
-});
+ // Edit data
+$('.EditCatat').on('submit', function(e) {
+    e.preventDefault(); // Menghentikan tindakan default submit form
 
-                },
-                error: function() {
-                    // Penanganan kesalahan jika terjadi
-                }
+   const ID_catat_tabungan = $('.id_catat_tabungan').val();
+const ID_users_catat = $('.id_users_catat').val();
+const Nomor_tabungan = $('.nomor_tabungan').val();
+const Nomor_nominal = $('.nomor_nominal').val();
+const Keterangan_catat = $('.keterangan_catat').val();
+
+// Buat objek FormData untuk mengirim data dalam bentuk form
+const formData = new FormData();
+formData.append('id', ID_catat_tabungan); // Perbaiki nama variabel
+formData.append('nomor_user', ID_users_catat); // Perbaiki nama variabel
+formData.append('id_tabungan', Nomor_tabungan);
+formData.append('nomor_nominal', Nomor_nominal);
+formData.append('keterangan_catat', Keterangan_catat);
+
+
+    $.ajax({
+        type: "POST",
+        url: "edit_catat.php", // Sesuaikan dengan URL yang sesuai
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.includes("berhasil")) {
+              // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
+setTimeout(() => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Sukses',
+    text: response,
+    showConfirmButton: false,
+    timer: 2000, // Menunggu 5 detik
+    allowOutsideClick: false
+  })
+}, 
+);
+            
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Terjadi kesalahan: ' + error,
             });
         }
-
-        // Memanggil fungsi pembaruan setiap 1 detik
-        setInterval(getData, 1000);
     });
+});
+
+
+
+
+
+// Tambahkan event handler untuk tombol "Delete"
+$('#catat-tabungan').on('click', '.delete-category', function() {
+  // Dapatkan ID kategori yang akan dihapus
+  const categoryId = $(this).data('id');
+
+  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi Penghapusan',
+    text: 'Anda yakin ingin menghapus kategori ini?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Lakukan permintaan AJAX untuk menghapus kategori
+      $.ajax({
+        url: 'delete_pengeluaran.php', // Ganti dengan URL yang sesuai
+        method: 'POST',
+        data: { id: categoryId },
+        success: function(response) {
+  if (response === 'success') {
+    // Berhasil mengedit kategori
+    Swal.fire({
+      title: 'Kategori Telah Dihapus!',
+      icon: 'success',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    });
+    loadCategories(); // Muat ulang data kategori setelah mengedit
+  } else {
+    Swal.fire({
+      title: 'Gagal Menghapus Kategori',
+      icon: 'error',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    });
+  }
+}
+      });
+    }
+  });
+});
+
+});
 </script>
-
-
-                  </div>
-                  <!-- /.tab-pane -->
-                </div>
+                  
                 <!-- /.tab-content -->
               </div><!-- /.card-body -->
+
+              <div class="tab-pane" id="pengaturan">
+                    <form id="TabunganForm" class="TabunganForm" method="post" enctype="multipart/form-data">
+                                <input type="hidden" class="form-control"  name="user_id" id="user_id"  value="<?= $id_users ?>">
+                                <input type="hidden" class="form-control"  name="id" id="id"  value="<?= $row['id_tabungan'] ?>">
+                                <div class="row">
+                                <div class="col-sm-6">
+
+                                <div class="form-group">
+                                <label for="nama_tabungan">Nama Tabungan</label>
+                                <input type="text" class="form-control" value="<?= $row['nama_tabungan'] ?>"  name="nama_tabungan" id="nama_tabungan" placeholder="Masukkan Nama Tabungan">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="target_tabungan">Target Tabungan</label>
+                                <input type="number" class="form-control" value="<?= $row['target'] ?>" name="target_tabungan" id="target_tabungan" placeholder="Masukkan Nama Tabungan">
+                            </div>
+
+                            </div>
+
+                            <div class="col-sm-6">
+                               <div class="form-group">
+                  <label for="rencana_pengisian">Rencana Pengisian</label>
+                  <select class="form-control select2" name="rencana_pengisian" id="rencana_pengisian" style="width: 100%;">
+                    <option value="Harian" <?= $row['rencana'] == 'Harian' ? 'selected' : '' ?>>Harian</option>
+                    <option value="Mingguan" <?= $row['rencana'] == 'Mingguan' ? 'selected' : '' ?>>Mingguan</option>
+                    <option value="Bulanan" <?= $row['rencana'] == 'Bulanan' ? 'selected' : '' ?>>Bulanan</option>
+                  </select>
+                </div>
+                  
+               <div class="form-group">
+    <label for="nominal_pengisian">Nominal Pengisian</label>
+    <div class="input-group">
+        <input type="number" name="nominal_pengisian" value="<?= $row['nominal'] ?>" id="nominal_pengisian" class="form-control">
+        <div class="input-group-append">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+        </div>
+    </div>
+</div>
+
+
+                            </div>
+                            </div>
+
+
+                             <div class="form-group">
+                                <label for="fileInput">Gambar</label>
+                                <input type="file" class="form-control"  name="fileInput" id="fileInput" accept=".jpg, .jpeg, .png"  placeholder="Masukkan Nama Tabungan">
+                            </div>
+                            <div class="text-center">
+<img id="imageValidationMessage" src="../../data/img/tabungan/<?= $row['gambar'] ?>" style="max-width: 300px; max-height: 300px;">
+</div>
+
+                            <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+                           <button type="button" class="btn btn-danger mt-3 delete-tabungan" data-id="<?= $row['id_tabungan'] ?>">Hapus Tabungan</button>
+
+                        </form>
+
+                        <script>
+
+                          $(document).ready(function() {
+
+// Tambahkan event handler untuk tombol "Delete"
+$('#TabunganForm').on('click', '.delete-tabungan', function() {
+  // Dapatkan ID kategori yang akan dihapus
+  const id_tabungan = $(this).data('id');
+
+  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi Penghapusan',
+    text: 'Anda yakin ingin menghapus tabungan ini?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Lakukan permintaan AJAX untuk menghapus tabungan
+      $.ajax({
+        url: 'delete_tabungan.php', // Ganti dengan URL yang sesuai
+        method: 'POST',
+        data: { id: id_tabungan },
+        success: function(response) {
+  if (response === 'success') {
+    // Berhasil mengedit tabungan
+    setTimeout(() => {
+    Swal.fire({
+      title: 'Tabungan Telah Dihapus!',
+      icon: 'success',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    }).then(() => {
+    // Menunggu 5 detik sebelum mereset ulang halaman
+    setTimeout(() => {
+     location.href = 'tabungan.php';
+    }, 1000);
+  });
+}, 1000);
+  } else {
+    Swal.fire({
+      title: 'Gagal Menghapus Tabungan',
+      icon: 'error',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    });
+  }
+}
+      });
+    }
+  });
+});
+
+});
+
+                           // Merekam perubahan pada input file
+document.getElementById('fileInput').addEventListener('change', function() {
+    // Menampilkan fileInput yang dipilih
+    var previewImage = document.getElementById('imageValidationMessage');
+    var file = this.files[0];
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+$('#TabunganForm').on('submit', function(e) {
+    e.preventDefault(); // Menghentikan tindakan default submit form
+
+    const userId = $('#user_id').val();
+    const ID = $('#id').val();
+    const tabungan = $('#nama_tabungan').val();
+    const target_tabungan = $('#target_tabungan').val();
+    const rencana = $('#rencana_pengisian').val();
+    const nominal = $('#nominal_pengisian').val();
+    const fileInput = $('#fileInput')[0].files[0];
+
+    // Buat objek FormData untuk mengirim data dalam bentuk form
+    const formData = new FormData();
+    formData.append('id', ID);
+    formData.append('id_user', userId);
+    formData.append('nama_tabungan', tabungan);
+    formData.append('target_tabungan', target_tabungan);
+    formData.append('rencana_pengisian', rencana);
+    formData.append('nominal_pengisian', nominal);
+    formData.append('fileInput', fileInput);
+
+    $.ajax({
+        type: "POST",
+        url: "update-tabungan.php", // Sesuaikan dengan URL yang sesuai
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.includes("berhasil")) {
+                   // Mengatur SweetAlert untuk ditampilkan setelah 2 detik
+setTimeout(() => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Sukses',
+    text: response,
+    showConfirmButton: false,
+    timer: 1000, // Menunggu 5 detik
+    allowOutsideClick: false
+  }).then(() => {
+    // Menunggu 5 detik sebelum mereset ulang halaman
+    setTimeout(() => {
+      location.reload(); // Melakukan refresh halaman setelah 5 detik
+    }, 1000);
+  });
+}, 1000);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: response,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Terjadi kesalahan: ' + error,
+            });
+        }
+    });
+});
+                        </script>
+                    <hr>
+                <!-- /.tab-content -->
+              </div>
             </div>
             <!-- /.card -->
           </div>

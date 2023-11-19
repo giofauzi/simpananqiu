@@ -47,123 +47,143 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userStatus = $statusRow['status'];
 
         // Tambahkan variabel untuk menyimpan nama_tabungan sebelumnya
-        
-        $nama_tabungan_lama = '';
+$checkQueryTabungan = "SELECT id_tabungan, id_user, nama_tabungan FROM tabungan WHERE id_tabungan = $id_tabungan AND id_user = '$id_user'";
+$checkResultTabungan = mysqli_query($koneksi, $checkQueryTabungan);
+
+// Pemeriksaan apakah $row bukan null
+if ($checkResultTabungan) {
+    $row = mysqli_fetch_array($checkResultTabungan);
+
+    if ($row !== null) {
+        $nama_tabungan_lama = $row['nama_tabungan'];
 
         // Cek apakah nama_tabungan tidak kosong dan berbeda dengan nama_tabungan_lama
         if (!empty($nama_tabungan) && $nama_tabungan != $nama_tabungan_lama) {
             // Query untuk memeriksa apakah nama_tabungan sudah ada dalam database dengan transaksi yang sesuai
             $checkQuery = "SELECT COUNT(*) as count FROM tabungan WHERE id_user = '$id_user' AND nama_tabungan = '$nama_tabungan'";
             $checkResult = mysqli_query($koneksi, $checkQuery);
-            $row = mysqli_fetch_assoc($checkResult);
-            $tabunganCount = $row['count'];
 
-            if ($tabunganCount > 0) {
-                echo "Tabungan Sudah Ada!";
+            if ($checkResult) {
+                $row = mysqli_fetch_assoc($checkResult);
+                $tabunganCount = $row['count'];
+
+                if ($tabunganCount > 0) {
+                    echo "Tabungan Sudah Ada!";
+                    exit();
+                } else {
+                    // Update nama_tabungan_lama dengan nilai baru
+                    $nama_tabungan_lama = $nama_tabungan;
+                }
             } else {
-                // Update nama_tabungan_lama dengan nilai baru
-                $nama_tabungan_lama = $nama_tabungan;
+                // Handle jika query cek nama_tabungan gagal
+                echo "Gagal melakukan query cek nama_tabungan: " . mysqli_error($koneksi);
+                exit();
             }
         } else {
             // Jika nama_tabungan kosong atau sama dengan nama_tabungan_lama, lanjutkan tanpa memeriksa keberadaan dalam database
             $nama_tabungan_lama = $nama_tabungan;
         }
+    } else {
+        // Handle jika tidak ada hasil dari query cek nama_tabungan
+        echo "Tabungan dengan ID $id_tabungan tidak ditemukan untuk user ini.";
+        exit();
+    }
+} else {
+    // Handle jika query cek nama_tabungan gagal
+    echo "Gagal melakukan query cek nama_tabungan: " . mysqli_error($koneksi);
+    exit();
+}
+
+
 
         if ($userStatus == 1) {
-            // Jika status pengguna adalah 0 dan jumlah tabungan mencapai batasan, tampilkan pesan harus menjadi premium
-            if ($tabunganCount >= 5) {
-                echo "Anda harus upgrade akun ke premium";
-            } else {
                 // Query untuk melanjutkan dengan pembaruan data
                 if($nominal_pengisian > $target_tabungan) {
-            echo 'Nominal pengisian tidak boleh melebihi target pengisian';
-        } else {
-            // Lanjutkan dengan query untuk menambah data
-                date_default_timezone_set('Asia/Jakarta');
-                $currentDateTime = date('Y-m-d H:i:s');
-                
-                // Gabungkan query untuk menghindari duplikasi
-        $query = "UPDATE tabungan SET 
-            nama_tabungan = '$nama_tabungan', 
-            target = '$target_tabungan', 
-            rencana = '$rencana_pengisian', 
-            nominal = '$nominal_pengisian', 
-            tgl_b = '$currentDateTime'";
-
-        // Hanya tambahkan kolom gambar jika ada gambar yang diunggah
-        if (!empty($fileInput)) {
-            // Hapus gambar lama jika ada
-            $queryCekGambar = "SELECT gambar FROM tabungan WHERE id_tabungan = $id_tabungan";
-            $resultCekGambar = mysqli_query($koneksi, $queryCekGambar);
-
-            if ($resultCekGambar && mysqli_num_rows($resultCekGambar) > 0) {
-                $rowCekGambar = mysqli_fetch_assoc($resultCekGambar);
-                $gambarLama = $rowCekGambar['gambar'];
-
-                if (!empty($gambarLama) && file_exists("../../data/img/tabungan/$gambarLama")) {
-                    unlink("../../data/img/tabungan/$gambarLama");
-                }
-            }
-
-            // Setel gambar ke nama file yang diunggah
-            $query .= ", gambar = '$fileInput'";
-        }
-
-        $query .= " WHERE id_tabungan = '$id_tabungan'";
-
-
-                if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil ditambah.";
+                    echo 'Nominal pengisian tidak boleh melebihi target pengisian';
                 } else {
-                    echo "Terjadi kesalahan saat menambah data tabungan: " . mysqli_error($koneksi);
+                    // Lanjutkan dengan query untuk menambah data
+                    date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+                    
+                    // Gabungkan query untuk menghindari duplikasi
+                    $query = "UPDATE tabungan SET 
+                        nama_tabungan = '$nama_tabungan', 
+                        target = '$target_tabungan', 
+                        rencana = '$rencana_pengisian', 
+                        nominal = '$nominal_pengisian', 
+                        tgl_b = '$currentDateTime'";
+
+                    // Hanya tambahkan kolom gambar jika ada gambar yang diunggah
+                    if (!empty($fileInput)) {
+                        // Hapus gambar lama jika ada
+                        $queryCekGambar = "SELECT gambar FROM tabungan WHERE id_tabungan = $id_tabungan";
+                        $resultCekGambar = mysqli_query($koneksi, $queryCekGambar);
+
+                        if ($resultCekGambar && mysqli_num_rows($resultCekGambar) > 0) {
+                            $rowCekGambar = mysqli_fetch_assoc($resultCekGambar);
+                            $gambarLama = $rowCekGambar['gambar'];
+
+                            if (!empty($gambarLama) && file_exists("../../data/img/tabungan/$gambarLama")) {
+                                unlink("../../data/img/tabungan/$gambarLama");
+                            }
+                        }
+
+                        // Setel gambar ke nama file yang diunggah
+                        $query .= ", gambar = '$fileInput'";
+                    }
+
+                    $query .= " WHERE id_tabungan = '$id_tabungan'";
+
+                    if (mysqli_query($koneksi, $query)) {
+                        echo "Data tabungan berhasil diubah.";
+                    } else {
+                        echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
+                    }
                 }
-        }
-            }
         } else {
             // Query untuk melanjutkan dengan pembaruan data
-           if($nominal_pengisian > $target_tabungan) {
-            echo 'Nominal pengisian tidak boleh melebihi target pengisian';
-        } else {
-            // Lanjutkan dengan query untuk menambah data
+            if($nominal_pengisian > $target_tabungan) {
+                echo 'Nominal pengisian tidak boleh melebihi target pengisian';
+            } else {
+                // Lanjutkan dengan query untuk menambah data
                 date_default_timezone_set('Asia/Jakarta');
                 $currentDateTime = date('Y-m-d H:i:s');
                 
                 // Gabungkan query untuk menghindari duplikasi
-        $query = "UPDATE tabungan SET 
-            nama_tabungan = '$nama_tabungan', 
-            target = '$target_tabungan', 
-            rencana = '$rencana_pengisian', 
-            nominal = '$nominal_pengisian', 
-            tgl_b = '$currentDateTime'";
+                $query = "UPDATE tabungan SET 
+                    nama_tabungan = '$nama_tabungan', 
+                    target = '$target_tabungan', 
+                    rencana = '$rencana_pengisian', 
+                    nominal = '$nominal_pengisian', 
+                    tgl_b = '$currentDateTime'";
 
-        // Hanya tambahkan kolom gambar jika ada gambar yang diunggah
-        if (!empty($fileInput)) {
-            // Hapus gambar lama jika ada
-            $queryCekGambar = "SELECT gambar FROM tabungan WHERE id_tabungan = $id_tabungan";
-            $resultCekGambar = mysqli_query($koneksi, $queryCekGambar);
+                // Hanya tambahkan kolom gambar jika ada gambar yang diunggah
+                if (!empty($fileInput)) {
+                    // Hapus gambar lama jika ada
+                    $queryCekGambar = "SELECT gambar FROM tabungan WHERE id_tabungan = $id_tabungan";
+                    $resultCekGambar = mysqli_query($koneksi, $queryCekGambar);
 
-            if ($resultCekGambar && mysqli_num_rows($resultCekGambar) > 0) {
-                $rowCekGambar = mysqli_fetch_assoc($resultCekGambar);
-                $gambarLama = $rowCekGambar['gambar'];
+                    if ($resultCekGambar && mysqli_num_rows($resultCekGambar) > 0) {
+                        $rowCekGambar = mysqli_fetch_assoc($resultCekGambar);
+                        $gambarLama = $rowCekGambar['gambar'];
 
-                if (!empty($gambarLama) && file_exists("../../data/img/tabungan/$gambarLama")) {
-                    unlink("../../data/img/tabungan/$gambarLama");
+                        if (!empty($gambarLama) && file_exists("../../data/img/tabungan/$gambarLama")) {
+                            unlink("../../data/img/tabungan/$gambarLama");
+                        }
+                    }
+
+                    // Setel gambar ke nama file yang diunggah
+                    $query .= ", gambar = '$fileInput'";
                 }
-            }
 
-            // Setel gambar ke nama file yang diunggah
-            $query .= ", gambar = '$fileInput'";
-        }
-
-        $query .= " WHERE id_tabungan = '$id_tabungan'";
-
+                $query .= " WHERE id_tabungan = '$id_tabungan'";
 
                 if (mysqli_query($koneksi, $query)) {
-                    echo "Data tabungan berhasil ditambah.";
+                    echo "Data tabungan berhasil diubah.";
                 } else {
-                    echo "Terjadi kesalahan saat menambah data tabungan: " . mysqli_error($koneksi);
+                    echo "Terjadi kesalahan saat mengubah data tabungan: " . mysqli_error($koneksi);
                 }
-        }
+            }
         }
     }
 } else {

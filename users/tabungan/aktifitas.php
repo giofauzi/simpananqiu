@@ -23,8 +23,8 @@ if ($result) {
     if (mysqli_num_rows($result) > 0) {
         while ($d = mysqli_fetch_assoc($result)) {
             // Pisahkan tanda dan nilai
-    $tanda = substr($d['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-    $nilai = (int) substr($d['nominal'], 1); // Ambil nilai setelah karakter pertama
+    $tanda = substr($d['nominal_backup'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($d['nominal_backup'], 1); // Ambil nilai setelah karakter pertama
 
     // Tentukan keterangan berdasarkan tanda
     $keterangan = ($tanda === '+') ? 'Tambah' : 'Kurangi';
@@ -59,7 +59,7 @@ break;
           JOIN users u ON t.id_user = u.id_user
           LEFT JOIN catat_tabungan ct ON t.id_tabungan = ct.id_tabungan
           WHERE t.id_tabungan = $id_tabungan AND u.id_user = $id_users
-          AND DATE(ct.tgl_e) = CURDATE()";
+          AND DATE(ct.tgl_e) = CURDATE() AND DATE(ct.tgl_b) = CURDATE()";
 
 $result = mysqli_query($koneksi, $query);
 
@@ -86,7 +86,8 @@ if ($result) {
                 </span>
                 <span class='description'>Tabungan - " . date('d F Y H.i', strtotime($d['tgl_e'])) . ' WIB' . "</span>
             </div>
-            <p>{$keterangan} Data Tabungan {$d['nama_tabungan']}</p>
+            <p>Ubah Data Tabungan {$d['nama_tabungan']}</p>
+            <p> Dari Tambah Data Tangal  " . date('d F Y H.i', strtotime($d['tgl_b'])) . ' WIB' . "
             <p class='text-bold' style='color:{$color};'> <i class='fas {$icon} mr-1' style='color:{$color}'></i>Rp " . number_format($nilai, 2, ',', '.') . "</p>
         </div>
     ";

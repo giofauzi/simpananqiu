@@ -79,10 +79,10 @@ if ($user['status'] == 1) {
     }
 
     // Menampilkan SweetAlert pertama kali setelah halaman dimuat
-    setTimeout(tampilkanIklan, 60000); // Show the alert after 1 minute
+    setTimeout(tampilkanIklan, 120000); // Show the alert after 1 minute
 
     // Membuat interval untuk menampilkan SweetAlert setiap 1 menit
-    setInterval(tampilkanIklan, 60000); // Show the alert every minute
+    setInterval(tampilkanIklan, 120000); // Show the alert every minute
     </script>";
 }
 

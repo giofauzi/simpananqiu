@@ -479,7 +479,7 @@ $waktu = date('H:i');
 
 if ($waktu >= '00:00' && $waktu < '10:59') {
     $ucapan = "Selamat Pagi";
-} elseif ($waktu >= '1q:00' && $waktu < '14:59') {
+} elseif ($waktu >= '11:00' && $waktu < '14:59') {
     $ucapan = "Selamat Siang";
 } elseif ($waktu >= '15:00' && $waktu < '17:59') {
     $ucapan = "Selamat Sore";

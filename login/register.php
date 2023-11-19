@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah'])) {
         $errors[] = 'username tidak boleh kosong';
     } else {
         $username = mysqli_real_escape_string($koneksi, $_POST['username']);
+$username = strtolower($username);
     }
 
     if (empty($_POST['jenis_kelamin'])) {

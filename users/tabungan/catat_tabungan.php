@@ -118,7 +118,7 @@ function updateInfo() {
               </div><!-- /.card-header -->
               <div class="card-body">
                 <div class="tab-content">
-                  <div class="active tab-pane"  style="max-height: 700px; overflow-y: auto;" id="activity">
+                  <div class="active tab-pane"  style="max-height: 550px; overflow-y: auto;" id="activity">
                     <!-- Post -->
                     <div class="form-group">
   <label for="pilih_tipe">Pilih Tipe</label>
@@ -167,7 +167,7 @@ function updateInfo() {
 
                   </div>
                   <!-- /.tab-pane -->
-                  <div class="tab-pane" style="max-height: 700px; overflow-y: auto;" id="timeline">
+                  <div class="tab-pane" style="max-height: 550px; overflow-y: auto;" id="timeline">
                     <!-- The timeline -->
                     <div class="form-group">
   <label for="pilih_tipe">Pilih Tipe</label>
@@ -268,158 +268,114 @@ echo '<input type="hidden" class="form-control" name="estimasi" value="'.$estima
                       </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-primary">Kirim</button>
+                          <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
                       </div>
                     </form>
                     <hr>
-                   <!-- Tambahkan class 'example2' ke tabel -->
-                   <div class="table-responsive">
-<table  class="table table-bordered table-hover example2">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Tanggal</th>
-            <th>Nominal</th>
-            <th>Keterangan</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody class="tbody"></tbody> <!-- Hapus semua baris tbody -->
-</table>
-<div>
+ <div id="catat-tabungan" style="max-height: 450px; overflow-y: auto;" class="row"></div>
+                    <script>
+$(document).ready(function() {
+  function loadData(containerId) {
+  var IDTabungan = <?= $id_tabungan_from_url ?>; // Ambil id_tabungan dari PHP dan sisipkan ke dalam JavaScript
 
-<!-- Script Ajax -->
-<script>
-    $(document).ready(function() {
-        // Fungsi untuk memperbarui tabel
-        function getData() {
-            var id_tabungan = <?= $row['id_tabungan']; ?>;
+  // Lakukan permintaan AJAX untuk mengambil data kategori, termasuk id_tabungan
+  $.ajax({
+    url: 'get_data.php',
+    method: 'GET',
+    data: {
+      id_tabungan: IDTabungan,
+    },
+    success: function(data) {
+      $('#' + containerId).html(data);
+    }
+  });
+}
 
-            $.ajax({
-                type: 'GET',
-                url: 'get_data.php',
-                data: { id_tabungan: id_tabungan },
-                dataType: 'json',
-                success: function(response) {
-                    // Dapatkan referensi ke tbody tabel
-                    var tbody = $('.tbody');
-
-                    // Hapus semua baris pada tabel
-                    tbody.empty();
-
-                    // Loop melalui data dan tambahkan baris baru ke tbody
-                    $.each(response.getData, function(index, item) {
-    var keteranganValue = item.keterangan ? item.keterangan : 'Data tidak tersedia';
-    var id_catat = item.id_catat;
-    var id_tabungan = item.id_tabungan;
-   var nominalValue = item.nominal ? item.nominal.replace('+', '') : '';
+// Load data for "Pemasukan" and "Pengeluaran" initially
+loadData("catat-tabungan");
+// Atur penyegaran setiap 3 detik (3000 milidetik) untuk data "Pemasukan" dan "Pengeluaran"
+setInterval(function() {
+  loadData("catat-tabungan");
+}, 1000);
 
 
-    var newRow = '<tr>' +
-        '<td>' + (index + 1) + '</td>' +
-        '<td class="tanggal">' + item.tgl_b + '</td>' +
-        '<td style="color:green;" class="nominal">' + nominalValue + '</td>' +
-        '<td class="keterangan">' + keteranganValue + '</td>' +
-        '<td class="nomor" style="display:none;" data-id="'+ id_catat +'">' + id_catat + '</td>' +
-        '<td class="id_tabungan" style="display:none;" data-id="'+ id_tabungan +'">' + id_tabungan + '</td>' +
-        '<td>' +
-            '<button class="btn btn-warning mr-1 edit-catat" data-id="'+ id_catat +'"><i class="fas fa-edit"></i></button>' +
-            '<button class="btn btn-danger delete-catat" data-id="'+ id_catat +'"><i class="fas fa-trash"></i</button>' +
-        '</td>' +
-        '</tr>' ;
-    tbody.append(newRow);
-});
-                },
-                error: function() {
-                    // Penanganan kesalahan jika terjadi
-                }
-            });
-        }
-        // Memanggil fungsi pembaruan setiap 1 detik
-        setInterval(getData, 1000);
-    });
+  $('#catat-tabungan').on('click', '.edit-catat', function() {
+  const IDCatat = $(this).closest('.card-body').find('.nomor').data('id');
+const Keterangan = $(this).closest('.card-body').find('.keterangan').text();
+const Nominal = $(this).closest('.card-body').find('.nominal').text();
+const IdTabungan = $(this).closest('.card-body').find('.id_tabungan').text();
 
-  
-  $('.tbody').on('click', '.edit-catat', function() {
-  const CatatID = $(this).closest('tr').find('.nomor').data('id');
-  const Nominal = $(this).closest('tr').find('.nominal').text();
-  const IDTabungan = $(this).closest('tr').find('.id_tabungan').text();
-  const keterangan = $(this).closest('tr').find('.keterangan').text();
-  
-  const id_users = <?= $id_users ?>;
 
   Swal.fire({
-    title: 'Edit Catat Tabungan',
+    title: 'Edit Catat Kategori',
     html: `<div class="form-group">
       <label for="nominal">Nominal</label>
-      <input type="text" class="form-control nomor_nominal" required name="nomor_nominal"  placeholder="Masukkan Nominal" value="${Nominal}">
-      <input type="hidden" class="form-control" id="nomor" required name="nomor"  value="${CatatID}">
-      <input type="hidden" class="form-control " id="id_tabungan" required name="id_tabungan" value="${IDTabungan}">
-      <input type="hidden" class="form-control nomor_user" required name="nomor_user"  value="${id_users}">
-
+      <input type="number" class="form-control" required name="nominal" id="nomor_nominal" placeholder="Masukkan Nominal" value="${Nominal}">
+      <input type="hidden" class="form-control" required name="id_tabungan" id="id_tabungan" value="${IdTabungan}">
+      <input type="hidden" class="form-control" required name="id_users" id="id_users" value="<?= $id_users ?>">
+      <input type="hidden" class="form-control" required name="id_catat" id="id_catat" value="${IDCatat}">
     </div>
     <div class="form-group">
-      <label for="keterangan">Keterangan</label>
-     <textarea class="form-control keterangan" rows="3">${keterangan}</textarea>
-    </div> 
+      <label for="keterangan_catat">Keterangan</label>
+      <textarea class="form-control" id="keterangan_catat" name="keterangan_catat" rows="3">${Keterangan}</textarea>
+    </div>
     `,
-    showCancelButton: true,
-    confirmButtonText: 'Simpan',
-    cancelButtonText: 'Batal',
   }).then((result) => {
     if (result.isConfirmed) {
-      const EditNominal = $('.nomor_nominal').val();
-      const EditNomorUser = $('.nomor_user').val();
-      const IDTabungan = $('#id_tabungan').val();
-      const EditID = $('#nomor').val();
-      const keterangan = $('.keterangan').val();
+      const NominalEdit = $('#nomor_nominal').val();
+      const editIdTabungan = $('#id_tabungan').val();
+      const IDusers = $('#id_users').val();
+      const id_catat = $('#id_catat').val();
+      const keterangan_catat = $('#keterangan_catat').val();
 
       $.ajax({
     url: 'edit_catat.php',
     method: 'POST',
     data: {
-        id: EditID,
-        id_tabungan: IDTabungan,
-        nomor_user: EditNomorUser,
-        nomor_nominal: EditNominal,
-        keterangan: keterangan,
+        id: id_catat,
+        id_tabungan: editIdTabungan,
+        nomor_nominal: NominalEdit,
+        nomor_user : IDusers,
+        keterangan_catat: keterangan_catat,
     },
     dataType: 'json', // Mengharapkan respons dalam format JSON
     success: function(response) {
-        if (response.status === 'success') {
-            Swal.fire({
-                title: 'Kategori Telah Diedit',
-                icon: 'success',
-                showConfirmButton: false,
-                timer: 2000,
-                allowOutsideClick: false,
-            });
-            loadCategories();
-        } else if (response.status === 'error') {
-            Swal.fire({
-                title: 'Gagal Mengedit Kategori',
-                text: response.message.join('<br>'), // Menampilkan pesan kesalahan dalam bentuk daftar
-                icon: 'error',
-                showConfirmButton: false,
-                timer: 2000,
-                allowOutsideClick: false,
-            });
-        }
+       if (response.status === 'success') {
+    Swal.fire({
+        title: 'Kategori Telah Diedit',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        allowOutsideClick: false,
+    });
+    loadData("catat-tabungan"); // Sesuaikan dengan ID container yang benar
+} else if (response.status === 'error') {
+    Swal.fire({
+        title: 'Gagal Mengedit Kategori',
+        text: response.message.join('<br>'), // Menampilkan pesan kesalahan dalam bentuk daftar
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 2000,
+        allowOutsideClick: false,
+    });
+}
+
     },
-     error: function(xhr, status, error) {
-        console.error(xhr.responseText); // Tambahkan ini untuk melihat pesan kesalahan dari server dalam konsol browser
-    }
 });
 
     }
   });
 });
 
+
+
+
+
 // Tambahkan event handler untuk tombol "Delete"
-$('.tbody').on('click', '.delete-catat', function() {
+$('#catat-tabungan').on('click', '.delete-catat', function() {
   // Dapatkan ID kategori yang akan dihapus
-  const TabunganID = $(this).data('id');
+  const categoryId = $(this).data('id');
 
   // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
   Swal.fire({
@@ -435,7 +391,7 @@ $('.tbody').on('click', '.delete-catat', function() {
       $.ajax({
         url: 'delete_catat.php', // Ganti dengan URL yang sesuai
         method: 'POST',
-        data: { id: TabunganID },
+        data: { id: categoryId },
         success: function(response) {
   if (response === 'success') {
     // Berhasil mengedit kategori
@@ -461,13 +417,10 @@ $('.tbody').on('click', '.delete-catat', function() {
     }
   });
 });
+
+});
 </script>
-
-
-
-                  </div>
-                  <!-- /.tab-pane -->
-                </div>
+                  
                 <!-- /.tab-content -->
               </div><!-- /.card-body -->
 

@@ -171,7 +171,7 @@ include "../view/sidebar_t.php";
                                 <input type="file" class="form-control"  name="fileInput" id="fileInput" accept=".jpg, .jpeg, .png"  placeholder="Masukkan Nama Tabungan">
                             </div>
                             <div class="text-center">
-<img id="imageValidationMessage" src="../dist/img/galeri.png" style="max-width: 300px; max-height: 300px;">
+<img id="imageValidationMessage" src="../dist/img/galeri.png" style="max-width: 250px; max-height: 250px;">
 </div>
 
                             <button type="submit" class="btn btn-primary mt-3">Simpan</button>
@@ -412,7 +412,7 @@ $_SESSION['id_tabungan'] = $d['id_tabungan'];
             }
 
             echo '<a href="#" data-toggle="modal" title="Klik Gambar" class="edit-modal modal-gambar" data-id="'.$d['id_tabungan'].'" data-target="#gambarModal_t'.$d['id_tabungan'].'">
-            <img style="width:300px;height:300px;border-radius:20px;"
+            <img style="width:250px;height:250px;border-radius:20px;"
                  src="'.$gambarPath.'"
                  alt="Gambar Tabungan">
                  </a>';
@@ -582,7 +582,7 @@ while ($catat = mysqli_fetch_assoc($query_catat)) {
             }
 
             echo '<a href="#" data-toggle="modal" title="Klik Gambar" class="edit-modal modal-gambar" data-id="'.$d['id_tabungan'].'" data-target="#gambarModal_t'.$d['id_tabungan'].'">';
-            echo '<img style="width:300px;height:300px;border-radius:20px;margin: auto;"';
+            echo '<img style="width:250px;height:250px;border-radius:20px;margin: auto;"';
             echo 'src="'.$gambarPath.'" alt="Gambar Tabungan">';
             echo '</a>';
             echo '</div>';

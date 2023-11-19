@@ -23,8 +23,8 @@ if ($result) {
 
     while ($d = mysqli_fetch_assoc($result)) {
         // Pisahkan tanda dan nilai
-        $tanda = substr($d['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-        $nilai = (int) substr($d['nominal'], 1); // Ambil nilai setelah karakter pertama
+        $tanda = substr($d['nominal_backup'], 0, 1); // Ambil karakter pertama (tanda)
+        $nilai = (int) substr($d['nominal_backup'], 1); // Ambil nilai setelah karakter pertama
 
         // Tentukan keterangan berdasarkan tanda
         $keterangan = ($tanda === '+') ? 'Tambah' : 'Kurangi';

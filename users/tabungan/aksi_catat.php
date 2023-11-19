@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentDateTime = date('Y-m-d H:i:s');
                 
                 // Gabungkan query untuk menghindari duplikasi
-                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '$keterangan','$currentDateTime')";
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, nominal_backup, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '+$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
                     echo "Data catat tabungan berhasil ditambah!";
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentDateTime = date('Y-m-d H:i:s');
                 
                 // Gabungkan query untuk menghindari duplikasi
-                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', NULL,'$currentDateTime')";
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, nominal_backup, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '+$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
                     echo "Data catat tabungan berhasil ditambah!";
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentDateTime = date('Y-m-d H:i:s');
                 
                 // Gabungkan query untuk menghindari duplikasi
-                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '$keterangan','$currentDateTime')";
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, nominal_backup, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '+$nominal', '$keterangan','$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
                     echo "Data catat tabungan berhasil ditambah!";
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $currentDateTime = date('Y-m-d H:i:s');
                 
                 // Gabungkan query untuk menghindari duplikasi
-                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', NULL,'$currentDateTime')";
+                $query = "INSERT INTO catat_tabungan (id_tabungan, nominal, nominal_backup, keterangan, tgl_b) VALUES ('$id_tabungan', '+$nominal', '+$nominal', NULL,'$currentDateTime')";
 
                 if (mysqli_query($koneksi, $query)) {
                     echo "Data catat tabungan berhasil ditambah!";
