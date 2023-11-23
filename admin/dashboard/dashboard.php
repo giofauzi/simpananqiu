@@ -9,7 +9,16 @@ include "../view/navbar_t.php";
 <?php 
 include "../view/sidebar_t.php";
 ?>
-
+<?php
+$qK = mysqli_query($koneksi, "SELECT * FROM kategori WHERE id_admin = $id_admin");
+$kategori = mysqli_num_rows($qK);
+$qU = mysqli_query($koneksi, "SELECT * FROM users");
+$users = mysqli_num_rows($qU);
+$qC = mysqli_query($koneksi, "SELECT * FROM kontak");
+$kontak = mysqli_num_rows($qC);
+ 
+?>       
+      
 
 <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -32,15 +41,63 @@ include "../view/sidebar_t.php";
 
     <!-- Main content -->
     <section class="content">
+      <!-- Small boxes (Stat box) -->
+      
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
-        
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3><?= $kategori ?></h3>
+
+                <p>Kategori</p>
+              </div>
+              <div class="icon">
+              <i class="fas fa-book"></i>
+              </div>
+              <a href="../master/k_s.php" class="small-box-footer">Lebih Lanjut <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3><?= $users ?></h3>
+
+                <p>User</p>
+              </div>
+              <div class="icon">
+              <i class="fas fa-users"></i>
+              </div>
+              <a href="../akun/akun.php" class="small-box-footer">Lebih Lanjut <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-primary">
+              <div class="inner">
+                <h3><?= $kontak ?></h3>
+
+                <p>Kontak</p>
+              </div>
+              <div class="icon">
+              <i class="far fa-comment-alt"></i>
+              </div>
+              <a href="../kontak/kontak.php" class="small-box-footer">Lebih Lanjut <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+</div>
         <!-- /.row -->
         <!-- Main row -->
         <div class="row">
           <!-- Left col -->
           <section class="col-lg-7 connectedSortable">
             <!-- Custom tabs (Charts with tabs)-->
+            
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">

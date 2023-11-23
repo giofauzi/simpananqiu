@@ -3,6 +3,73 @@
 <?php include '../view/sidebar_t.php' ?>
 
 
+<style>
+.onoffswitch {
+    position: relative;
+    width: 90px;
+    user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid #999999;
+    border-radius: 20px;
+}
+.onoffswitch-inner {
+    width: 200%;
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before,
+.onoffswitch-inner:after {
+    float: left;
+    width: 50%;
+    height: 30px;
+    padding: 0;
+    line-height: 30px;
+    font-size: 14px;
+    color: white;
+    font-family: Trebuchet, Arial, sans-serif;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "ON";
+    padding-left: 10px;
+    background-color: #2FCCFF;
+    color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "OFF";
+    padding-right: 10px;
+    background-color: #EEEEEE;
+    color: #999999;
+    text-align: right;
+}
+.onoffswitch-switch {
+    width: 18px;
+    margin: 6px;
+    background: #FFFFFF;
+    border: 2px solid #999999;
+    border-radius: 20px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 56px;
+    transition: all 0.3s ease-in 0s;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px;
+}
+</style>
+
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -78,16 +145,23 @@ while ($row = mysqli_fetch_array($query)) {
   <td>
     <?php
       if ($row['status'] == 1) {
-          echo 'NOT ACTIVE';
+          echo 'PREMIUM';
       } else {
-          echo 'ACTIVE';
+          echo 'BELUM PREMIUM';
       }
       ?>
   </td>
   <td>
-    <a href="#" class="btn btn-warning update" data-toggle="modal" data-target="#updateModal<?= $row['id_user'] ?>" data-userid="<?= $row['id_user'] ?>"><i class="fa fa-pen"></i></a>
-    
-  </td>
+    <div class="onoffswitch">
+        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch<?= $row['id_user']; ?>" <?= ($row['status'] == 1) ? 'checked' : ''; ?> data-id="<?= $row['id_user']; ?>">
+        <label class="onoffswitch-label" for="myonoffswitch<?= $row['id_user']; ?>">
+            <div class="onoffswitch-inner"></div>
+            <div class="onoffswitch-switch"></div>
+        </label>
+    </div>
+</td>
+
+
 
 </tr>
 <?php } ?>
@@ -105,108 +179,58 @@ while ($row = mysqli_fetch_array($query)) {
           <!-- /.col -->
         </div>
    
-<?php
-$query = mysqli_query($koneksi, "SELECT * FROM users");
-while ($row = mysqli_fetch_array($query)) {
-?>
-<div class="modal fade" id="updateModal<?= $row['id_user'] ?>" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="updateModalLabel">Update User</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="status">Status:</label>
-            <select class="form-control status" name="status" style="width: 100%">
-              <?php
-              $statusOptions = array(
-                array('value' => '1', 'label' => 'NOT ACTIVE'),
-                array('value' => '2', 'label' => 'ACTIVE')
-                // Tambahkan opsi lainnya jika diperlukan
-              );
+        <script>
+$(document).ready(function () {
+    $(".onoffswitch-checkbox").on("change", function () {
+        var idUser = $(this).data('id');
+        var newStatus = ($(this).is(":checked")) ? 1 : 2;
 
-              $selectedStatus = $row['status']; // Ambil nilai status dari database
+        $.ajax({
+            type: "POST",
+            url: "update_akun.php", // Ubah sesuai dengan alamat file PHP yang benar
+            data: {
+                id_user: idUser,
+                status: newStatus,
+            },
+            success: function (response) {
+                if (response) {
+                    // Tampilkan notifikasi atau lakukan sesuatu jika berhasil
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses',
+                        text: 'Status berhasil diperbarui!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
 
-              foreach ($statusOptions as $option) {
-                $selected = ($option['value'] == $selectedStatus) ? 'selected' : '';
-                echo '<option value="' . $option['value'] . '" ' . $selected . '>' . $option['label'] . '</option>';
-              }
-              ?>
-            </select>
-          </div>
-          <input type="hidden" class="id_user" name="id_user" value="<?= $row['id_user'] ?>">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary simpan">Save Changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-<?php } ?>
-
-<script>
-  $(document).ready(function () {
-  // Event saat tombol "Simpan" diklik
-  $(".simpan").on("click", function () {
-    var modal = $(this).closest(".modal"); // Temukan modal yang terkait dengan tombol "Simpan"
-    var idUser = modal.find(".id_user").val(); // Dapatkan nilai input 
-    var status = modal.find(".status").val(); // Dapatkan nilai input
-
-    // Kirim permintaan Ajax dengan id pengguna yang sesuai
-    $.ajax({
-      type: "POST",
-      url: "update_akun.php", // Ganti dengan alamat file PHP yang sesuai
-      data: {
-        id_user: idUser, // Tambahkan id_user ke data yang dikirimkan
-        status: status, // Tambahkan transaksi ke data yang dikirimkan
-      },
-      success: function (response) {
-        if (response) {
-          setTimeout(() => {
-             Swal.fire({
-     icon: 'success',
-            title: 'Sukses',
-            text: response,
-            showConfirmButton: false,
-            timer: 1000 // Menampilkan notifikasi selama 3 detik
-  }).then(() => {
-    // Menunggu 5 detik sebelum mereset ulang halaman
-    setTimeout(() => {
-      location.reload(); // Melakukan refresh halaman setelah 5 detik
-    }, 1000);
-  });
-}, 1000);
-          
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: response,
-            showConfirmButton: false,
-            timer: 2000
-          });
-        }
-      },
-      error: function (xhr, status, error) {
-        // Tangani kesalahan jika permintaan Ajax gagal
-        Swal.fire({
-          icon: 'error',
-          title: 'Terjadi Kesalahan',
-          text: 'Terjadi kesalahan: ' + error,
+                    // Lakukan refresh halaman setelah 3 detik
+                    setTimeout(function () {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Gagal memperbarui status.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Tangani kesalahan jika permintaan Ajax gagal
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: 'Terjadi kesalahan: ' + error,
+                });
+            }
         });
-      }
     });
-  });
 });
-
 </script>
+
+
 
   <?php
   
