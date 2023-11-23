@@ -463,7 +463,7 @@ setTimeout(() => {
             <div class="card-body p-0">
               <div class="mailbox-read-info">
                 <h5>Pesan Admin SimpananQiu</h5>
-                <h6>From: simpananqiu@gmail.com
+                <h6>Dari: simpananqiu@gmail.com
                   <?php 
                   date_default_timezone_set('Asia/Jakarta');
                     $currentDateTime = date('Y-m-d H:i:s');

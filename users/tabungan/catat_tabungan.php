@@ -8,19 +8,64 @@ include "../view/sidebar_t.php";
 if (isset($_GET['nama']) && isset($_GET['no'])) {
     $id_user_from_url = $_GET['nama'];
     $id_tabungan_from_url = $_GET['no'];
-    
 
-    // Lakukan pengecekan apakah id_user dan id_tabungan sesuai
-    // Gantilah kondisi ini sesuai dengan cara Anda menyimpan id_user dan id_tabungan
-    $query = "SELECT * FROM tabungan WHERE id_user = '$id_user_from_url' AND id_tabungan = '$id_tabungan_from_url'";
-    $result = mysqli_query($koneksi, $query);
-    $row = mysqli_fetch_array($result);
+    // Fetch the target_tabungan from the tabungan table
+    $target_query = "SELECT * FROM tabungan WHERE id_user = '$id_user_from_url' AND id_tabungan = '$id_tabungan_from_url'";
+    $target_result = mysqli_query($koneksi, $target_query);
+    $row = mysqli_fetch_assoc($target_result);
+    $target_tabungan = $row['target'];
 
-     
+    // Fetch the total_nominal from the catat_tabungan table
+    $total_nominal_query = "SELECT SUM(nominal) as total_nominal FROM catat_tabungan WHERE id_tabungan = '$id_tabungan_from_url'";
+    $total_nominal_result = mysqli_query($koneksi, $total_nominal_query);
+    $total_nominal_row = mysqli_fetch_assoc($total_nominal_result);
+    $total_nominal = $total_nominal_row['total_nominal'];
 
-    if ($result && mysqli_num_rows($result) > 0) {
+    // Check if there are records in the tabungan table
+    if ($target_result && mysqli_num_rows($target_result) > 0) {
+        // Check if the total_nominal is less than the target_tabungan
+        if ($total_nominal < $target_tabungan) {
+            // Allow insertion of new data
         ?>
-        
+       <script>
+    // Fungsi untuk memeriksa total_nominal secara terus-menerus
+    function cekTotalNominal() {
+        // Kirim permintaan Ajax untuk mendapatkan total_nominal terbaru
+        $.ajax({
+            type: "GET",
+            url: "check_target.php", // Ganti dengan nama file atau URL yang sesuai
+            data: { nama: "<?php echo $id_user_from_url; ?>", no: "<?php echo $id_tabungan_from_url; ?>" },
+            success: function(response) {
+                // Cek apakah total_nominal sudah mencapai atau melebihi target_tabungan
+                if (response >= <?php echo $target_tabungan; ?>) {
+                    // Total nominal sudah mencapai target, hentikan interval
+                    clearInterval(intervalId);
+
+                    // Tampilkan SweetAlert setelah jeda 2 detik
+                    setTimeout(function () {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Selamat!',
+                            text: 'Target tabungan sudah terpenuhi.',
+                            showConfirmButton: false,
+                            timer: 2000 // Set durasi SweetAlert (ms)
+                        });
+
+                        // Redirect ke halaman lain atau lakukan aksi sesuai kebutuhan
+                        setTimeout(function () {
+                            window.location.href = 'tabungan.php';
+                        }, 2000); // Sesuaikan durasi dengan timer di atas
+                    }, 3000); // Jeda 2 detik sebelum menampilkan SweetAlert
+                }
+            }
+        });
+    }
+
+    // Jalankan cekTotalNominal secara terus-menerus setiap 1 detik (1000 ms)
+    var intervalId = setInterval(cekTotalNominal, 1000);
+</script>
+
+
         <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -114,6 +159,11 @@ function updateInfo() {
                   <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Alur</a></li>
                   <li class="nav-item"><a class="nav-link" href="#tambah" data-toggle="tab"><i class='fas fa-edit'></i></a></li>
                   <li class="nav-item"><a class="nav-link" href="#pengaturan" data-toggle="tab">Pengaturan</a></li>
+                  <?php 
+                  if($rencana = $row['rencana'] === 'Bulanan') {
+                    echo '<li class="nav-item"><a class="nav-link" href="#notifikasi" data-toggle="tab">Notifikasi</a></li>';
+                  }
+                  ?>
                 </ul>
               </div><!-- /.card-header -->
               <div class="card-body">
@@ -216,35 +266,7 @@ function Alur() {
 
                   <div class="tab-pane" id="tambah">
                     <form id="CatatForm" class="form-horizontal">
-                      <?php 
-$id_tabungan = $row['id_tabungan'];
-
-// Query untuk mengambil data dari tabel catat_tabungan
-$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
-
-// Inisialisasi variabel untuk menyimpan total nominal
-$total_nominal = 0;
-
-while ($catat = mysqli_fetch_assoc($query_catat)) {
-    // Pisahkan tanda dan nilai
-    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
-    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
-
-    // Lakukan perhitungan berdasarkan tanda
-    if ($tanda === '+') {
-        $total_nominal += $nilai;
-    } elseif ($tanda === '-') {
-        $total_nominal -= $nilai;
-    }
-}
-
-// Hitung sisa target
-$sisa_target = max(0, $row['target'] - $total_nominal);
-
-// Hitung estimasi waktu
-$estimasi_waktu = floor($sisa_target / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
-echo '<input type="hidden" class="form-control" name="estimasi" value="'.$estimasi_waktu.'" id="estimasi">';
-?>
+                      
                       <input type="hidden" class="form-control" name="nomor" value="<?= $id_users ?>" id="nomor">
                       <input type="hidden" class="form-control" name="nama" value="<?= $id_tabungan_from_url ?>" id="nama">
                       <div class="form-group row">
@@ -343,7 +365,7 @@ const IdTabungan = $(this).closest('.card-body').find('.id_tabungan').text();
     success: function(response) {
        if (response.status === 'success') {
     Swal.fire({
-        title: 'Kategori Telah Diedit',
+        title: 'Catat Tabungan Telah Diedit',
         icon: 'success',
         showConfirmButton: false,
         timer: 2000,
@@ -352,8 +374,16 @@ const IdTabungan = $(this).closest('.card-body').find('.id_tabungan').text();
     loadData("catat-tabungan"); // Sesuaikan dengan ID container yang benar
 } else if (response.status === 'error') {
     Swal.fire({
-        title: 'Gagal Mengedit Kategori',
+        title: 'Gagal Mengedit Catat Tabungan',
         text: response.message.join('<br>'), // Menampilkan pesan kesalahan dalam bentuk daftar
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 2000,
+        allowOutsideClick: false,
+    });
+} else if (response.status === 'MelebihiTarget') {
+    Swal.fire({
+        title: 'Nominal Melebihi Target',
         icon: 'error',
         showConfirmButton: false,
         timer: 2000,
@@ -473,7 +503,13 @@ $('#catat-tabungan').on('click', '.delete-catat', function() {
                                 <input type="file" class="form-control"  name="fileInput" id="fileInput" accept=".jpg, .jpeg, .png"  placeholder="Masukkan Nama Tabungan">
                             </div>
                             <div class="text-center">
-<img id="imageValidationMessage" src="../../data/img/tabungan/<?= $row['gambar'] ?>" style="max-width: 300px; max-height: 300px;">
+                              <?php 
+                              $gambarPathTabungan = "../../data/img/tabungan/" .$row['gambar'];
+                              if(empty($row['gambar']) ||  !file_exists($gambarPathTabungan)) {
+                                $gambarPathTabungan = "../dist/img/galeri.png";
+                              }
+                              ?>
+<img id="imageValidationMessage" src="<?= $gambarPathTabungan ?>" style="max-width: 300px; max-height: 300px;">
 </div>
 
                             <button type="submit" class="btn btn-primary mt-3">Simpan</button>
@@ -621,6 +657,135 @@ setTimeout(() => {
                     <hr>
                 <!-- /.tab-content -->
               </div>
+
+
+                <div class="tab-pane" id="notifikasi">
+                    <div class="col-md-12">
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">Harap Disimak, <?= $all['nama_user'] ?></h3>
+
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool" ><i class="fas fa-info"></i></a>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <div class="mailbox-read-info">
+                <h5>Pesan Admin SimpananQiu</h5>
+                <h6>Dari: simpananqiu@gmail.com
+                  <?php 
+                  date_default_timezone_set('Asia/Jakarta');
+                    $currentDateTime = date('Y-m-d H:i:s');
+          
+                  ?>
+                  <span class="mailbox-read-time float-right"><?= date('d F Y H.i', strtotime($currentDateTime)) ?></span></h6>
+              </div>
+           
+              <div class="mailbox-read-message">
+               <?php
+date_default_timezone_set('Asia/Jakarta');
+$waktu = date('H:i');
+
+if ($waktu >= '00:00' && $waktu < '10:59') {
+    $ucapan = "Selamat Pagi";
+} elseif ($waktu >= '11:00' && $waktu < '14:59') {
+    $ucapan = "Selamat Siang";
+} elseif ($waktu >= '15:00' && $waktu < '17:59') {
+    $ucapan = "Selamat Sore";
+} else {
+    $ucapan = "Selamat Malam";
+}
+?>
+
+<p><?= $ucapan ?> <?= $all['nama_user'] ?></p>
+
+
+               <p>Kami ingin memberitahu Anda bahwa setiap tahun, target tabungan Anda akan mengalami kenaikan sebesar 10%. Ini dilakukan untuk mengantisipasi adanya inflasi dan memastikan bahwa Anda dapat mencapai target tabungan dengan lebih baik.</p>
+
+<p>Kami melakukan peningkatan nominal pengisian agar sesuai dengan kenaikan target tabungan. Peningkatan ini hanya sebesar 10% per tahun. Tujuannya adalah untuk membantu Anda mencapai target tabungan dengan lebih efektif.</p>
+
+<p>Sebagai contoh, jika Anda menetapkan target tabungan sebesar <?= 'Rp ' . number_format($target_tabungan, 2, ',', '.') ?> dengan rencana pengisian bulanan sebesar <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?>, dan Anda berencana menyelesaikannya pada tanggal 20 November 2025, setiap tahunnya akan ada peningkatan 10%. Misalnya, pada tanggal 20 November 2024, nominal pengisian bulanan akan naik dari <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?> menjadi <?= 'Rp ' . number_format($row['nominal'] * 1.10, 2, ',', '.') ?>.</p>
+
+
+                
+                <div>
+                  <div style="float:right;margin-right:10px;">
+                     <p>Dengan penuh kebersamaan,<br>Admin SimpananQiu </p>
+                  </div>
+                  <div style="float:left;">
+                    
+                  </div>
+                </div>
+               
+               
+              </div>
+              <!-- /.mailbox-read-message -->
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer delete-akun">
+              <button type="button" class="btn btn-danger delete-account" data-id="<?= $id_users ?>"><i class="far fa-trash-alt"></i> Hapus Akun</button>
+            </div>
+            <!-- /.card-footer -->
+
+            <script>
+              
+// Tambahkan event handler untuk tombol "Delete"
+$('.delete-akun').on('click', '.delete-account', function() {
+  // Dapatkan ID kategori yang akan dihapus
+  const ID = $(this).data('id');
+
+  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
+  Swal.fire({
+    title: 'Konfirmasi Penghapusan',
+    text: 'Anda yakin ingin menghapus akun ini?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Lakukan permintaan AJAX untuk menghapus kategori
+      $.ajax({
+        url: 'delete-account.php', // Ganti dengan URL yang sesuai
+        method: 'POST',
+        data: { id: ID },
+        success: function(response) {
+  if (response === 'success') {
+    // Berhasil mengedit kategori
+    Swal.fire({
+  title: 'Akun Telah Dihapus!',
+  icon: 'success',
+  showConfirmButton: false, // Menghilangkan tombol OK
+  timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+  allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+});
+
+// Setelah 2 detik, redirect ke halaman back_login.php
+setTimeout(function () {
+  window.location.href = 'back_login.php';
+}, 2000);
+} else {
+    Swal.fire({
+      title: 'Gagal Menghapus Akun',
+      icon: 'error',
+      showConfirmButton: false, // Menghilangkan tombol OK
+      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
+      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
+    });
+  }
+}
+      });
+    }
+  });
+});
+            </script>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+                <!-- /.tab-content -->
+              </div>
             </div>
             <!-- /.card -->
           </div>
@@ -639,7 +804,6 @@ setTimeout(() => {
    // Event saat tombol "Simpan" diklik
     $("#CatatForm").on("submit", function (e) {
   e.preventDefault(); 
-        var estimasi = $("#estimasi").val(); 
         var id_tabungan = $("#nama").val(); 
         var idUsers = $("#nomor").val(); 
           var tipe = $(".tipe").val(); 
@@ -671,7 +835,6 @@ setTimeout(() => {
             url: "aksi_catat.php", // Ganti dengan alamat file PHP yang sesuai
             data: {
                 id_tabungan: id_tabungan, // Tambahkan id_tabungan ke data yang dikirimkan
-                estimasi: estimasi, // Tambahkan estimasi ke data yang dikirimkan
                 id_user: idUsers, // Tambahkan id_user ke data yang dikirimkan
                   tipe: tipe, // Tambahkan tipe ke data yang dikirimkan
                 nominal: nominal,
@@ -769,6 +932,12 @@ setTimeout(() => {
       
 
     <?php 
+        } else {
+             // Tidak sesuai, redirect ke halaman yang sesuai
+        $_SESSION['tabungan_terpenuhi'] = 'Selamat Tabungan Anda Terpenuhi!';
+        echo '<script>window.location.href = "tabungan.php";</script>';
+        }
+   
     } else {
         // Tidak sesuai, redirect ke halaman yang sesuai
         $_SESSION['gagal'] = 'Opps, Anda Gagal!';

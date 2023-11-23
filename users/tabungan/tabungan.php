@@ -572,7 +572,7 @@ while ($catat = mysqli_fetch_assoc($query_catat)) {
             // Data mencapai atau melebihi target
             echo '<div class="col-md-4">';
             echo '  <div class="card mb-4">';
-            echo '    <div class="card-body clickable">';
+            echo '    <div class="card-body ">';
             echo '      <h5 class="card-text nama_tabungan" data-id="' . $d['id_tabungan'] . '">' . $d['nama_tabungan'] . '</h5>';
             echo '<div class="text-center mb-2">';
             $gambarPath = "../../data/img/tabungan/" . $d['gambar']; // Path gambar sesuai dengan data dalam database
@@ -587,17 +587,64 @@ while ($catat = mysqli_fetch_assoc($query_catat)) {
             echo '</a>';
             echo '</div>';
             echo '      <p class="card-text id_user" style="display:none;">' . $d['id_user'] . '</p>';
-            $formattedTarget = 'Rp ' . number_format($d['target'], 2, ',', '.');
-            echo '      <h6 class="card-text text-bold" style="font-size:20px;">' . $formattedTarget. '</h6>';
-            $FormatNominal = 'Rp ' . number_format($d['nominal'], 2, ',', '.');
-            if($d['rencana'] === 'Harian') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perhari</h6>';
-            } else if($d['rencana'] === 'Mingguan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perminggu</h6>';
-            } else if($d['rencana'] === 'Bulanan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $FormatNominal. ' Perbulan</h6>';
+                        
+$formatTarget = 'Rp' . number_format($d['target'], 2, ',', '.');
+$formatUang = 'Rp' . number_format($d['nominal'], 2, ',', '.');
+?>
+
+<div class="profile-info">
+    <h3 class="profile-username text-bold"><?= $formatTarget ?></h3>
+    <div style="margin-bottom:-13px;">
+        <?php
+        $id_tabungan = $d['id_tabungan'];
+
+        // Query untuk mengambil data dari tabel catat_tabungan
+        $query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+        // Inisialisasi variabel untuk menyimpan total nominal positif dan negatif
+        $total_positif = 0;
+        $total_negatif = 0;
+
+        while ($catat = mysqli_fetch_assoc($query_catat)) {
+            // Pisahkan tanda dan nilai
+            $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+            $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+            // Lakukan perhitungan berdasarkan tanda
+            if ($tanda === '+') {
+                $total_positif += $nilai;
+            } elseif ($tanda === '-') {
+                $total_negatif += $nilai;
             }
+        }
+
+        // Hitung total nominal
+        $total_nominal = $total_positif - $total_negatif;
+
+        // Hitung persentase progres
+        $hitung_persen = min(($total_nominal / $d['target']) * 100, 100); // Persen tidak boleh lebih dari 100
+        ?>
+
+        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" data-width="60" data-height="60" data-fgColor="#3c8dbc">
+    </div>
+</div>
+
+
+<p style="margin-top:-20px; font-weight:bold; color:black;"><?= $formatUang ?> 
+    <?php
+    if ($d['rencana'] === 'Harian') {
+        echo 'Perhari';
+    } elseif ($d['rencana'] === 'Mingguan') {
+        echo 'Perminggu';
+    } elseif ($d['rencana'] === 'Bulanan') {
+        echo 'Perbulan';
+    }
+    ?>
+</p>
+<?php 
+
             echo '<hr>';
+            
             echo '<div class="text-center">';
             $id_tabungan = $d['id_tabungan'];
            // Query untuk mengambil data dari tabel catat_tabungan
@@ -623,16 +670,27 @@ $sisa_target = max(0, $d['target'] - $total_nominal);
 
 // Hitung estimasi waktu
 $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+
+$tgl_b = new DateTime($d['tgl_b']);
+$tgl_e = new DateTime($d['tgl_e']);
+
+// Set waktu pada kedua objek DateTime menjadi pukul 00:00:00
+$tgl_b->setTime(0, 0, 0);
+$tgl_e->setTime(0, 0, 0);
+
+// Hitung selisih hari
+$selisih = $tgl_b->diff($tgl_e)->days;
+
             if($d['rencana'] === 'Harian') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perhari</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Hari</h6>';
             } else if($d['rencana'] === 'Mingguan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perminggu</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Minggu</h6>';
             } else if($d['rencana'] === 'Bulanan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $estimasi_waktu. ' Perbulan</h6>';
+                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Bulan</h6>';
             }
 
             echo '</div>';
-            echo '      <a href="#" class="btn btn-warning edit-category"><i class="fa fa-pen"></i></a>';
+            echo '      <a href="history_catat.php?nama=' . $id_users . '&no=' . $d['id_tabungan'] . '" class="btn btn-warning "><i class="fa fa-pen"></i></a>';
             echo '     <a href="#" class="btn btn-danger delete-tabungan" data-id="' . $d['id_tabungan'] . '"><i class="fa fa-trash"></i></a>';
             echo '    </div>';
             echo '  </div>';
@@ -671,6 +729,32 @@ if (isset($_SESSION['gagal'])) {
     echo '});';
     echo '</script>';
     unset($_SESSION['gagal']); // Hapus pesan dari session
+}
+
+if (isset($_SESSION['tabungan_terpenuhi'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "success",';
+    echo '    title: "' . $_SESSION['tabungan_terpenuhi'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 4000'; //Ini 3 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['tabungan_terpenuhi']); // Hapus pesan dari session
+}
+
+if (isset($_SESSION['tabungan_belum'])) {
+    echo '<script>';
+    echo 'Swal.fire({';
+    echo '    position: "center",';
+    echo '    icon: "warning",';
+    echo '    title: "' . $_SESSION['tabungan_belum'] . '",';
+    echo '    showConfirmButton: false,';
+    echo '    timer: 4000'; //Ini 3 detik
+    echo '});';
+    echo '</script>';
+    unset($_SESSION['tabungan_belum']); // Hapus pesan dari session
 }
 ?>
 

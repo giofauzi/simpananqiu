@@ -8,8 +8,8 @@ $id_tabungan = $_GET['id_tabungan']; // Ambil id_tabungan dari permintaan AJAX
         $result = mysqli_query($koneksi, "SELECT * FROM catat_tabungan WHERE id_tabungan = $id_tabungan ORDER BY id_catat DESC");
         while ($d = mysqli_fetch_array($result)) {
             echo '<div class="col-md-4">';
-echo '  <div class="card mb-4">';
-echo '    <div class="card-body d-flex flex-column">';
+echo '  <div class="card card-primary card-outline mb-4">';
+echo '    <div class="card-body  d-flex flex-column">';
 echo '      <div>';
 echo '        <h5 class="card-title text-bold mb-2">Tambah</h5>';
 echo '        <p class="card-text" style="color:green;"><i class="fas fa-arrow-up"></i> ' . number_format($d['nominal'], 2, '.', ',') . '</p>';
