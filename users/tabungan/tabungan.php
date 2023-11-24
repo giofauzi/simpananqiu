@@ -308,7 +308,7 @@ setTimeout(() => {
 $(document).ready(function() {
 
 // Tambahkan event handler untuk tombol "Delete"
-$('#berlangsung-container, #tercapai-container').on('click', '.delete-tabungan', function() {
+$('#berlangsung-container, .tercapai-container').on('click', '.delete-tabungan', function() {
   // Dapatkan ID kategori yang akan dihapus
   const id_tabungan = $(this).data('id');
 
@@ -455,7 +455,7 @@ $formatUang = 'Rp' . number_format($d['nominal'], 2, ',', '.');
         $hitung_persen = min(($total_nominal / $d['target']) * 100, 100); // Persen tidak boleh lebih dari 100
         ?>
 
-        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" data-width="60" data-height="60" data-fgColor="#3c8dbc">
+        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" readonly data-width="60" data-height="60" data-fgColor="#3c8dbc">
     </div>
 </div>
 
@@ -536,7 +536,7 @@ $estimasi_waktu = floor($sisa_target / $d['nominal']); // Menggunakan floor untu
                     </div>
                   </div>
                   <div class="tab-pane fade" id="custom-tabs-two-profile" role="tabpanel" aria-labelledby="custom-tabs-two-profile-tab">
-                    <div  class="row">
+                    <div  class="row tercapai-container">
                       <?php
                       $result = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_user = $id_users ");
     $dataDitemukan = false; // Variabel penanda
@@ -625,7 +625,7 @@ $formatUang = 'Rp' . number_format($d['nominal'], 2, ',', '.');
         $hitung_persen = min(($total_nominal / $d['target']) * 100, 100); // Persen tidak boleh lebih dari 100
         ?>
 
-        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" data-width="60" data-height="60" data-fgColor="#3c8dbc">
+        <input type="text" class="knob" value="<?= number_format($hitung_persen, 0, '', '') ?>" readonly data-width="60" data-height="60" data-fgColor="#3c8dbc">
     </div>
 </div>
 
@@ -681,13 +681,20 @@ $tgl_e->setTime(0, 0, 0);
 // Hitung selisih hari
 $selisih = $tgl_b->diff($tgl_e)->days;
 
-            if($d['rencana'] === 'Harian') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Hari</h6>';
-            } else if($d['rencana'] === 'Mingguan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Minggu</h6>';
-            } else if($d['rencana'] === 'Bulanan') {
-                echo '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Bulan</h6>';
-            }
+// Logika kondisional untuk menampilkan selisih waktu sesuai dengan nilai "rencana"
+if ($d['rencana'] === 'Harian') {
+    echo  '<h6 class="card-text text-bold" style="font-size:15px;">' . $selisih. ' Hari</h6>';
+} elseif ($d['rencana'] === 'Mingguan') {
+    $minggu = floor($selisih / 7);
+    $hariSisa = $selisih % 7;
+    echo '<h6 class="card-text text-bold" style="font-size:15px;">'.$minggu.' <inggu '.$hariSisa.' Hari</h6>';
+} elseif ($d['rencana'] === 'Bulanan') {
+    $bulan = floor($selisih / 30);
+    $minggu = floor($selisih / 7);
+    $hariSisa = $selisih % 30;
+    echo '<h6 class="card-text text-bold" style="font-size:15px;">'.$bulan.' Bulan '.$minggu.' Minggu '.$hariSisa.' Hari</h6>';
+}
+
 
             echo '</div>';
             echo '      <a href="history_catat.php?nama=' . $id_users . '&no=' . $d['id_tabungan'] . '" class="btn btn-warning "><i class="fa fa-pen"></i></a>';

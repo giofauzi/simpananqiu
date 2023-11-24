@@ -119,7 +119,22 @@ $master = [
     </a>
 </li>
 
+<?php 
+if($all['status'] == 1) {
+    echo '<li class="nav-item">
+    <a href="../premium/premium.php" class="nav-link' . (($current_page === 'premium.php' || $current_page === 'beli.php') ? ' active' : '') . '">
+        <i class="nav-icon fas fa-arrow-up"></i>
+        <p>
+            Tingkatkan Akun
+        </p>
+    </a>
+</li>';
+} else {
+    // Code untuk status tidak sama dengan 1 (misalnya, status bukan 1)
+}
+?>
 
+ 
     
     
      <li class="nav-item">

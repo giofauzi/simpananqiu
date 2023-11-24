@@ -290,7 +290,7 @@ function Alur() {
                       </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-primary">Simpan</button>
+                          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
                         </div>
                       </div>
                     </form>
@@ -512,8 +512,8 @@ $('#catat-tabungan').on('click', '.delete-catat', function() {
 <img id="imageValidationMessage" src="<?= $gambarPathTabungan ?>" style="max-width: 300px; max-height: 300px;">
 </div>
 
-                            <button type="submit" class="btn btn-primary mt-3">Simpan</button>
-                           <button type="button" class="btn btn-danger mt-3 delete-tabungan" data-id="<?= $row['id_tabungan'] ?>">Hapus Tabungan</button>
+                            <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save"></i> Simpan</button>
+                           <button type="button" class="btn btn-danger mt-3 delete-tabungan" data-id="<?= $row['id_tabungan'] ?>"><i class="fas fa-trash"></i> Hapus Tabungan</button>
 
                         </form>
 
@@ -705,7 +705,75 @@ if ($waktu >= '00:00' && $waktu < '10:59') {
 
 <p>Kami melakukan peningkatan nominal pengisian agar sesuai dengan kenaikan target tabungan. Peningkatan ini hanya sebesar 10% per tahun. Tujuannya adalah untuk membantu Anda mencapai target tabungan dengan lebih efektif.</p>
 
-<p>Sebagai contoh, jika Anda menetapkan target tabungan sebesar <?= 'Rp ' . number_format($target_tabungan, 2, ',', '.') ?> dengan rencana pengisian bulanan sebesar <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?>, dan Anda berencana menyelesaikannya pada tanggal 20 November 2025, setiap tahunnya akan ada peningkatan 10%. Misalnya, pada tanggal 20 November 2024, nominal pengisian bulanan akan naik dari <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?> menjadi <?= 'Rp ' . number_format($row['nominal'] * 1.10, 2, ',', '.') ?>.</p>
+<p>Sebagai contoh, jika Anda menetapkan target tabungan sebesar <?= 'Rp ' . number_format($row['target'], 2, ',', '.') ?> dengan rencana pengisian bulanan sebesar <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?>, dan Anda berencana menyelesaikannya 
+<?php 
+$id_tabungan = $id_tabungan_from_url;
+
+// Query untuk mengambil data dari tabel catat_tabungan
+$query_catat = mysqli_query($koneksi, "SELECT nominal FROM catat_tabungan WHERE id_tabungan = $id_tabungan");
+
+// Inisialisasi variabel untuk menyimpan total nominal
+$total_nominal = 0;
+
+while ($catat = mysqli_fetch_assoc($query_catat)) {
+    // Pisahkan tanda dan nilai
+    $tanda = substr($catat['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+    $nilai = (int) substr($catat['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+    // Lakukan perhitungan berdasarkan tanda
+    if ($tanda === '+') {
+        $total_nominal += $nilai;
+    } elseif ($tanda === '-') {
+        $total_nominal -= $nilai;
+    }
+}
+
+
+// Hitung estimasi waktu dalam bulan
+$estimasi_waktu_bulan = ceil($row['target']  / $row['nominal']); // Menggunakan ceil untuk membulatkan ke atas
+
+// Hitung tahun dan bulan
+$tahun = floor($estimasi_waktu_bulan / 12);
+$bulan = $estimasi_waktu_bulan % 12;
+
+// Tampilkan data sesuai kebutuhan
+if ($row['rencana'] === 'Bulanan') {
+    if ($tahun > 0) {
+        echo "pada tanggal " . date('d F Y', strtotime("+{$tahun} years +{$bulan} months", strtotime($row['tgl_b']))) . " (Estimasi $tahun tahun";
+        if ($bulan > 0) {
+            echo " {$bulan} bulan)";
+        } else {
+            echo ")";
+        }
+    } elseif ($bulan > 0) {
+        echo "pada tanggal " . date('d F Y', strtotime("+{$bulan} months", strtotime($row['tgl_b']))) . " (Estimasi $bulan bulan)";
+    } else {
+        echo "segera";
+    }
+}
+?>
+
+, setiap tahunnya akan ada peningkatan 10%. Misalnya,
+<?php 
+$id_tabungan = $id_tabungan_from_url;
+
+// Query untuk mengambil data dari tabel tabungan
+$query_tabungan = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_tabungan = $id_tabungan");
+$row = mysqli_fetch_assoc($query_tabungan);
+
+// Tambahkan 1 tahun pada tanggal awal rencana tabungan
+$tanggal_selesai = date('d F Y', strtotime("+1 year", strtotime($row['tgl_b'])));
+
+// Tampilkan data sesuai kebutuhan
+if ($row['rencana'] === 'Bulanan') {
+    echo "pada tanggal " . $tanggal_selesai;
+}
+?>
+
+
+, nominal pengisian bulanan akan naik dari <?= 'Rp ' . number_format($row['nominal'], 2, ',', '.') ?> menjadi <?= 'Rp ' . number_format($row['nominal'] * 1.10, 2, ',', '.') ?>.</p>
+
+
 
 
                 
@@ -723,69 +791,99 @@ if ($waktu >= '00:00' && $waktu < '10:59') {
               <!-- /.mailbox-read-message -->
             </div>
             <!-- /.card-body -->
-            <div class="card-footer delete-akun">
-              <button type="button" class="btn btn-danger delete-account" data-id="<?= $id_users ?>"><i class="far fa-trash-alt"></i> Hapus Akun</button>
+            <div class="card-footer">
+               <button type="button" class=" btn btn-md btn-primary" data-toggle="modal" data-target="#staticBackdrop"><i class="fas fa-search"></i> Selengkapnya</button>
+              
+
             </div>
             <!-- /.card-footer -->
 
-            <script>
-              
-// Tambahkan event handler untuk tombol "Delete"
-$('.delete-akun').on('click', '.delete-account', function() {
-  // Dapatkan ID kategori yang akan dihapus
-  const ID = $(this).data('id');
-
-  // Tampilkan konfirmasi penghapusan menggunakan SweetAlert
-  Swal.fire({
-    title: 'Konfirmasi Penghapusan',
-    text: 'Anda yakin ingin menghapus akun ini?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Ya',
-    cancelButtonText: 'Batal'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Lakukan permintaan AJAX untuk menghapus kategori
-      $.ajax({
-        url: 'delete-account.php', // Ganti dengan URL yang sesuai
-        method: 'POST',
-        data: { id: ID },
-        success: function(response) {
-  if (response === 'success') {
-    // Berhasil mengedit kategori
-    Swal.fire({
-  title: 'Akun Telah Dihapus!',
-  icon: 'success',
-  showConfirmButton: false, // Menghilangkan tombol OK
-  timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
-  allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
-});
-
-// Setelah 2 detik, redirect ke halaman back_login.php
-setTimeout(function () {
-  window.location.href = 'back_login.php';
-}, 2000);
-} else {
-    Swal.fire({
-      title: 'Gagal Menghapus Akun',
-      icon: 'error',
-      showConfirmButton: false, // Menghilangkan tombol OK
-      timer: 2000, // Menampilkan pesan selama 2 detik (sesuaikan sesuai kebutuhan)
-      allowOutsideClick: false // Mencegah pengguna menutup pesan dengan mengklik di luar pesan
-    });
-  }
-}
-      });
-    }
-  });
-});
-            </script>
+           
           </div>
           <!-- /.card -->
         </div>
         <!-- /.col -->
                 <!-- /.tab-content -->
               </div>
+
+
+          
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Tabel Informasi</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table id="example2" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Tanggal</th>
+            <th>Nominal Pengisian</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $no = 1;
+        $query_catat = mysqli_query($koneksi, "SELECT * FROM tabungan WHERE id_tabungan = $id_tabungan_from_url ORDER BY id_tabungan DESC");
+
+        // Inisialisasi variabel untuk menyimpan total nominal
+        $total_nominal = 0;
+
+        while ($row = mysqli_fetch_assoc($query_catat)) {
+            // Pisahkan tanda dan nilai
+            $tanda = substr($row['nominal'], 0, 1); // Ambil karakter pertama (tanda)
+            $nilai = (int) substr($row['nominal'], 1); // Ambil nilai setelah karakter pertama
+
+            // Lakukan perhitungan berdasarkan tanda
+            if ($tanda === '+') {
+                $total_nominal += $nilai;
+            } elseif ($tanda === '-') {
+                $total_nominal -= $nilai;
+            }
+
+            // Hitung estimasi waktu
+            $estimasi_waktu = floor(($row['target'] - $total_nominal) / $row['nominal']); // Menggunakan floor untuk membulatkan ke bawah
+
+            $currentDate = strtotime($row['tgl_b']); // Tanggal awal
+            $nominal = $row['nominal']; // Nominal awal
+            $tahun = 0;
+
+            for ($i = 1; $i <= $estimasi_waktu; $i++) {
+                // Tambahkan 1 bulan pada tanggal
+                $currentDate = strtotime("+1 month", $currentDate);
+
+                // Tambahkan 10% setiap satu tahun
+                if ($i % 12 == 0) {
+                    $nominal += $nominal * 0.1;
+                    $tahun++;
+                }
+
+                echo "<tr>
+                        <td>{$no}</td>
+                        <td>" . date('d F Y', $currentDate) . "</td>
+                        <td>Rp " . number_format($nominal, 2, ',', '.') . "</td>
+                    </tr>";
+
+                $no++;
+            }
+        }
+        ?>
+    </tbody>
+</table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
             </div>
             <!-- /.card -->
           </div>

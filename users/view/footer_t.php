@@ -29,10 +29,22 @@ if (window.location.href.indexOf("catat_tabungan.php") > -1) {
   document.querySelector('#tombol1').style.display = "none";
 }
 
+if (window.location.href.indexOf("premium.php") > -1) {
+  // Jika URL adalah "premium.php," sembunyikan elemen
+  document.querySelector('#tombol1').style.display = "none";
+}
+
+if (window.location.href.indexOf("beli.php") > -1) {
+  // Jika URL adalah "beli.php," sembunyikan elemen
+  document.querySelector('#tombol1').style.display = "none";
+}
+
 if (window.location.href.indexOf("transaksi.php") > -1) {
   // Jika URL adalah "profile.php," sembunyikan elemen
   document.querySelector('#tombol1').style.bottom = "60px";
 }
+
+
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {

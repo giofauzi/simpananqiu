@@ -150,7 +150,7 @@ if ($row['rencana'] === 'Harian') {
                   
                   
                 </ul>
-               <a href="tabungan.php" class="btn btn-warning btn-block">
+               <a href="tabungan.php" class="btn btn-warning btn-block"><i class="fas fa-arrow-circle-left"></i> 
                <b>Kembali</b>
                </a>
               

@@ -220,7 +220,7 @@ if ($row['nama_keuangan'] === 'Pemasukan') {
         ?>
     </td>
     <td>
-      <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#modal-lg<?= $row['id_keuangan'] ?>"
+      <a href="#" class="btn btn-warning"
    onclick="setUpdateId(<?= $row['id_keuangan'] ?>)">
    <i class="fa fa-pen"></i>
 </a>

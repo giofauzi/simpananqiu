@@ -156,7 +156,7 @@ include "../view/sidebar_t.php";
                             </div>
 
                             <div class="form-group">
-                                <label for="deskripsi">deskripsi</label>
+                                <label for="deskripsi">Deskripsi</label>
                               <textarea class="form-control" rows="3" id="deskripsi" name="deskripsi_aset" placeholder="Masukkan Deskripsi"></textarea>
                             </div>
                             <button type="button" id="simpanAset" class="btn btn-primary mt-3">Simpan</button>

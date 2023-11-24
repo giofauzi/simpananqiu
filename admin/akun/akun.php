@@ -203,10 +203,6 @@ $(document).ready(function () {
                         timer: 1500
                     });
 
-                    // Lakukan refresh halaman setelah 3 detik
-                    setTimeout(function () {
-                        location.reload();
-                    }, 3000);
                 } else {
                     Swal.fire({
                         icon: 'error',
