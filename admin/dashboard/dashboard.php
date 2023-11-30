@@ -46,22 +46,9 @@ $kontak = mysqli_num_rows($qC);
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row">
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-info">
-              <div class="inner">
-                <h3><?= $kategori ?></h3>
-
-                <p>Kategori</p>
-              </div>
-              <div class="icon">
-              <i class="fas fa-book"></i>
-              </div>
-              <a href="../master/k_s.php" class="small-box-footer">Lebih Lanjut <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
+          
           <!-- ./col -->
-          <div class="col-lg-3 col-6">
+          <div class="col-lg-4 col-6">
             <!-- small box -->
             <div class="small-box bg-success">
               <div class="inner">
@@ -76,7 +63,7 @@ $kontak = mysqli_num_rows($qC);
             </div>
           </div>
           <!-- ./col -->
-          <div class="col-lg-3 col-6">
+          <div class="col-lg-4 col-6">
             <!-- small box -->
             <div class="small-box bg-primary">
               <div class="inner">
